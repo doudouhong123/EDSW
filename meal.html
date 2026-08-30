@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>義大社工科｜訂餐</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#fff8f0;--white:#ffffff;--warm1:#ff8c42;--warm2:#e8641a;--warm3:#c44d0a;
+      --yellow:#ffd166;--green:#06d6a0;--green2:#04a87e;--sky:#4fc3f7;--sky2:#0288d1;
+      --purple:#9c6fde;--purple2:#7b4fc9;--ink:#2d1b0e;--ink2:#5a3825;--muted:#a07858;
+      --border:#f0d8c0;--shadow:rgba(200,80,10,0.10);--danger:#e05555;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--bg);
+      background-image:radial-gradient(circle at 10% 20%,rgba(255,140,66,0.10) 0%,transparent 50%),
+        radial-gradient(circle at 90% 80%,rgba(6,214,160,0.07) 0%,transparent 45%);
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:24px 14px 56px;color:var(--ink);}
+    .deco{position:fixed;pointer-events:none;opacity:0.07;z-index:0;animation:floatY 8s ease-in-out infinite;}
+    .deco:nth-child(1){top:5%;left:3%;font-size:1.8rem;animation-delay:0s;}
+    .deco:nth-child(2){top:18%;right:4%;font-size:1.2rem;animation-delay:2s;}
+    .deco:nth-child(3){top:60%;left:2%;font-size:1rem;animation-delay:4s;}
+    .deco:nth-child(4){top:78%;right:3%;font-size:1.5rem;animation-delay:1.5s;}
+    @keyframes floatY{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-12px) rotate(6deg);}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    @keyframes rowIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    header{width:100%;max-width:500px;background:var(--white);border:1.5px solid var(--border);
+      border-radius:20px;padding:14px 20px;margin-bottom:16px;
+      box-shadow:0 4px 20px var(--shadow);z-index:1;animation:slideDown 0.5s ease both;}
+    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .site-title{display:flex;align-items:center;gap:9px;font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
+    .title-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--warm1),var(--warm3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(200,80,10,0.3);flex-shrink:0;}
+    .btn-return{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#fff8f4;color:var(--muted);transition:all 0.2s;}
+    .btn-return:hover{background:#ffe8d8;border-color:var(--warm1);color:var(--warm3);transform:translateX(-2px);}
+    .header-info{display:flex;align-items:center;justify-content:space-between;}
+    #clock{font-size:0.8rem;color:var(--muted);font-family:'Zen Maru Gothic',sans-serif;}
+    #welcome{font-size:0.85rem;color:var(--warm2);font-weight:600;}
+
+    .page{display:none;width:100%;max-width:500px;flex-direction:column;gap:16px;z-index:1;}
+    .page.active{display:flex;animation:fadeIn 0.35s ease;}
+
+    .dates-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
+    .dates-header{background:linear-gradient(135deg,#fff3e0,#ffe0b2);padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:var(--warm2);display:flex;align-items:center;gap:7px;}
+    .dates-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .date-btn{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid var(--border);background:linear-gradient(135deg,#fff8f3,#fef0e4);font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;animation:rowIn 0.3s ease both;box-shadow:0 2px 8px rgba(200,80,10,0.08);}
+    .date-btn:hover{background:linear-gradient(135deg,#ffe8d0,#ffd8b8);transform:translateY(-2px);box-shadow:0 4px 14px rgba(200,80,10,0.18);}
+    .date-btn-left{display:flex;align-items:center;gap:10px;}
+    .date-tags{display:flex;gap:6px;margin-top:5px;}
+    .tag{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;}
+    .tag-lunch{background:#fff3e0;color:var(--warm2);border:1px solid #ffd8b0;}
+    .tag-drink{background:#e0f7fa;color:var(--sky2);border:1px solid #b2e8f5;}
+    .dates-empty{padding:40px 18px;text-align:center;color:var(--muted);}
+    .dates-empty-icon{font-size:2.2rem;display:block;margin-bottom:10px;}
+    .dates-empty p{font-size:0.88rem;}
+
+    .order-date-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);border-radius:8px;padding:5px 14px;font-size:0.88rem;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;border:1px solid #ffd8b0;}
+    .section-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
+    .section-header{padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .section-header.lunch{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);}
+    .section-header.drink{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:var(--sky2);}
+    .shop-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:auto;}
+    .shop-badge.lunch{background:#fff3e0;color:var(--warm2);border:1px solid #ffd8b0;}
+    .shop-badge.drink{background:#e0f7fa;color:var(--sky2);border:1px solid #b2e8f5;}
+    .section-body{padding:18px;display:flex;flex-direction:column;gap:14px;}
+
+    .field{display:flex;flex-direction:column;gap:6px;}
+    .field label{font-size:1rem;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:4px;}
+    .field input[type="text"],.field input[type="number"],.field select{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s,box-shadow 0.2s;appearance:none;-webkit-appearance:none;}
+    .field input:focus,.field select:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);background:var(--white);}
+    .select-wrap{position:relative;}
+    .select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.9rem;}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+    input[type="number"]{appearance:textfield;-moz-appearance:textfield;}
+
+    .form-msg{font-size:0.82rem;padding:9px 14px;border-radius:10px;display:none;}
+    .form-msg.show{display:block;}
+    .form-msg.ok{background:#e8f5ec;color:var(--green2);border:1px solid #b8e0c8;}
+    .form-msg.err{background:#fde8e4;color:var(--danger);border:1px solid #f5c5bb;}
+
+    .btn-row{width:100%;max-width:500px;display:flex;gap:12px;z-index:1;}
+    .btn{flex:1;padding:16px;border-radius:14px;border:none;font-size:1.1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn:active{transform:scale(0.97);}
+    .btn-submit{background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#fff;box-shadow:0 4px 14px rgba(200,80,10,0.28);}
+    .btn-submit:hover{box-shadow:0 6px 20px rgba(200,80,10,0.38);transform:translateY(-2px);}
+    .btn-submit:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
+    .btn-back{background:#fff3e8;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-back:hover{background:#ffe0c8;color:var(--warm3);border-color:var(--warm1);}
+
+    .btn-add-item{width:100%;padding:13px;border-radius:12px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-size:1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;}
+    .btn-add-item.lunch-add{border-color:#ffd8b0;color:var(--warm2);}
+    .btn-add-item.lunch-add:hover{background:#fff3e8;border-color:var(--warm1);}
+    .btn-add-item.drink-add{border-color:#b2e8f5;color:var(--sky2);}
+    .btn-add-item.drink-add:hover{background:#e0f7fa;border-color:var(--sky);}
+
+    .order-item{border:1px solid var(--border);border-radius:12px;padding:16px;background:#fffaf6;display:flex;flex-direction:column;gap:12px;position:relative;animation:rowIn 0.3s ease both;}
+    .order-item+.order-item{margin-top:12px;}
+    .item-header{display:flex;align-items:center;justify-content:space-between;font-size:1rem;font-weight:700;color:var(--muted);}
+    .btn-remove-item{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--danger);padding:4px 8px;border-radius:6px;transition:background 0.2s;}
+    .btn-remove-item:hover{background:#fde8e4;}
+
+    /* ── 訂單清單 ── */
+    .order-list-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);animation:rowIn 0.4s ease both;width:100%;max-width:500px;}
+    .order-list-header{background:linear-gradient(135deg,#e8f4f8,#d8ecf4);padding:14px 20px;font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:#0288d1;border-bottom:1.5px solid #c0d8e4;}
+    .order-person-block{padding:14px 20px;border-bottom:1px solid #f0f4f8;}
+    .order-person-block:last-child{border-bottom:none;}
+    .order-person-name{font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .order-row{display:flex;flex-direction:column;gap:5px;padding:10px 14px;border-radius:12px;background:#fffaf5;border:1px solid var(--border);margin-bottom:8px;font-size:1.1rem;line-height:1.7;}
+    .order-row:last-child{margin-bottom:0;}
+    .order-row-item{color:var(--warm2);font-weight:700;}
+    .order-row-drink{color:var(--sky2);font-weight:700;}
+    .order-row-detail{color:var(--muted);font-size:1rem;}
+    .spinner{width:36px;height:36px;border:4px solid #fde8d4;border-top:4px solid var(--warm1);border-radius:50%;animation:spin 0.9s linear infinite;}
+    @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+    .loading-text{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;color:var(--ink2);}
+  </style>
+</head>
+<body>
+
+<div class="deco">🍱</div>
+<div class="deco">🧋</div>
+<div class="deco">🌿</div>
+<div class="deco">🍜</div>
+
+<header>
+  <div class="header-top">
+    <div class="site-title"><div class="title-icon">🍱</div>義大社工科｜訂餐</div>
+    <button class="btn-return" onclick="window.location.href='main.html'">← 返回</button>
+  </div>
+  <div class="header-info">
+    <span id="clock"></span>
+    <span id="welcome"></span>
+  </div>
+</header>
+
+<div class="page active" id="page-dates">
+  <div class="loading-card" id="dates-loading">
+    <div class="spinner"></div>
+    <div class="loading-text">載入中…</div>
+  </div>
+  <div class="dates-card" id="dates-card" style="display:none">
+    <div class="dates-header">📅 請選擇訂餐日期</div>
+    <div class="dates-body" id="dates-body"></div>
+  </div>
+
+  <!-- 訂單清單（選擇日期後顯示） -->
+  <div id="my-order-list" style="display:none;"></div>
+</div>
+
+<div class="page" id="page-order">
+  <div><span class="order-date-badge" id="order-date-badge" onclick="goBackToDates()" style="cursor:pointer;" title="點擊重新選擇日期">📅 —</span></div>
+
+  <div class="section-card" id="lunch-section" style="display:none">
+    <div class="section-header lunch">🍱 午餐<span class="shop-badge lunch" id="lunch-shop-badge"></span></div>
+    <div class="section-body">
+      <div id="lunch-items-wrap"></div>
+      <button class="btn-add-item lunch-add" onclick="addLunchItem()">＋ 新增午餐</button>
+    </div>
+  </div>
+
+  <div class="section-card" id="drink-section" style="display:none">
+    <div class="section-header drink">🧋 飲料<span class="shop-badge drink" id="drink-shop-badge"></span></div>
+    <div class="section-body">
+      <div id="drink-items-wrap"></div>
+      <button class="btn-add-item drink-add" onclick="addDrinkItem()">＋ 新增飲料</button>
+    </div>
+  </div>
+
+  <div class="section-card" id="note-section" style="display:none">
+    <div class="section-header" style="background:linear-gradient(135deg,#f3e5f5,#e1bee7);color:#7b1fa2;">📝 備註</div>
+    <div class="section-body">
+      <div class="field">
+        <textarea id="order-notes" placeholder="可填寫特殊需求或說明（選填）"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
+                 font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);
+                 background:#fff8f4;outline:none;min-height:80px;resize:vertical;line-height:1.6;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-msg" id="form-msg"></div>
+</div>
+
+<div class="btn-row" id="btn-row-order" style="display:none;max-width:500px;width:100%;z-index:1;">
+  <button class="btn btn-back" onclick="goBackToDates()">← 返回</button>
+  <button class="btn btn-submit" id="btn-submit" onclick="submitOrder()">✅ 送出訂單</button>
+</div>
+
+<script>
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+  const account = localStorage.getItem('account');
+  let currentDateData = null;
+  let currentUserName = '';
+  let lunchCount = 0;
+  let drinkCount = 0;
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleDateString('zh-TW') + '　' + now.toLocaleTimeString('zh-TW',{hour12:false});
+  }
+  setInterval(updateClock,1000); updateClock();
+
+  async function loadUser() {
+    if (!account) { alert('請先登入'); window.location.href='index.html'; return; }
+    try {
+      const res  = await fetch(`${GAS_URL}?account=${encodeURIComponent(account)}`);
+      const data = await res.json();
+      currentUserName = data.name || account;
+      document.getElementById('welcome').textContent = '👋 ' + currentUserName;
+    } catch {
+      currentUserName = account;
+      document.getElementById('welcome').textContent = '👋 ' + account;
+    }
+  }
+
+  async function loadDates() {
+    try {
+      // 同時載入菜單和結單日期
+      const [menuRes, closeRes] = await Promise.all([
+        fetch(`${GAS_URL}?action=getMealMenu`,{cache:'no-store'}),
+        fetch(`${GAS_URL}?action=getMealClosedDates`,{cache:'no-store'})
+      ]);
+      const menuJson  = await menuRes.json();
+      const closeJson = await closeRes.json();
+      const closedSet = new Set(closeJson.status==='ok' ? closeJson.data : []);
+
+      document.getElementById('dates-loading').style.display = 'none';
+      document.getElementById('dates-card').style.display = 'block';
+      const body = document.getElementById('dates-body');
+      body.innerHTML = '';
+      if (!menuJson.data||menuJson.data.length===0) {
+        body.innerHTML=`<div class="dates-empty"><span class="dates-empty-icon">📭</span><p>目前尚無可訂餐的日期</p></div>`;
+        return;
+      }
+      const sorted = [...menuJson.data].sort((a,b)=>new Date(String(b.date).replace(/\//g,'-'))-new Date(String(a.date).replace(/\//g,'-')));
+      sorted.forEach((item,i)=>{
+        const dateStr = normalizeDate(item.date);
+        const d = new Date(dateStr+'T00:00:00+08:00');
+        const weekdays=['日','一','二','三','四','五','六'];
+        const weekday=weekdays[d.getDay()];
+        const isClosed = closedSet.has(dateStr);
+        const tags=[
+          item.lunch?`<span class="tag tag-lunch">🍱 ${esc(item.lunch)}</span>`:'',
+          item.drink?`<span class="tag tag-drink">🧋 ${esc(item.drink)}</span>`:''
+        ].filter(Boolean).join('');
+        const btn=document.createElement('button');
+        btn.className='date-btn';
+        btn.style.animationDelay=(i*0.06)+'s';
+
+        if (isClosed) {
+          // 已結單：反白、無法點擊
+          btn.disabled = true;
+          btn.style.opacity = '0.45';
+          btn.style.cursor = 'not-allowed';
+          btn.style.background = 'linear-gradient(135deg,#f0f0f0,#e8e8e8)';
+          btn.style.color = '#aaa';
+          btn.style.border = '1.5px solid #ddd';
+          btn.innerHTML=`
+            <div class="date-btn-left">
+              <span style="font-size:1.3rem;">🔒</span>
+              <div>
+                <div>${dateStr} <span style="font-size:0.78rem;opacity:0.7;">（週${weekday}）</span>
+                  <span style="font-size:0.7rem;background:#fde8e4;color:#e05555;border-radius:6px;padding:1px 6px;margin-left:4px;">已結單</span>
+                </div>
+                <div class="date-tags" style="margin-top:5px;">${tags}</div>
+              </div>
+            </div>
+            <span style="font-size:0.78rem;color:#bbb;">不開放訂餐</span>`;
+        } else {
+          btn.innerHTML=`
+            <div class="date-btn-left">
+              <span style="font-size:1.3rem;">📅</span>
+              <div>
+                <div>${dateStr} <span style="font-size:0.78rem;opacity:0.7;">（週${weekday}）</span></div>
+                <div class="date-tags" style="margin-top:5px;">${tags}</div>
+              </div>
+            </div>
+            <span style="font-size:1.1rem;opacity:0.4;">›</span>`;
+          btn.addEventListener('click',()=>selectDate(item,dateStr));
+        }
+        body.appendChild(btn);
+      });
+
+      // 載入所有日期的訂單清單
+      const allDates = sorted.map(item => normalizeDate(item.date));
+      await loadAllOrderLists(allDates);
+
+    } catch {
+      document.getElementById('dates-loading').innerHTML='<p style="color:#e05555;font-size:0.9rem;">⚠ 載入失敗，請稍後再試</p>';
+    }
+  }
+
+  /* ── 載入所有日期訂單清單（常駐顯示）── */
+  async function loadAllOrderLists(dates) {
+    const wrap = document.getElementById('my-order-list');
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    if (!dates.length) return;
+
+    const results = await Promise.all(
+      dates.map(date =>
+        fetch(`${GAS_URL}?action=getMealOrders&date=${encodeURIComponent(date)}`,{cache:'no-store'})
+          .then(r => r.json())
+          .then(json => ({ date, rows: json.status==='ok' ? json.data : [] }))
+          .catch(() => ({ date, rows: [] }))
+      )
+    );
+
+    const withData = results.filter(r => r.rows.length > 0);
+    if (!withData.length) return;
+
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.gap = '14px';
+
+    function sortKey(str) {
+      const s = String(str || '').trim();
+      if (!s) return '\uffff';
+      const c = s.charCodeAt(0);
+      if (c >= 48 && c <= 57)         return '0' + s;
+      if (c >= 65 && c <= 90)         return '1' + s;
+      if (c >= 97 && c <= 122)        return '2' + s;
+      if (c >= 0x3105 && c <= 0x312E) return '3' + s;
+      return '4' + s;
+    }
+
+    withData.forEach(({ date, rows }) => {
+      const grouped = {};
+      rows.forEach(r => {
+        const nm = r.name || '（未填）';
+        if (!grouped[nm]) grouped[nm] = [];
+        grouped[nm].push(r);
+      });
+      const sortedNames = Object.keys(grouped).sort((a,b) =>
+        sortKey(a).localeCompare(sortKey(b), 'zh-TW')
+      );
+      const card = document.createElement('div');
+      card.className = 'order-list-card';
+      let html = `<div class="order-list-header">📋 ${esc(date)} 訂單清單（共 ${rows.length} 筆）</div>`;
+      sortedNames.forEach(nm => {
+        html += `<div class="order-person-block"><div class="order-person-name">👤 ${esc(nm)}</div>`;
+        grouped[nm].forEach(r => {
+          const parts = [];
+          if (r.lunchItem) parts.push(
+            `<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>` +
+            (r.lunchPrice ? `<span class="order-row-detail"> $${esc(r.lunchPrice)}</span>` : '')
+          );
+          if (r.drinkItem) {
+            let d = `<span class="order-row-drink">🧋 ${esc(r.drinkItem)}</span>`;
+            const ex = [r.sugar, r.ice].filter(Boolean).join(' / ');
+            if (ex) d += `<span class="order-row-detail"> ${esc(ex)}</span>`;
+            if (r.drinkPrice) d += `<span class="order-row-detail"> $${esc(r.drinkPrice)}</span>`;
+            parts.push(d);
+          }
+          if (r.notes) parts.push(`<span class="order-row-detail">📝 ${esc(r.notes)}</span>`);
+          html += `<div class="order-row">${parts.join('<br>')}</div>`;
+        });
+        html += `</div>`;
+      });
+      card.innerHTML = html;
+      wrap.appendChild(card);
+    });
+  }
+
+  /* ── 送出後重新整理清單 ── */
+  async function loadOrderList() {
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealMenu`,{cache:'no-store'});
+      const json = await res.json();
+      if (json.status==='ok' && json.data.length) {
+        const dates = [...json.data]
+          .sort((a,b)=>new Date(String(b.date).replace(/\//g,'-'))-new Date(String(a.date).replace(/\//g,'-')))
+          .map(item => normalizeDate(item.date));
+        await loadAllOrderLists(dates);
+      }
+    } catch {}
+  }
+
+  function selectDate(item,dateStr) {
+    currentDateData=item;
+    document.getElementById('order-date-badge').textContent='📅 '+dateStr;
+    if (item.lunch) {
+      document.getElementById('lunch-section').style.display='block';
+      document.getElementById('lunch-shop-badge').textContent='🏪 '+item.lunch;
+      document.getElementById('lunch-items-wrap').innerHTML='';
+      lunchCount=0; addLunchItem();
+    } else { document.getElementById('lunch-section').style.display='none'; }
+    if (item.drink) {
+      document.getElementById('drink-section').style.display='block';
+      document.getElementById('drink-shop-badge').textContent='🏪 '+item.drink;
+      document.getElementById('drink-items-wrap').innerHTML='';
+      drinkCount=0; addDrinkItem();
+    } else { document.getElementById('drink-section').style.display='none'; }
+    document.getElementById('note-section').style.display='block';
+    document.getElementById('order-notes').value='';
+    document.getElementById('form-msg').className='form-msg';
+    showPage('page-order');
+    document.getElementById('btn-row-order').style.display='flex';
+  }
+
+  function addLunchItem() {
+    lunchCount++;
+    const n=lunchCount;
+    const wrap=document.getElementById('lunch-items-wrap');
+    const div=document.createElement('div');
+    div.className='order-item'; div.id='lunch-item-'+n;
+    div.innerHTML=`
+      <div class="item-header">
+        <span>第 ${n} 筆午餐</span>
+        ${n>1?`<button class="btn-remove-item" onclick="removeItem('lunch-item-${n}')">✕ 移除</button>`:''}
+      </div>
+      <div class="field"><label>餐點名稱</label>
+        <input type="text" class="lunch-item-name" placeholder="請輸入餐點名稱" autocomplete="off"/></div>
+      <div class="field"><label>價錢</label>
+        <input type="text" class="lunch-item-price" placeholder="請輸入價錢"
+               inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/></div>`;
+    wrap.appendChild(div);
+  }
+
+  function addDrinkItem() {
+    drinkCount++;
+    const n=drinkCount;
+    const wrap=document.getElementById('drink-items-wrap');
+    const div=document.createElement('div');
+    div.className='order-item'; div.id='drink-item-'+n;
+    div.innerHTML=`
+      <div class="item-header">
+        <span>第 ${n} 筆飲料</span>
+        ${n>1?`<button class="btn-remove-item" onclick="removeItem('drink-item-${n}')">✕ 移除</button>`:''}
+      </div>
+      <div class="field"><label>飲料名稱</label>
+        <input type="text" class="drink-item-name" placeholder="請輸入飲料名稱" autocomplete="off"/></div>
+      <div class="field-row">
+        <div class="field"><label>甜度</label>
+          <div class="select-wrap"><select class="drink-item-sugar">
+            <option value="全糖">全糖</option><option value="少糖">少糖</option>
+            <option value="半糖" selected>半糖</option><option value="微糖">微糖</option>
+            <option value="無糖">無糖</option>
+          </select></div></div>
+        <div class="field"><label>冰塊</label>
+          <div class="select-wrap"><select class="drink-item-ice">
+            <option value="正常冰" selected>正常冰</option><option value="少冰">少冰</option>
+            <option value="微冰">微冰</option><option value="去冰">去冰</option>
+            <option value="溫">溫</option>
+          </select></div></div>
+      </div>
+      <div class="field"><label>價錢</label>
+        <input type="text" class="drink-item-price" placeholder="請輸入價錢"
+               inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/></div>`;
+    wrap.appendChild(div);
+  }
+
+  function removeItem(id) { const el=document.getElementById(id); if(el) el.remove(); }
+
+  function goBackToDates() {
+    document.getElementById('page-order').classList.remove('active');
+    document.getElementById('page-dates').classList.add('active');
+    document.getElementById('btn-row-order').style.display='none';
+    lunchCount=0; drinkCount=0;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  async function submitOrder() {
+    const lunchVisible=document.getElementById('lunch-section').style.display!=='none';
+    const drinkVisible=document.getElementById('drink-section').style.display!=='none';
+    const notes=document.getElementById('order-notes').value.trim();
+    const dateStr=document.getElementById('order-date-badge').textContent.replace('📅 ','').trim();
+    const btn=document.getElementById('btn-submit');
+    const lunchRows=[];
+    if (lunchVisible) {
+      document.querySelectorAll('#lunch-items-wrap .order-item').forEach(item=>{
+        const name=item.querySelector('.lunch-item-name').value.trim();
+        const price=item.querySelector('.lunch-item-price').value.trim();
+        if (name||price) lunchRows.push({name,price});
+      });
+    }
+    const drinkRows=[];
+    if (drinkVisible) {
+      document.querySelectorAll('#drink-items-wrap .order-item').forEach(item=>{
+        const name=item.querySelector('.drink-item-name').value.trim();
+        const sugar=item.querySelector('.drink-item-sugar').value;
+        const ice=item.querySelector('.drink-item-ice').value;
+        const price=item.querySelector('.drink-item-price').value.trim();
+        if (name||price) drinkRows.push({name,sugar,ice,price});
+      });
+    }
+    if (!lunchRows.length&&!drinkRows.length) { showMsg('⚠ 請至少填寫一筆午餐或飲料','err'); return; }
+    btn.disabled=true; showMsg('送出中…','ok');
+    try {
+      const rows=[];
+      lunchRows.forEach(r=>rows.push({date:dateStr,userName:currentUserName,lunchItem:r.name,lunchPrice:r.price,drinkItem:'',sugar:'',ice:'',drinkPrice:'',notes}));
+      drinkRows.forEach(r=>rows.push({date:dateStr,userName:currentUserName,lunchItem:'',lunchPrice:'',drinkItem:r.name,sugar:r.sugar,ice:r.ice,drinkPrice:r.price,notes}));
+      const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'saveMealOrder',rows})});
+      const json=await res.json();
+      if (json.status==='ok') {
+        showMsg('✅ 訂單送出成功！','ok');
+        setTimeout(async ()=>{
+          goBackToDates();
+          hideMsg();
+          await loadOrderList();
+        },1500);
+      } else { showMsg('⚠ 送出失敗：'+(json.message||'未知錯誤'),'err'); }
+    } catch { showMsg('⚠ 連線失敗，請稍後再試','err'); }
+    finally { btn.disabled=false; }
+  }
+
+  /* ── 載入並顯示該日期訂單清單 ── */
+  async function loadOrderList(date) {
+    const wrap = document.getElementById('my-order-list');
+    wrap.style.display = 'block';
+    wrap.innerHTML = `<div style="text-align:center;padding:18px;color:var(--muted);font-size:0.88rem;">載入中…</div>`;
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealOrders&date=${encodeURIComponent(date)}`,{cache:'no-store'});
+      const json = await res.json();
+      if (json.status !== 'ok' || !json.data.length) {
+        wrap.innerHTML = '';
+        wrap.style.display = 'none';
+        return;
+      }
+
+      // 排序函式：數字→大寫英→小寫英→注音→其他（中文）
+      function sortKey(str) {
+        const s = String(str || '').trim();
+        if (!s) return '\uffff';
+        const c = s.charCodeAt(0);
+        if (c >= 48 && c <= 57)              return '0' + s;
+        if (c >= 65 && c <= 90)              return '1' + s;
+        if (c >= 97 && c <= 122)             return '2' + s;
+        if (c >= 0x3105 && c <= 0x312E)      return '3' + s;
+        return '4' + s;
+      }
+
+      // 依姓名分組
+      const grouped = {};
+      json.data.forEach(r => {
+        const nm = r.name || '（未填）';
+        if (!grouped[nm]) grouped[nm] = [];
+        grouped[nm].push(r);
+      });
+
+      // 姓名排序
+      const sortedNames = Object.keys(grouped).sort((a, b) =>
+        sortKey(a).localeCompare(sortKey(b), 'zh-TW')
+      );
+
+      let html = `<div class="order-list-card">
+        <div class="order-list-header">📋 ${esc(date)} 訂單清單（共 ${json.data.length} 筆）</div>`;
+
+      sortedNames.forEach(nm => {
+        html += `<div class="order-person-block">
+          <div class="order-person-name">👤 ${esc(nm)}</div>`;
+        grouped[nm].forEach(r => {
+          const parts = [];
+          if (r.lunchItem)  parts.push(`<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>${r.lunchPrice ? `<span class="order-row-detail"> $${esc(r.lunchPrice)}</span>` : ''}`);
+          if (r.drinkItem) {
+            let drinkDetail = `<span class="order-row-drink">🧋 ${esc(r.drinkItem)}</span>`;
+            const extras = [r.sugar, r.ice].filter(Boolean).join(' / ');
+            if (extras) drinkDetail += `<span class="order-row-detail"> ${esc(extras)}</span>`;
+            if (r.drinkPrice) drinkDetail += `<span class="order-row-detail"> $${esc(r.drinkPrice)}</span>`;
+            parts.push(drinkDetail);
+          }
+          if (r.notes) parts.push(`<span class="order-row-detail">📝 ${esc(r.notes)}</span>`);
+          html += `<div class="order-row">${parts.join('<br>')}</div>`;
+        });
+        html += `</div>`;
+      });
+
+      html += `</div>`;
+      wrap.innerHTML = html;
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    } catch {
+      wrap.innerHTML = '';
+      wrap.style.display = 'none';
+    }
+  }
+
+  function hideMsg(){document.getElementById('form-msg').className='form-msg';}
+  function showMsg(text,type){const el=document.getElementById('form-msg');el.textContent=text;el.className='form-msg show '+type;}
+  function esc(s){return(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  function normalizeDate(val){if(!val)return'';const s=String(val).trim();if(s.includes('T'))return s.slice(0,10);const parts=s.replace(/\//g,'-').split('-');if(parts.length===3)return parts[0]+'-'+parts[1].padStart(2,'0')+'-'+parts[2].padStart(2,'0');return s;}
+
+  loadUser();
+  loadDates();
+</script>
+</body>
+</html>

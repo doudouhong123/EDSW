@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>義大社工科｜訂餐後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#fff8f0;--white:#ffffff;--warm1:#ff8c42;--warm2:#e8641a;--warm3:#c44d0a;
+      --green:#06d6a0;--green2:#04a87e;--sky:#4fc3f7;--sky2:#0288d1;
+      --ink:#2d1b0e;--ink2:#5a3825;--muted:#a07858;
+      --border:#f0d8c0;--shadow:rgba(200,80,10,0.10);--danger:#e05555;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--bg);
+      background-image:radial-gradient(circle at 10% 20%,rgba(255,140,66,0.12) 0%,transparent 50%),
+        radial-gradient(circle at 90% 80%,rgba(6,214,160,0.08) 0%,transparent 45%);
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:24px 14px 56px;color:var(--ink);}
+    .deco{position:fixed;pointer-events:none;opacity:0.08;z-index:0;animation:floatY 8s ease-in-out infinite;}
+    .deco:nth-child(1){top:5%;left:3%;font-size:2rem;animation-delay:0s;}
+    .deco:nth-child(2){top:18%;right:4%;font-size:1.3rem;animation-delay:2s;}
+    .deco:nth-child(3){top:60%;left:2%;font-size:1.1rem;animation-delay:4s;}
+    .deco:nth-child(4){top:78%;right:3%;font-size:1.6rem;animation-delay:1.5s;}
+    @keyframes floatY{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-14px) rotate(6deg);}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    @keyframes rowIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    header{width:100%;max-width:500px;background:var(--white);border:1.5px solid var(--border);
+      border-radius:20px;padding:14px 20px;margin-bottom:16px;
+      box-shadow:0 4px 20px var(--shadow);z-index:1;animation:slideDown 0.5s ease both;}
+    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .site-title{display:flex;align-items:center;gap:9px;font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
+    .title-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--warm1),var(--warm3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(200,80,10,0.3);flex-shrink:0;}
+    .btn-return{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#fff8f4;color:var(--muted);transition:all 0.2s;}
+    .btn-return:hover{background:#ffe8d8;border-color:var(--warm1);color:var(--warm3);transform:translateX(-2px);}
+    #clock{font-size:0.8rem;color:var(--muted);font-family:'Zen Maru Gothic',sans-serif;}
+
+    .page{display:none;width:100%;max-width:500px;flex-direction:column;gap:16px;z-index:1;}
+    .page.active{display:flex;animation:fadeIn 0.35s ease;}
+
+    .card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
+    .card-header{padding:13px 18px;display:flex;align-items:center;gap:8px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.95rem;font-weight:700;}
+    .card-header.lunch{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);}
+    .card-header.drink{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:var(--sky2);}
+    .card-body{padding:18px;display:flex;flex-direction:column;gap:12px;}
+
+    .field{display:flex;flex-direction:column;gap:6px;}
+    .field label{font-size:0.82rem;font-weight:600;color:var(--ink2);}
+    .field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+    .field input:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);background:var(--white);}
+
+    .btn-row{width:100%;max-width:500px;display:flex;gap:12px;z-index:1;}
+    .btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn:active{transform:scale(0.97);}
+    .btn-submit{background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#fff;box-shadow:0 4px 14px rgba(200,80,10,0.28);}
+    .btn-submit:hover{box-shadow:0 6px 20px rgba(200,80,10,0.38);transform:translateY(-2px);}
+    .btn-skip{background:#fff3e8;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-skip:hover{background:#ffe0c8;color:var(--warm3);border-color:var(--warm1);}
+    .btn-back{background:#fff3e8;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-back:hover{background:#ffe0c8;color:var(--warm3);border-color:var(--warm1);}
+
+    .overlay{position:fixed;inset:0;background:rgba(45,27,14,0.5);backdrop-filter:blur(6px);z-index:300;display:flex;align-items:center;justify-content:center;}
+    .dialog{background:var(--white);border:1.5px solid var(--border);border-radius:24px;padding:28px 24px 24px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(45,27,14,0.2);animation:popIn 0.35s cubic-bezier(0.34,1.5,0.64,1) both;display:flex;flex-direction:column;gap:16px;}
+    .dialog-icon{font-size:2rem;text-align:center;}
+    .dialog h2{font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);text-align:center;}
+    .dialog p{font-size:0.82rem;color:var(--muted);text-align:center;margin-top:-8px;}
+    .dialog-field{display:flex;flex-direction:column;gap:6px;}
+    .dialog-field label{font-size:0.8rem;font-weight:600;color:var(--ink2);}
+    .dialog-field input[type="date"]{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+    .dialog-field input[type="date"]:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);}
+    .dialog-btn-row{display:flex;gap:10px;}
+    .dialog-btn-row .btn{padding:13px;}
+
+    .dates-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
+    .dates-header{background:linear-gradient(135deg,#f3e5f5,#e1bee7);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid var(--border);}
+    .dates-header-title{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:#7b1fa2;display:flex;align-items:center;gap:6px;}
+    .dates-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .date-btn{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid #e0d0f0;background:linear-gradient(135deg,#f9f0ff,#f3e5f5);font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:#7b1fa2;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;animation:rowIn 0.3s ease both;box-shadow:0 2px 8px rgba(123,31,162,0.10);}
+    .date-btn:hover{background:linear-gradient(135deg,#e8d5ff,#dbb8f5);transform:translateY(-2px);box-shadow:0 4px 14px rgba(123,31,162,0.18);}
+    .date-btn:active{transform:scale(0.97);}
+    .date-btn-left{display:flex;align-items:center;gap:10px;}
+    .date-btn-icon{font-size:1.3rem;}
+    .date-btn-tags{display:flex;gap:6px;}
+    .tag{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;}
+    .tag-lunch{background:#fff3e0;color:var(--warm2);border:1px solid #ffd8b0;}
+    .tag-drink{background:#e0f7fa;color:var(--sky2);border:1px solid #b2e8f5;}
+    .btn-delete-date{padding:5px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid #f5c5c5;background:#fff0f0;color:#e05555;transition:all 0.2s;flex-shrink:0;}
+    .btn-delete-date:hover{background:#e05555;color:#fff;border-color:#e05555;}
+    .btn-close-date{padding:5px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid #b8d8c8;background:#e8f5ec;color:#04a87e;transition:all 0.2s;flex-shrink:0;}
+    .btn-close-date:hover{background:#04a87e;color:#fff;border-color:#04a87e;}
+    .btn-close-date.closed{background:#fde8e4;color:#e05555;border-color:#f5c5bb;}
+    .btn-close-date.closed:hover{background:#e05555;color:#fff;border-color:#e05555;}
+    .dates-empty-icon{font-size:2.2rem;display:block;margin-bottom:10px;}
+    .dates-empty p{font-size:0.88rem;}
+    .btn-add-date{width:100%;padding:13px;border-radius:14px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-size:0.9rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-add-date:hover{border-color:var(--warm1);color:var(--warm2);background:#fff8f3;}
+
+    /* ── 餐點整理 ── */
+    .arrange-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-top:14px;box-shadow:0 2px 12px var(--shadow);}
+    .arrange-card-header{padding:10px 16px;font-family:'Zen Maru Gothic',sans-serif;font-size:0.85rem;font-weight:700;border-bottom:1.5px solid var(--border);}
+    .arrange-card-header.lunch-h{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);}
+    .arrange-card-header.drink-h{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:var(--sky2);}
+    .arrange-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+    .arrange-table th{padding:7px 8px;text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap;font-weight:700;}
+    .arrange-table th.lunch-th{background:linear-gradient(135deg,#fff8f0,#fff3e0);color:var(--warm2);}
+    .arrange-table th.drink-th{background:linear-gradient(135deg,#f0fbff,#e0f7fa);color:var(--sky2);}
+    .arrange-table td{padding:7px 8px;border-bottom:1px solid #f5f0ea;color:var(--ink);vertical-align:middle;}
+    .arrange-table tr:last-child td{border-bottom:none;}
+    .arrange-table tr:hover td{background:#fffaf5;}
+    .arrange-save-msg{font-size:0.78rem;padding:6px 12px;}
+
+    /* ── 編輯彈窗 ── */
+    .edit-overlay{position:fixed;inset:0;background:rgba(45,27,14,0.55);backdrop-filter:blur(6px);z-index:400;display:none;align-items:center;justify-content:center;}
+    .edit-overlay.show{display:flex;}
+    .edit-dialog{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:22px 20px 18px;width:92%;max-width:400px;box-shadow:0 20px 60px rgba(45,27,14,0.2);display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto;}
+    .edit-dialog-title{font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
+    .edit-field{display:flex;flex-direction:column;gap:4px;}
+    .edit-field label{font-size:0.78rem;font-weight:600;color:var(--ink2);}
+    .edit-field input,.edit-field select,.edit-field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.92rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s;}
+    .edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus{border-color:var(--warm1);background:var(--white);}
+    .edit-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .edit-select-wrap{position:relative;}
+    .edit-select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.85rem;}
+    .edit-select-wrap select{appearance:none;-webkit-appearance:none;}
+    .edit-btn-row{display:flex;gap:10px;margin-top:4px;}
+    .edit-btn{flex:1;padding:11px;border-radius:12px;border:none;font-size:0.92rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;}
+    .edit-btn-save{background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#fff;box-shadow:0 3px 10px rgba(200,80,10,0.25);}
+    .edit-btn-save:hover{transform:translateY(-1px);}
+    .edit-btn-cancel{background:#f5f0ea;color:var(--muted);border:1.5px solid var(--border);}
+    .edit-btn-cancel:hover{background:#ffe8d8;color:var(--warm3);}
+    .edit-btn-delete{background:#fff0f0;color:#e05555;border:1.5px solid #f5c5c5;flex:0.8;}
+    .edit-btn-delete:hover{background:#e05555;color:#fff;border-color:#e05555;}
+    .edit-msg{font-size:0.78rem;text-align:center;min-height:18px;}
+    .row-clickable{cursor:pointer;}
+    .row-clickable:hover td{background:#fff3e8!important;}
+    .order-view-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
+    .order-view-header{background:linear-gradient(135deg,#e8f4f8,#d8ecf4);padding:13px 18px;font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:#0288d1;border-bottom:1.5px solid #c0d8e4;}
+    .order-view-body{padding:16px 18px;}
+    .select-label{font-size:0.8rem;font-weight:600;color:var(--ink2);display:block;margin-bottom:6px;}
+    .select-wrap{position:relative;}
+    .select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.9rem;}
+    .date-select-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;appearance:none;-webkit-appearance:none;transition:border-color 0.2s,box-shadow 0.2s;}
+    .date-select-input:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);}
+    .order-table-wrap{overflow-x:auto;margin-top:12px;}
+    .order-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+    .order-table th{background:linear-gradient(135deg,#f0f8ff,#e4f0f8);color:#0288d1;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;padding:8px;text-align:left;border-bottom:1.5px solid #c0d8e4;white-space:nowrap;}
+    .order-table td{padding:8px;border-bottom:1px solid #f0f4f8;color:var(--ink);vertical-align:middle;}
+    .order-table tr:last-child td{border-bottom:none;}
+    .order-table tr:hover td{background:#f5faff;}
+    .order-empty{text-align:center;padding:28px;color:var(--muted);font-size:0.88rem;}
+    .order-count-badge{display:inline-block;background:#e8f4f8;color:#0288d1;font-size:0.72rem;font-weight:700;border-radius:20px;padding:2px 10px;margin-left:6px;border:1px solid #c0d8e4;}
+    /* ── 總計表格 ── */
+    .summary-wrap{margin-top:14px;}
+    .summary-title{font-family:'Zen Maru Gothic',sans-serif;font-size:0.85rem;font-weight:700;color:#7b1fa2;margin-bottom:8px;}
+    .summary-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+    .summary-table th{background:linear-gradient(135deg,#f3e5f5,#e1bee7);color:#7b1fa2;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;padding:8px;text-align:left;border-bottom:1.5px solid #d7b8e8;white-space:nowrap;}
+    .summary-table td{padding:8px;border-bottom:1px solid #f3e5f5;color:var(--ink);vertical-align:middle;}
+    .summary-table tr:last-child td{border-bottom:none;}
+    .summary-table tr:hover td{background:#faf5ff;}
+    .summary-total-row td{background:linear-gradient(135deg,#f3e5f5,#ede0f8);font-weight:700;color:#7b1fa2;border-top:2px solid #c8a0e0;}
+    .price-cell{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--warm2);}
+    .price-total{color:#7b1fa2;}
+  </style>
+</head>
+<body>
+
+<div class="deco">🍱</div>
+<div class="deco">🧋</div>
+<div class="deco">🌿</div>
+<div class="deco">🍜</div>
+
+<header>
+  <div class="header-top">
+    <div class="site-title"><div class="title-icon">🍱</div>義大社工科｜訂餐後台</div>
+    <button class="btn-return" onclick="window.location.href='deleloper.html'">← 返回</button>
+  </div>
+  <div><span id="clock"></span></div>
+</header>
+
+<!-- 頁面一：輸入店家 -->
+<div class="page" id="page-input">
+  <div style="z-index:1">
+    <span id="input-date-badge" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);color:#7b1fa2;border-radius:8px;padding:5px 14px;font-size:0.88rem;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;border:1px solid #d7b8e8;">📅 —</span>
+  </div>
+  <div class="card">
+    <div class="card-header lunch">🍱 午餐</div>
+    <div class="card-body">
+      <div class="field"><label>店家名稱</label>
+        <input type="text" id="lunch-shop" placeholder="請輸入午餐店家名稱" autocomplete="off"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header drink">🧋 飲料</div>
+    <div class="card-body">
+      <div class="field"><label>店家名稱</label>
+        <input type="text" id="drink-shop" placeholder="請輸入飲料店家名稱" autocomplete="off"/></div>
+    </div>
+  </div>
+  <div style="font-size:0.78rem;color:var(--muted);text-align:center;z-index:1;">
+    午餐或飲料可只填一個，送出後可在日期頁面查看
+  </div>
+</div>
+
+<div class="btn-row" id="btn-row-input" style="display:none;max-width:500px;width:100%;z-index:1;">
+  <button class="btn btn-back" onclick="showDateDialog()">← 重選日期</button>
+  <button class="btn btn-submit" onclick="submitShops()">送出 →</button>
+</div>
+
+<!-- 頁面二：日期按鈕頁 -->
+<div class="page" id="page-dates">
+  <div class="dates-card">
+    <div class="dates-header">
+      <div class="dates-header-title">📅 已建立的日期</div>
+      <span id="dates-count" style="font-size:0.72rem;color:#9c4dcc;font-weight:600;"></span>
+    </div>
+    <div class="dates-body" id="dates-body">
+      <div class="dates-empty"><span class="dates-empty-icon">📭</span><p>尚未建立任何日期的餐點</p></div>
+    </div>
+  </div>
+
+  <button class="btn-add-date" onclick="showDateDialog()">＋ 新增日期餐點</button>
+
+  <!-- 訂單查詢區 -->
+  <div class="order-view-card">
+    <div class="order-view-header">📋 訂單查詢</div>
+    <div class="order-view-body">
+      <span class="select-label">選擇日期</span>
+      <div class="select-wrap">
+        <select id="order-date-select" class="date-select-input" onchange="loadOrdersByDate(this.value)">
+          <option value="">－ 請選擇日期 －</option>
+        </select>
+      </div>
+      <div id="order-view-result"></div>
+
+      <!-- 總計按鈕 -->
+      <button id="btn-summary" onclick="showSummary()"
+        style="display:none;width:100%;margin-top:12px;padding:11px;border-radius:12px;border:none;
+               background:linear-gradient(135deg,#7b1fa2,#9c4dcc);color:#fff;font-size:0.95rem;
+               font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;
+               box-shadow:0 3px 10px rgba(123,31,162,0.3);transition:all 0.2s;">
+        📊 查看總計
+      </button>
+
+      <!-- 總計結果 -->
+      <div id="summary-result"></div>
+
+      <!-- 餐點整理按鈕 -->
+      <button id="btn-arrange" onclick="showArrangement()"
+        style="display:none;width:100%;margin-top:10px;padding:11px;border-radius:12px;border:none;
+               background:linear-gradient(135deg,#0288d1,#4fc3f7);color:#fff;font-size:0.95rem;
+               font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;
+               box-shadow:0 3px 10px rgba(2,136,209,0.3);transition:all 0.2s;">
+        🍽 餐點整理
+      </button>
+
+      <!-- 餐點整理結果 -->
+      <div id="arrange-result"></div>
+    </div>
+  </div>
+</div>
+
+<div class="btn-row" id="btn-row-dates" style="display:none;max-width:500px;width:100%;z-index:1;"></div>
+
+<!-- 日期對話視窗 -->
+<div class="overlay" id="date-overlay">
+  <div class="dialog">
+    <div class="dialog-icon">📅</div>
+    <h2>選擇日期</h2>
+    <p>請選擇要新增餐點的日期</p>
+    <div class="dialog-field">
+      <label>日期（年月日）</label>
+      <input type="date" id="date-picker"/>
+    </div>
+    <div class="dialog-btn-row">
+      <button class="btn btn-skip" onclick="skipToDatePage()">跳過</button>
+      <button class="btn btn-submit" onclick="confirmDate()">送出 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 編輯彈窗 ── -->
+<div class="edit-overlay" id="edit-overlay">
+  <div class="edit-dialog">
+    <div class="edit-dialog-title">✏️ 編輯訂單</div>
+    <div style="font-size:0.78rem;color:var(--muted);" id="edit-info"></div>
+
+    <div class="edit-field">
+      <label>餐點名稱</label>
+      <input type="text" id="edit-lunch-item" placeholder="請輸入餐點名稱" autocomplete="off"/>
+    </div>
+    <div class="edit-field">
+      <label>餐點價錢</label>
+      <input type="text" id="edit-lunch-price" placeholder="請輸入價錢" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+    </div>
+    <div class="edit-field">
+      <label>飲料名稱</label>
+      <input type="text" id="edit-drink-item" placeholder="請輸入飲料名稱" autocomplete="off"/>
+    </div>
+    <div class="edit-field-row">
+      <div class="edit-field">
+        <label>甜度</label>
+        <div class="edit-select-wrap">
+          <select id="edit-sugar">
+            <option value="">—</option>
+            <option value="全糖">全糖</option>
+            <option value="少糖">少糖</option>
+            <option value="半糖">半糖</option>
+            <option value="微糖">微糖</option>
+            <option value="無糖">無糖</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-field">
+        <label>冰塊</label>
+        <div class="edit-select-wrap">
+          <select id="edit-ice">
+            <option value="">—</option>
+            <option value="正常冰">正常冰</option>
+            <option value="少冰">少冰</option>
+            <option value="微冰">微冰</option>
+            <option value="去冰">去冰</option>
+            <option value="溫">溫</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>飲料價錢</label>
+      <input type="text" id="edit-drink-price" placeholder="請輸入價錢" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+    </div>
+    <div class="edit-field">
+      <label>備註</label>
+      <textarea id="edit-notes" placeholder="備註（選填）" style="min-height:60px;resize:vertical;"></textarea>
+    </div>
+    <div class="edit-msg" id="edit-msg"></div>
+    <div class="edit-btn-row">
+      <button class="edit-btn edit-btn-cancel" onclick="closeEditModal()">取消</button>
+      <button class="edit-btn edit-btn-delete" onclick="deleteEditOrder()">🗑 刪除</button>
+      <button class="edit-btn edit-btn-save" onclick="saveEditOrder()">✅ 儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+  let mealData = JSON.parse(localStorage.getItem('de_meal_data') || '{}');
+  let currentDate = '';
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleDateString('zh-TW') + '　' + now.toLocaleTimeString('zh-TW',{hour12:false});
+  }
+  setInterval(updateClock,1000); updateClock();
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date-picker').value = today;
+    document.getElementById('date-overlay').style.display = 'flex';
+    loadDateSelect();
+  });
+
+  function confirmDate() {
+    const val = document.getElementById('date-picker').value;
+    if (!val) { alert('請選擇日期'); return; }
+    currentDate = val;
+    const d = new Date(val+'T00:00:00');
+    const label = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    document.getElementById('input-date-badge').textContent = '📅 '+label;
+    if (mealData[currentDate]) {
+      document.getElementById('lunch-shop').value = mealData[currentDate].lunch||'';
+      document.getElementById('drink-shop').value = mealData[currentDate].drink||'';
+    } else {
+      document.getElementById('lunch-shop').value='';
+      document.getElementById('drink-shop').value='';
+    }
+    document.getElementById('date-overlay').style.display='none';
+    showPage('page-input');
+    document.getElementById('btn-row-input').style.display='flex';
+    document.getElementById('btn-row-dates').style.display='none';
+  }
+
+  function skipToDatePage() {
+    document.getElementById('date-overlay').style.display='none';
+    showPage('page-dates');
+    document.getElementById('btn-row-input').style.display='none';
+    document.getElementById('btn-row-dates').style.display='none';
+    renderDateButtons();
+  }
+
+  function showDateDialog() { document.getElementById('date-overlay').style.display='flex'; }
+
+  async function submitShops() {
+    const lunch = document.getElementById('lunch-shop').value.trim();
+    const drink = document.getElementById('drink-shop').value.trim();
+    if (!lunch && !drink) { alert('請至少填入午餐或飲料的店家名稱'); return; }
+    const btn = document.querySelector('#btn-row-input .btn-submit');
+    btn.disabled=true; btn.textContent='送出中…';
+    try {
+      const res = await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'saveMealMenu',date:currentDate,lunch,drink})});
+      const json = await res.json();
+      if (json.status==='ok') {
+        mealData[currentDate]={lunch,drink};
+        localStorage.setItem('de_meal_data',JSON.stringify(mealData));
+        showPage('page-dates');
+        document.getElementById('btn-row-input').style.display='none';
+        renderDateButtons();
+        showToast(json.isUpdate?'✅ 已更新到 Google Sheets':'✅ 已新增到 Google Sheets');
+        loadDateSelect();
+      } else { alert('⚠ 送出失敗：'+(json.message||'未知錯誤')); }
+    } catch { alert('⚠ 連線失敗，請確認網路後重試'); }
+    finally { btn.disabled=false; btn.textContent='送出 →'; }
+  }
+
+  function showToast(msg) {
+    let t=document.getElementById('toast');
+    if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:#06d6a0;color:#fff;padding:12px 24px;border-radius:14px;font-size:0.92rem;font-weight:600;z-index:1000;opacity:0;transition:all 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:320px;width:90%;text-align:center;';document.body.appendChild(t);}
+    t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)';},2500);
+  }
+
+  let closedDates = new Set(); // 已結單日期集合
+
+  async function loadClosedDates() {
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealClosedDates`,{cache:'no-store'});
+      const json = await res.json();
+      if (json.status==='ok') closedDates = new Set(json.data);
+    } catch {}
+  }
+
+  async function renderDateButtons() {
+    await loadClosedDates();
+    const body=document.getElementById('dates-body'),count=document.getElementById('dates-count');
+    const keys=Object.keys(mealData).sort().reverse();
+    body.innerHTML='';
+    if (!keys.length) {
+      body.innerHTML=`<div class="dates-empty"><span class="dates-empty-icon">📭</span><p>尚未建立任何日期的餐點</p></div>`;
+      count.textContent=''; return;
+    }
+    count.textContent=`共 ${keys.length} 個日期`;
+    keys.forEach((dateKey,i)=>{
+      const data=mealData[dateKey];
+      const d=new Date(dateKey+'T00:00:00');
+      const label=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const weekdays=['日','一','二','三','四','五','六'];
+      const weekday=weekdays[d.getDay()];
+      const isClosed = closedDates.has(dateKey);
+      const tags=[
+        data.lunch?`<span class="tag tag-lunch">🍱 ${esc(data.lunch)}</span>`:'',
+        data.drink?`<span class="tag tag-drink">🧋 ${esc(data.drink)}</span>`:''
+      ].filter(Boolean).join('');
+      const btn=document.createElement('button');
+      btn.className='date-btn';btn.style.animationDelay=(i*0.06)+'s';
+      if (isClosed) btn.style.opacity='0.7';
+      btn.innerHTML=`
+        <div class="date-btn-left">
+          <span class="date-btn-icon">${isClosed?'🔒':'📅'}</span>
+          <div>
+            <div style="font-size:1rem;">${label} <span style="font-size:0.78rem;opacity:0.7;">（週${weekday}）</span>${isClosed?'<span style="font-size:0.7rem;background:#fde8e4;color:#e05555;border-radius:6px;padding:1px 6px;margin-left:6px;">已結單</span>':''}</div>
+            <div class="date-btn-tags" style="margin-top:5px;">${tags}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:1.1rem;opacity:0.4;">›</span>
+          <button class="btn-close-date${isClosed?' closed':''}"
+            onclick="event.stopPropagation();toggleCloseDate('${dateKey}',${isClosed})">
+            ${isClosed?'取消結單':'結單'}
+          </button>
+          <button class="btn-delete-date" onclick="event.stopPropagation();deleteDate('${dateKey}')">刪除</button>
+        </div>`;
+      btn.addEventListener('click',()=>openDateDetail(dateKey));
+      body.appendChild(btn);
+    });
+  }
+
+  /* ── 結單 / 取消結單 ── */
+  async function toggleCloseDate(dateKey, isClosed) {
+    const d=new Date(dateKey+'T00:00:00');
+    const label=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const action = isClosed ? 'openMealDate' : 'closeMealDate';
+    const confirmMsg = isClosed
+      ? `確定要取消「${label}」的結單嗎？`
+      : `確定要結單「${label}」嗎？\n結單後使用者將無法再點餐。`;
+    if (!confirm(confirmMsg)) return;
+    try {
+      const res  = await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action, date:dateKey})});
+      const json = await res.json();
+      if (json.status==='ok') {
+        if (isClosed) closedDates.delete(dateKey);
+        else closedDates.add(dateKey);
+        showToast(isClosed ? '🔓 已取消結單 '+label : '🔒 已結單 '+label);
+        renderDateButtons();
+      } else { alert('⚠ 操作失敗：'+(json.message||'未知錯誤')); }
+    } catch { alert('⚠ 連線失敗，請稍後再試'); }
+  }
+
+  async function deleteDate(dateKey) {
+    const d=new Date(dateKey+'T00:00:00');
+    const label=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (!confirm(`確定要刪除「${label}」的餐點資料嗎？`)) return;
+    try {
+      const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'deleteMealMenu',date:dateKey})});
+      const json=await res.json();
+      if (json.status!=='ok') { alert('⚠ Google Sheets 刪除失敗：'+(json.message||'未知錯誤')); return; }
+    } catch { alert('⚠ 連線失敗，無法同步刪除 Google Sheets'); return; }
+    delete mealData[dateKey];
+    localStorage.setItem('de_meal_data',JSON.stringify(mealData));
+    renderDateButtons();
+    showToast('🗑 已刪除 '+label);
+    loadDateSelect();
+    // 若目前查詢選單選的就是被刪的日期，清空結果
+    const sel=document.getElementById('order-date-select');
+    if (sel.value===dateKey) { sel.value=''; document.getElementById('order-view-result').innerHTML=''; }
+  }
+
+  function openDateDetail(dateKey) {
+    const data=mealData[dateKey];
+    const d=new Date(dateKey+'T00:00:00');
+    const label=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    alert(`📅 ${label}\n\n🍱 午餐：${data.lunch||'（未填）'}\n🧋 飲料：${data.drink||'（未填）'}\n\n（詳細菜單功能開發中）`);
+  }
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  /* ── 下拉選單：從 GAS 載入日期 ── */
+  async function loadDateSelect() {
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealMenu`,{cache:'no-store'});
+      const json = await res.json();
+      const sel  = document.getElementById('order-date-select');
+      const prev = sel.value;
+      sel.innerHTML='<option value="">－ 請選擇日期 －</option>';
+      if (json.status==='ok' && json.data.length>0) {
+        const sorted=[...json.data].sort((a,b)=>b.date.localeCompare(a.date));
+        sorted.forEach(item=>{
+          const opt=document.createElement('option');
+          opt.value=item.date; opt.textContent=item.date;
+          sel.appendChild(opt);
+        });
+        // 若之前有選取值且還存在，保持選取
+        if (prev && [...sel.options].some(o=>o.value===prev)) sel.value=prev;
+      }
+    } catch {}
+  }
+
+  /* ── 依日期載入訂單 ── */
+  async function loadOrdersByDate(date) {
+    const result=document.getElementById('order-view-result');
+    const btnSummary=document.getElementById('btn-summary');
+    const summaryResult=document.getElementById('summary-result');
+    btnSummary.style.display='none';
+    summaryResult.innerHTML='';
+    document.getElementById('btn-arrange').style.display='none';
+    document.getElementById('arrange-result').innerHTML='';
+    if (!date) { result.innerHTML=''; return; }
+    result.innerHTML='<div class="order-empty">載入中…</div>';
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealOrders&date=${encodeURIComponent(date)}`,{cache:'no-store'});
+      const json = await res.json();
+      if (json.status!=='ok'||!json.data.length) {
+        result.innerHTML='<div class="order-empty">📭 此日期尚無訂單記錄</div>'; return;
+      }
+      const rows=json.data;
+      const nameCount = {}; // 追蹤每個姓名出現次數（用於 rowIndex）
+      result.innerHTML=`
+        <div style="font-size:0.78rem;color:#0288d1;font-weight:700;margin-top:10px;margin-bottom:4px;">
+          共 <span class="order-count-badge">${rows.length} 筆</span>
+          <span style="font-size:0.7rem;color:var(--muted);font-weight:400;margin-left:6px;">（點擊列可編輯）</span>
+        </div>
+        <div class="order-table-wrap">
+          <table class="order-table">
+            <thead><tr>
+              <th>姓名</th><th>餐點</th><th>餐點價錢</th>
+              <th>飲料</th><th>甜度</th><th>冰塊</th><th>飲料價錢</th><th>備註</th>
+            </tr></thead>
+            <tbody id="order-tbody"></tbody>
+          </table>
+        </div>`;
+
+      const tbody = document.getElementById('order-tbody');
+      rows.forEach(r => {
+        const nm = r.name || '';
+        if (nameCount[nm] === undefined) nameCount[nm] = 0;
+        const idx = nameCount[nm];
+        nameCount[nm]++;
+        const tr = document.createElement('tr');
+        tr.className = 'row-clickable';
+        tr.title = '點擊編輯此筆資料';
+        tr.innerHTML = `
+          <td>${esc(r.name)}</td><td>${esc(r.lunchItem)}</td><td>${esc(r.lunchPrice)}</td>
+          <td>${esc(r.drinkItem)}</td><td>${esc(r.sugar)}</td><td>${esc(r.ice)}</td>
+          <td>${esc(r.drinkPrice)}</td><td>${esc(r.notes)}</td>`;
+        tr.addEventListener('click', () => openEditModal(r, idx, date));
+        tbody.appendChild(tr);
+      });
+      // 顯示總計按鈕和餐點整理按鈕
+      btnSummary.style.display='block';
+      btnSummary._rows = rows;
+      btnSummary._date = date;
+      const btnArrange = document.getElementById('btn-arrange');
+      btnArrange.style.display='block';
+      document.getElementById('arrange-result').innerHTML='';
+    } catch { result.innerHTML='<div class="order-empty">⚠ 載入失敗，請稍後再試</div>'; }
+  }
+
+  /* ── 總計計算 ── */
+  async function showSummary() {
+    const btn = document.getElementById('btn-summary');
+    const rows = btn._rows || [];
+    const date = btn._date || '';
+    const result = document.getElementById('summary-result');
+    if (!rows.length) return;
+
+    const names = [...new Set(rows.map(r => r.name).filter(Boolean))];
+    const personData = names.map(name => {
+      const personRows = rows.filter(r => r.name === name);
+      const lunchTotal = personRows.reduce((sum, r) => sum + (parseInt(r.lunchPrice) || 0), 0);
+      const drinkTotal = personRows.reduce((sum, r) => sum + (parseInt(r.drinkPrice) || 0), 0);
+      return { name, lunchTotal, drinkTotal };
+    });
+    const dateLunchTotal = rows.reduce((sum, r) => sum + (parseInt(r.lunchPrice) || 0), 0);
+    const dateDrinkTotal = rows.reduce((sum, r) => sum + (parseInt(r.drinkPrice) || 0), 0);
+    const dateTotal = dateLunchTotal + dateDrinkTotal;
+
+    result.innerHTML = `
+      <div class="summary-wrap">
+        <div class="summary-title">📊 ${esc(date)} 訂單總計</div>
+        <div class="order-table-wrap">
+          <table class="summary-table">
+            <thead><tr>
+              <th>日期</th><th>姓名</th><th>午餐總價</th><th>飲料總價</th>
+            </tr></thead>
+            <tbody>
+              ${personData.map(p=>`<tr>
+                <td>${esc(date)}</td>
+                <td>${esc(p.name)}</td>
+                <td class="price-cell">${p.lunchTotal > 0 ? '$'+p.lunchTotal : '—'}</td>
+                <td class="price-cell">${p.drinkTotal > 0 ? '$'+p.drinkTotal : '—'}</td>
+              </tr>`).join('')}
+              <tr class="summary-total-row">
+                <td colspan="2">📅 日期午餐總價 / 飲料總價</td>
+                <td class="price-cell price-total">$${dateLunchTotal}</td>
+                <td class="price-cell price-total">$${dateDrinkTotal}</td>
+              </tr>
+              <tr class="summary-total-row">
+                <td colspan="3" style="font-size:0.9rem;">🧾 日期總價</td>
+                <td class="price-cell price-total" style="font-size:1rem;">$${dateTotal}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="summary-save-msg" style="font-size:0.8rem;margin-top:8px;"></div>
+      </div>`;
+
+    // 同步寫入 Google Sheets「午餐總價」
+    try {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'saveMealSummary',
+          date,
+          personRows: personData,
+          dateLunchTotal,
+          dateDrinkTotal,
+          dateTotal
+        })
+      });
+      const json = await res.json();
+      const msg = document.getElementById('summary-save-msg');
+      if (json.status === 'ok') {
+        msg.style.color = '#04a87e';
+        msg.textContent = '✅ 已同步儲存至 Google Sheets「午餐總價」';
+      } else {
+        msg.style.color = '#e05555';
+        msg.textContent = '⚠ 儲存失敗：' + (json.message || '未知錯誤');
+      }
+    } catch {
+      const msg = document.getElementById('summary-save-msg');
+      msg.style.color = '#e05555';
+      msg.textContent = '⚠ 連線失敗，無法儲存總計';
+    }
+  }
+
+  /* ── 餐點整理 ── */
+  async function showArrangement() {
+    const btn  = document.getElementById('btn-summary');
+    const rows = btn._rows || [];
+    const date = btn._date || '';
+    const result = document.getElementById('arrange-result');
+    if (!rows.length) return;
+
+    // 排序函式：數字→大寫英文→小寫英文→注音→其他
+    function sortKey(str) {
+      const s = String(str || '').trim();
+      if (!s) return '\uffff';
+      const c = s.charCodeAt(0);
+      if (c >= 48 && c <= 57)   return '0' + s;  // 數字
+      if (c >= 65 && c <= 90)   return '1' + s;  // 大寫英文
+      if (c >= 97 && c <= 122)  return '2' + s;  // 小寫英文
+      if (c >= 0x3105 && c <= 0x312E) return '3' + s; // 注音
+      return '4' + s; // 其他（中文等）
+    }
+
+    // ── 午餐整理 ──
+    const lunchRows = rows.filter(r => r.lunchItem).map(r => ({ item: r.lunchItem, name: r.name }));
+    lunchRows.sort((a, b) => sortKey(a.item).localeCompare(sortKey(b.item), 'zh-TW'));
+
+    // ── 飲料整理 ──
+    const drinkRows = rows.filter(r => r.drinkItem).map(r => ({ item: r.drinkItem, sugar: r.sugar, ice: r.ice, name: r.name }));
+    drinkRows.sort((a, b) => sortKey(a.item).localeCompare(sortKey(b.item), 'zh-TW'));
+
+    result.innerHTML = `
+      <div class="arrange-card">
+        <div class="arrange-card-header lunch-h">🍱 午餐整理</div>
+        <div style="overflow-x:auto;">
+          <table class="arrange-table">
+            <thead><tr>
+              <th class="lunch-th">餐點</th><th class="lunch-th">姓名</th>
+            </tr></thead>
+            <tbody>
+              ${lunchRows.length ? lunchRows.map(r=>`<tr><td>${esc(r.item)}</td><td>${esc(r.name)}</td></tr>`).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:16px;">無午餐資料</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div id="lunch-arrange-msg" class="arrange-save-msg"></div>
+      </div>
+
+      <div class="arrange-card">
+        <div class="arrange-card-header drink-h">🧋 飲料整理</div>
+        <div style="overflow-x:auto;">
+          <table class="arrange-table">
+            <thead><tr>
+              <th class="drink-th">飲料</th><th class="drink-th">甜度</th><th class="drink-th">冰塊</th><th class="drink-th">姓名</th>
+            </tr></thead>
+            <tbody>
+              ${drinkRows.length ? drinkRows.map(r=>`<tr><td>${esc(r.item)}</td><td>${esc(r.sugar)}</td><td>${esc(r.ice)}</td><td>${esc(r.name)}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">無飲料資料</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div id="drink-arrange-msg" class="arrange-save-msg"></div>
+      </div>`;
+
+    // 同步寫入 GAS
+    try {
+      const [lunchRes, drinkRes] = await Promise.all([
+        fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({ action:'saveLunchSummary', date, rows: lunchRows }) }),
+        fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({ action:'saveDrinkSummary', date, rows: drinkRows }) })
+      ]);
+      const lunchJson = await lunchRes.json();
+      const drinkJson = await drinkRes.json();
+
+      const lMsg = document.getElementById('lunch-arrange-msg');
+      const dMsg = document.getElementById('drink-arrange-msg');
+      lMsg.style.color = lunchJson.status==='ok' ? '#04a87e' : '#e05555';
+      lMsg.textContent = lunchJson.status==='ok' ? '✅ 已同步儲存至「午餐整理」' : '⚠ 儲存失敗：'+(lunchJson.message||'');
+      dMsg.style.color = drinkJson.status==='ok' ? '#04a87e' : '#e05555';
+      dMsg.textContent = drinkJson.status==='ok' ? '✅ 已同步儲存至「飲料整理」' : '⚠ 儲存失敗：'+(drinkJson.message||'');
+    } catch {
+      const lMsg = document.getElementById('lunch-arrange-msg');
+      if (lMsg) { lMsg.style.color='#e05555'; lMsg.textContent='⚠ 連線失敗'; }
+    }
+  }
+
+  let _editData = null; // 目前編輯的資料
+
+  function openEditModal(row, rowIndex, date) {
+    _editData = { row, rowIndex, date };
+    document.getElementById('edit-info').textContent = `📅 ${date}　👤 ${row.name}`;
+    document.getElementById('edit-lunch-item').value  = row.lunchItem  || '';
+    document.getElementById('edit-lunch-price').value = row.lunchPrice || '';
+    document.getElementById('edit-drink-item').value  = row.drinkItem  || '';
+    document.getElementById('edit-sugar').value       = row.sugar      || '';
+    document.getElementById('edit-ice').value         = row.ice        || '';
+    document.getElementById('edit-drink-price').value = row.drinkPrice || '';
+    document.getElementById('edit-notes').value       = row.notes      || '';
+    document.getElementById('edit-msg').textContent   = '';
+    document.getElementById('edit-overlay').classList.add('show');
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-overlay').classList.remove('show');
+    _editData = null;
+  }
+
+  async function saveEditOrder() {
+    if (!_editData) return;
+    const { row, rowIndex, date } = _editData;
+    const lunchItem  = document.getElementById('edit-lunch-item').value.trim();
+    const lunchPrice = document.getElementById('edit-lunch-price').value.trim();
+    const drinkItem  = document.getElementById('edit-drink-item').value.trim();
+    const sugar      = document.getElementById('edit-sugar').value;
+    const ice        = document.getElementById('edit-ice').value;
+    const drinkPrice = document.getElementById('edit-drink-price').value.trim();
+    const notes      = document.getElementById('edit-notes').value.trim();
+    const msg        = document.getElementById('edit-msg');
+
+    msg.style.color = '#a07858';
+    msg.textContent = '儲存中…';
+
+    try {
+      const res  = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'updateMealOrder',
+          date, name: row.name, rowIndex,
+          lunchItem, lunchPrice, drinkItem, sugar, ice, drinkPrice, notes
+        })
+      });
+      const json = await res.json();
+      if (json.status === 'ok') {
+        msg.style.color = '#04a87e';
+        msg.textContent = '✅ 已更新';
+        setTimeout(async () => {
+          closeEditModal();
+          await loadOrdersByDate(date);
+          await refreshSummarySheets(date);
+        }, 800);
+      } else {
+        msg.style.color = '#e05555';
+        msg.textContent = '⚠ 失敗：' + (json.message || '未知錯誤');
+      }
+    } catch {
+      msg.style.color = '#e05555';
+      msg.textContent = '⚠ 連線失敗';
+    }
+  }
+
+  async function deleteEditOrder() {
+    if (!_editData) return;
+    const { row, rowIndex, date } = _editData;
+    if (!confirm(`確定要刪除「${row.name}」的這筆資料嗎？`)) return;
+
+    const msg = document.getElementById('edit-msg');
+    msg.style.color = '#a07858';
+    msg.textContent = '刪除中…';
+
+    try {
+      // 1. 刪除午餐前台資料
+      const res  = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'deleteMealOrder', date, name: row.name, rowIndex })
+      });
+      const json = await res.json();
+      if (json.status !== 'ok') {
+        msg.style.color = '#e05555';
+        msg.textContent = '⚠ 刪除失敗：' + (json.message || '未知錯誤');
+        return;
+      }
+
+      msg.style.color = '#04a87e';
+      msg.textContent = '✅ 已刪除';
+
+      setTimeout(async () => {
+        closeEditModal();
+        // 重新載入訂單
+        await loadOrdersByDate(date);
+        // 同步更新午餐整理、飲料整理、午餐總價
+        const btn = document.getElementById('btn-summary');
+        if (btn._rows) await refreshSummarySheets(date);
+      }, 800);
+
+    } catch {
+      msg.style.color = '#e05555';
+      msg.textContent = '⚠ 連線失敗';
+    }
+  }
+
+  /* ── 刪除後重新計算並同步寫入三個工作表 ── */
+  async function refreshSummarySheets(date) {
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealOrders&date=${encodeURIComponent(date)}`,{cache:'no-store'});
+      const json = await res.json();
+      if (json.status !== 'ok') return;
+      const rows = json.data;
+
+      // 重新計算
+      const names = [...new Set(rows.map(r => r.name).filter(Boolean))];
+      const personData = names.map(name => {
+        const pr = rows.filter(r => r.name === name);
+        return {
+          name,
+          lunchTotal: pr.reduce((s,r) => s + (parseInt(r.lunchPrice)||0), 0),
+          drinkTotal: pr.reduce((s,r) => s + (parseInt(r.drinkPrice)||0), 0)
+        };
+      });
+      const dateLunchTotal = rows.reduce((s,r) => s + (parseInt(r.lunchPrice)||0), 0);
+      const dateDrinkTotal = rows.reduce((s,r) => s + (parseInt(r.drinkPrice)||0), 0);
+      const dateTotal = dateLunchTotal + dateDrinkTotal;
+
+      function sortKey(str) {
+        const s = String(str||'').trim(); if(!s) return '\uffff';
+        const c = s.charCodeAt(0);
+        if(c>=48&&c<=57) return '0'+s; if(c>=65&&c<=90) return '1'+s;
+        if(c>=97&&c<=122) return '2'+s; if(c>=0x3105&&c<=0x312E) return '3'+s;
+        return '4'+s;
+      }
+      const lunchRows = rows.filter(r=>r.lunchItem).map(r=>({item:r.lunchItem,name:r.name}));
+      lunchRows.sort((a,b)=>sortKey(a.item).localeCompare(sortKey(b.item),'zh-TW'));
+      const drinkRows = rows.filter(r=>r.drinkItem).map(r=>({item:r.drinkItem,sugar:r.sugar,ice:r.ice,name:r.name}));
+      drinkRows.sort((a,b)=>sortKey(a.item).localeCompare(sortKey(b.item),'zh-TW'));
+
+      // 同步寫入
+      await Promise.all([
+        fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+          body:JSON.stringify({action:'saveMealSummary',date,personRows:personData,dateLunchTotal,dateDrinkTotal,dateTotal})}),
+        fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+          body:JSON.stringify({action:'saveLunchSummary',date,rows:lunchRows})}),
+        fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+          body:JSON.stringify({action:'saveDrinkSummary',date,rows:drinkRows})})
+      ]);
+    } catch {}
+  }
+
+  // 點擊 overlay 背景關閉
+  document.getElementById('edit-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+  });
+
+  function esc(s){return(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
