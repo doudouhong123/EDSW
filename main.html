@@ -116,7 +116,28 @@
         .btn-cancel-dev { background: #e05555; }
         .btn-cancel-dev:hover { background: #c83e3e; transform: translateY(-1px); }
 
-        /* toast */
+        /* ── 自訂提示框 ── */
+        .msg-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 700;
+            align-items: center; justify-content: center;
+        }
+        .msg-overlay.show { display: flex; }
+        .msg-box {
+            background: #fff; color: #333; border-radius: 18px;
+            padding: 28px 24px 20px; width: 82%; max-width: 340px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
+            text-align: center;
+        }
+        .msg-icon { font-size: 2.2rem; }
+        .msg-text { font-size: 1.05rem; font-weight: 600; color: #444; line-height: 1.6; }
+        .msg-ok {
+            padding: 10px 36px; border-radius: 10px; border: none;
+            background: #7b4fc9; color: #fff; font-size: 1rem;
+            font-weight: 700; cursor: pointer;
+        }
+        .msg-ok:hover { background: #6a3db8; }
         #toast {
             position: fixed; top: 22px; left: 50%;
             transform: translateX(-50%) translateY(-20px);
@@ -167,9 +188,31 @@
 
 <div id="toast"></div>
 
+<!-- 自訂提示框 -->
+<div class="msg-overlay" id="msg-overlay">
+  <div class="msg-box">
+    <div class="msg-icon" id="msg-icon">⚠️</div>
+    <div class="msg-text" id="msg-text"></div>
+    <button class="msg-ok" id="msg-ok-btn" onclick="closeMsg()">OK</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+
+    // ── 自訂提示框 ──
+    let _msgCallback = null;
+    function showMsg(text, icon, callback) {
+        document.getElementById('msg-icon').textContent = icon || '⚠️';
+        document.getElementById('msg-text').textContent = text;
+        _msgCallback = callback || null;
+        document.getElementById('msg-overlay').classList.add('show');
+    }
+    function closeMsg() {
+        document.getElementById('msg-overlay').classList.remove('show');
+        if (_msgCallback) { _msgCallback(); _msgCallback = null; }
+    }
 
     // ── 時鐘 ──
     function updateTime() {
@@ -181,7 +224,7 @@
     // ── 取姓名 ──
     const account = localStorage.getItem('account');
     let currentUserName = '';
-    if (!account) { alert('請先登入'); window.location.href = 'index.html'; }
+    if (!account) { showMsg('請先登入', '🔒', () => { window.location.href = 'index.html'; }); }
     else {
         fetch(`${SCRIPT_URL}?account=${account}`)
             .then(r => r.json())
@@ -218,7 +261,7 @@
             video.play();
             video.onloadedmetadata = () => startScanLoop();
         } catch (err) {
-            alert('無法開啟相機：' + err.message);
+            showMsg('無法開啟相機：' + err.message, '📷', closeQR);
             closeQR();
         }
     }
@@ -258,14 +301,13 @@
             const json = await res.json();
             const dbNames = (json.data || []).map(d => String(d.name).trim());
             if (!dbNames.includes(deviceName.trim())) {
-                alert(`⚠ 無此設備「${deviceName}」\n請確認 QR Code 是否正確。`);
-                // 重新開始掃描
-                startScanLoop();
+                showMsg(`無此設備「${deviceName}」\n請確認 QR Code 是否正確。`, '⚠️', () => {
+                    startScanLoop();
+                });
                 return;
             }
         } catch {
-            alert('⚠ 無法連線驗證設備，請稍後再試');
-            startScanLoop();
+            showMsg('無法連線驗證設備，請稍後再試', '⚠️', () => { startScanLoop(); });
             return;
         }
 
