@@ -20,149 +20,319 @@
             overflow-x: hidden;
         }
         .container {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             animation: fadeIn 1s ease-in-out;
             max-width: 400px;
             width: 90%;
         }
-        .info {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        .info { text-align: center; margin-bottom: 30px; }
         .info div {
-            margin: 10px 0;
-            font-size: 22px;
-            opacity: 0;
-            animation: slideIn 0.8s ease-out 0.5s forwards;
+            margin: 10px 0; font-size: 22px;
+            opacity: 0; animation: slideIn 0.8s ease-out 0.5s forwards;
         }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .buttons { display: flex; flex-direction: column; gap: 15px; }
         button {
-            padding: 15px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
+            padding: 15px 20px; font-size: 18px; border: none;
+            border-radius: 10px; cursor: pointer;
+            background: rgba(255,255,255,0.2); color: #fff;
+            transition: all 0.3s ease; backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative; overflow: hidden;
         }
-        button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-        button:active {
-            transform: translateY(0);
-        }
+        button:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        button:active { transform: translateY(0); }
         button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             transition: left 0.5s;
         }
-        button:hover::before {
-            left: 100%;
+        button:hover::before { left: 100%; }
+        .btn-qr {
+            background: rgba(255,220,80,0.35);
+            border: 1.5px solid rgba(255,220,80,0.6);
+            font-weight: 700;
         }
-        .loading {
-            animation: pulse 1.5s infinite;
+        .btn-qr:hover { background: rgba(255,220,80,0.5); }
+        .loading { animation: pulse 1.5s infinite; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+        @keyframes slideIn { from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);} }
+        @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.5;} }
+
+        /* ── QR 掃描 overlay ── */
+        .qr-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88); z-index: 500;
+            flex-direction: column; align-items: center; justify-content: center; gap: 18px;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .qr-overlay.show { display: flex; }
+        .qr-title { color: #fff; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; }
+        #qr-video {
+            width: 300px; height: 300px; object-fit: cover;
+            border-radius: 16px; border: 3px solid #ffd050;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        .qr-hint { color: #ffd050; font-size: 0.95rem; }
+        .qr-close-btn {
+            padding: 10px 28px; border-radius: 10px; border: none;
+            background: rgba(255,255,255,0.18); color: #fff;
+            font-size: 1rem; cursor: pointer;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .qr-close-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* ── 確認 dialog ── */
+        .confirm-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); z-index: 600;
+            align-items: center; justify-content: center;
+        }
+        .confirm-overlay.show { display: flex; }
+        .confirm-dialog {
+            background: #fff; color: #333; border-radius: 18px;
+            padding: 28px 24px 22px; width: 88%; max-width: 360px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .confirm-title { font-size: 1.15rem; font-weight: 700; color: #444; text-align: center; }
+        .device-list {
+            background: #f5f0ff; border-radius: 10px; padding: 12px 16px;
+            font-size: 1rem; color: #5a3ea8; font-weight: 600; line-height: 1.7;
+            min-height: 40px;
+        }
+        .confirm-btns { display: flex; gap: 10px; }
+        .confirm-btns button {
+            flex: 1; padding: 12px; border-radius: 10px; border: none;
+            font-size: 1rem; font-weight: 700; cursor: pointer; color: #fff;
+            box-shadow: none; backdrop-filter: none;
+        }
+        .confirm-btns button::before { display: none; }
+        .btn-add-more { background: #7b4fc9; }
+        .btn-add-more:hover { background: #6a3db8; transform: translateY(-1px); }
+        .btn-submit-dev { background: #06d6a0; }
+        .btn-submit-dev:hover { background: #04b888; transform: translateY(-1px); }
+        .btn-cancel-dev { background: #e05555; }
+        .btn-cancel-dev:hover { background: #c83e3e; transform: translateY(-1px); }
+
+        /* toast */
+        #toast {
+            position: fixed; top: 22px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #06d6a0; color: #fff; padding: 12px 26px;
+            border-radius: 14px; font-size: 1rem; font-weight: 600;
+            z-index: 999; opacity: 0; transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15); white-space: nowrap;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="info">
-            <div id="time" class="loading">載入中...</div>
-            <div id="name" class="loading">載入中...</div>
-        </div>
-        <div class="buttons">
-            <button id="equipment">📱 設備</button>
-            <button id="stationery">✏️ 文具</button>
-            <button id="order">🍽️ 訂餐</button>
-            <button id="back">⬅️ 返回</button>
+
+<div class="container">
+    <div class="info">
+        <div id="time" class="loading">載入中...</div>
+        <div id="name" class="loading">載入中...</div>
+    </div>
+    <div class="buttons">
+        <button class="btn-qr" id="quick-scan">📷 快速登記</button>
+        <button id="equipment">📱 設備</button>
+        <button id="stationery">✏️ 文具</button>
+        <button id="order">🍽️ 訂餐</button>
+        <button id="back">⬅️ 返回</button>
+    </div>
+</div>
+
+<!-- QR 掃描 overlay -->
+<div class="qr-overlay" id="qr-overlay">
+    <div class="qr-title">📷 對準設備上的 QR Code</div>
+    <video id="qr-video" autoplay playsinline muted></video>
+    <canvas id="qr-canvas" style="display:none;"></canvas>
+    <div class="qr-hint">掃描後自動辨識設備</div>
+    <button class="qr-close-btn" onclick="closeQR()">✕ 關閉</button>
+</div>
+
+<!-- 確認 dialog -->
+<div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-dialog">
+        <div class="confirm-title" id="confirm-title">登記以下設備嗎？</div>
+        <div class="device-list" id="device-list"></div>
+        <div class="confirm-btns">
+            <button class="btn-add-more" onclick="addMore()">＋ 新增</button>
+            <button class="btn-submit-dev" onclick="submitDevices()">✅ 送出</button>
+            <button class="btn-cancel-dev" onclick="cancelConfirm()">✕ 取消</button>
         </div>
     </div>
+</div>
 
-    <script>
-        // ✅ 替換成你的 GAS 部署 URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+<div id="toast"></div>
 
-        // 顯示當前時間
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('time').textContent = '時間: ' + now.toLocaleString('zh-TW');
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+
+    // ── 時鐘 ──
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('time').textContent = '時間: ' + now.toLocaleString('zh-TW');
+    }
+    updateTime(); setInterval(updateTime, 1000);
+
+    // ── 取姓名 ──
+    const account = localStorage.getItem('account');
+    let currentUserName = '';
+    if (!account) { alert('請先登入'); window.location.href = 'index.html'; }
+    else {
+        fetch(`${SCRIPT_URL}?account=${account}`)
+            .then(r => r.json())
+            .then(data => {
+                currentUserName = data.name || account;
+                document.getElementById('name').textContent = '歡迎，' + currentUserName;
+            })
+            .catch(() => {
+                currentUserName = account;
+                document.getElementById('name').textContent = '歡迎，' + account;
+            });
+    }
+
+    // ── 按鈕 ──
+    document.getElementById('equipment').addEventListener('click', () => window.location.href = 'device.html');
+    document.getElementById('stationery').addEventListener('click', () => window.location.href = 'Stationery.html');
+    document.getElementById('order').addEventListener('click', () => window.location.href = 'meal.html');
+    document.getElementById('back').addEventListener('click', () => { localStorage.removeItem('account'); window.location.href = 'index.html'; });
+    document.getElementById('quick-scan').addEventListener('click', openQR);
+
+    // ══════════════════════════════
+    //  QR 掃描
+    // ══════════════════════════════
+    let videoStream = null;
+    let scanLoop   = null;
+    let scannedDevices = []; // 已掃描的設備清單
+
+    async function openQR() {
+        document.getElementById('qr-overlay').classList.add('show');
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const video = document.getElementById('qr-video');
+            video.srcObject = videoStream;
+            video.play();
+            video.onloadedmetadata = () => startScanLoop();
+        } catch (err) {
+            alert('無法開啟相機：' + err.message);
+            closeQR();
         }
-        updateTime();
-        setInterval(updateTime, 1000);
+    }
 
-        // ✅ 從 localStorage 讀取帳號（登入時存入的）
-        const account = localStorage.getItem('account');
+    function closeQR() {
+        stopScanLoop();
+        if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+        document.getElementById('qr-overlay').classList.remove('show');
+    }
 
-        if (!account) {
-            // 沒有登入資訊，踢回登入頁
-            alert('請先登入');
-            window.location.href = 'index.html';
-        } else {
-            // ✅ 用帳號向 GAS 查詢姓名
-            fetch(`${SCRIPT_URL}?account=${account}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.name) {
-                        document.getElementById('name').textContent = '歡迎，' + data.name;
-                    } else {
-                        document.getElementById('name').textContent = '名字：未找到';
-                    }
+    function startScanLoop() {
+        const video  = document.getElementById('qr-video');
+        const canvas = document.getElementById('qr-canvas');
+        const ctx    = canvas.getContext('2d');
+        scanLoop = setInterval(() => {
+            if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+            canvas.width  = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code && code.data.trim()) {
+                stopScanLoop();
+                handleScannedDevice(code.data.trim());
+            }
+        }, 300);
+    }
+
+    function stopScanLoop() {
+        if (scanLoop) { clearInterval(scanLoop); scanLoop = null; }
+    }
+
+    // ── 掃到後驗證設備是否存在 ──
+    async function handleScannedDevice(deviceName) {
+        try {
+            const res  = await fetch(`${SCRIPT_URL}?action=getDeviceDB`);
+            const json = await res.json();
+            const dbNames = (json.data || []).map(d => String(d.name).trim());
+            if (!dbNames.includes(deviceName.trim())) {
+                alert(`⚠ 無此設備「${deviceName}」\n請確認 QR Code 是否正確。`);
+                // 重新開始掃描
+                startScanLoop();
+                return;
+            }
+        } catch {
+            alert('⚠ 無法連線驗證設備，請稍後再試');
+            startScanLoop();
+            return;
+        }
+
+        // 驗證通過 → 加入清單並顯示確認框
+        if (!scannedDevices.includes(deviceName.trim())) {
+            scannedDevices.push(deviceName.trim());
+        }
+        closeQR();
+        showConfirm();
+    }
+
+    // ── 確認 dialog ──
+    function showConfirm() {
+        document.getElementById('device-list').textContent = scannedDevices.join('、');
+        document.getElementById('confirm-title').textContent =
+            `登記「${scannedDevices.join('、')}」嗎？`;
+        document.getElementById('confirm-overlay').classList.add('show');
+    }
+
+    function addMore() {
+        // 關閉確認框，重新開啟相機繼續掃
+        document.getElementById('confirm-overlay').classList.remove('show');
+        openQR();
+    }
+
+    function cancelConfirm() {
+        // 清空清單，回到掃描頁
+        scannedDevices = [];
+        document.getElementById('confirm-overlay').classList.remove('show');
+        openQR();
+    }
+
+    async function submitDevices() {
+        if (!scannedDevices.length) return;
+        const timestamp = new Date().toLocaleString('zh-TW');
+        try {
+            const res  = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action:   'device',
+                    userName: currentUserName,
+                    devices:  scannedDevices.join('、'),
+                    timestamp
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('name').textContent = '名字：無法載入';
-                });
+            });
+            const json = await res.json();
+            document.getElementById('confirm-overlay').classList.remove('show');
+            scannedDevices = [];
+            if (json.success) showToast('✅ 登記成功！');
+            else showToast('⚠ 登記失敗');
+        } catch {
+            showToast('⚠ 連線失敗，請稍後再試');
         }
+    }
 
-        // 按鈕事件
-        document.getElementById('equipment').addEventListener('click', () => {
-            window.location.href = 'device.html';
-        });
-
-        document.getElementById('stationery').addEventListener('click', () => {
-            window.location.href = 'Stationery.html';
-        });
-
-        document.getElementById('order').addEventListener('click', () => {
-    window.location.href = 'meal.html';
-});
-
-        document.getElementById('back').addEventListener('click', () => {
-            localStorage.removeItem('account'); // 登出時清除
-            window.location.href = 'index.html';
-        });
-    </script>
+    // ── Toast ──
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transform = 'translateX(-50%) translateY(-20px)';
+        }, 2500);
+    }
+</script>
 </body>
 </html>
