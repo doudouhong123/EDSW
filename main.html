@@ -138,6 +138,53 @@
             font-weight: 700; cursor: pointer;
         }
         .msg-ok:hover { background: #6a3db8; }
+        /* ── 歸還提示框 ── */
+        .return-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 650;
+            align-items: center; justify-content: center;
+        }
+        .return-overlay.show { display: flex; }
+        .return-box {
+            background: #fff; color: #333; border-radius: 18px;
+            padding: 26px 22px 20px; width: 88%; max-width: 380px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .return-icon { font-size: 2.2rem; text-align: center; }
+        .return-text { font-size: 1.05rem; font-weight: 600; color: #444; line-height: 1.7; text-align: center; }
+        .return-text b { color: #5a3ea8; }
+        .return-list {
+            background: #f5f0ff; border-radius: 10px; padding: 10px 14px;
+            display: flex; flex-direction: column; gap: 6px;
+            max-height: 40vh; overflow-y: auto;
+        }
+        .return-item { font-size: 1rem; color: #444; line-height: 1.5; }
+        .return-item .r-date { color: #888; font-size: 0.9rem; margin-right: 8px; }
+        .return-item .r-dev  { color: #5a3ea8; font-weight: 700; }
+        .return-note-label { font-size: 0.95rem; font-weight: 700; color: #555; }
+        .return-note {
+            width: 100%; min-height: 80px; resize: vertical;
+            padding: 10px 12px; border-radius: 10px;
+            border: 1.5px solid #d9cff0; background: #faf8ff;
+            font-size: 1rem; font-family: inherit; color: #333; outline: none;
+            box-sizing: border-box;
+        }
+        .return-note:focus { border-color: #7b4fc9; background: #fff; }
+        .return-btns { display: flex; gap: 10px; }
+        .return-btns button {
+            flex: 1; padding: 12px; border-radius: 10px; border: none;
+            font-size: 1rem; font-weight: 700; cursor: pointer; color: #fff;
+            box-shadow: none; backdrop-filter: none;
+        }
+        .return-btns button::before { display: none; }
+        .btn-return-ok   { background: #06d6a0; }
+        .btn-return-ok:hover   { background: #04b888; }
+        .btn-return-later{ background: #a0a0b0; }
+        .btn-return-later:hover{ background: #888898; }
+        .return-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .return-msg { font-size: 0.9rem; text-align: center; min-height: 1.2em; color: #e05555; }
+
         #toast {
             position: fixed; top: 22px; left: 50%;
             transform: translateX(-50%) translateY(-20px);
@@ -188,6 +235,22 @@
 
 <div id="toast"></div>
 
+<!-- 歸還提示框 -->
+<div class="return-overlay" id="return-overlay">
+    <div class="return-box">
+        <div class="return-icon">📦</div>
+        <div class="return-text" id="return-text"></div>
+        <div class="return-list" id="return-list"></div>
+        <div class="return-note-label">備註（反應事項）</div>
+        <textarea class="return-note" id="return-note" placeholder="例如：設備異常、缺少配件…（選填）"></textarea>
+        <div class="return-msg" id="return-msg"></div>
+        <div class="return-btns">
+            <button class="btn-return-ok" id="btn-return-ok" onclick="confirmReturn()">✅ 歸還</button>
+            <button class="btn-return-later" id="btn-return-later" onclick="skipReturn()">尚未</button>
+        </div>
+    </div>
+</div>
+
 <!-- 自訂提示框 -->
 <div class="msg-overlay" id="msg-overlay">
   <div class="msg-box">
@@ -231,11 +294,103 @@
             .then(data => {
                 currentUserName = data.name || account;
                 document.getElementById('name').textContent = '歡迎，' + currentUserName;
+                checkUnreturned();
             })
             .catch(() => {
                 currentUserName = account;
                 document.getElementById('name').textContent = '歡迎，' + account;
             });
+    }
+
+    // ══════════════════════════════
+    //  未歸還設備提醒
+    // ══════════════════════════════
+    let pendingReturns = [];   // [{ row, date, devices }]
+
+    async function checkUnreturned() {
+        try {
+            const res  = await fetch(`${SCRIPT_URL}?action=getUnreturned&name=${encodeURIComponent(currentUserName)}`, { cache: 'no-store' });
+            const json = await res.json();
+            if (json.status === 'ok' && json.data.length) {
+                pendingReturns = json.data;
+                showReturnDialog();
+            }
+        } catch { /* 查不到就不打擾使用者 */ }
+    }
+
+    // 一個提示框列出所有未歸還的設備
+    function showReturnDialog() {
+        const text = document.getElementById('return-text');
+        text.innerHTML = '';
+        const b = document.createElement('b');
+        b.textContent = currentUserName;
+        text.appendChild(b);
+        text.appendChild(document.createTextNode(
+            pendingReturns.length > 1
+              ? ` 有 ${pendingReturns.length} 筆設備尚未歸還，要歸還嗎？`
+              : ' 有設備尚未歸還，要歸還嗎？'));
+
+        const list = document.getElementById('return-list');
+        list.innerHTML = '';
+        pendingReturns.forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'return-item';
+            const d = document.createElement('span'); d.className = 'r-date'; d.textContent = r.date + ' 借';
+            const v = document.createElement('span'); v.className = 'r-dev';  v.textContent = r.devices;
+            item.appendChild(d); item.appendChild(v);
+            list.appendChild(item);
+        });
+
+        document.getElementById('return-note').value = '';
+        document.getElementById('return-msg').textContent = '';
+        setReturnBusy(false);
+        document.getElementById('return-overlay').classList.add('show');
+    }
+
+    function setReturnBusy(busy) {
+        document.getElementById('btn-return-ok').disabled = busy;
+        document.getElementById('btn-return-later').disabled = busy;
+        document.getElementById('btn-return-ok').textContent = busy ? '處理中…' : '✅ 歸還';
+    }
+
+    // 一次歸還全部
+    async function confirmReturn() {
+        if (!pendingReturns.length) return;
+        setReturnBusy(true);
+        try {
+            const res  = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: 'returnDevice',
+                    rows:   pendingReturns.map(r => r.row),
+                    name:   currentUserName,
+                    note:   document.getElementById('return-note').value.trim()
+                })
+            });
+            const json = await res.json();
+            if (json.status === 'ok') {
+                // 關閉歸還框 → 回到 main 畫面
+                document.getElementById('return-overlay').classList.remove('show');
+                showToast(`✅ 已歸還 ${json.count || pendingReturns.length} 筆設備`);
+                pendingReturns = [];
+            } else {
+                document.getElementById('return-msg').textContent = '⚠ ' + (json.message || '歸還失敗');
+                setReturnBusy(false);
+            }
+        } catch {
+            document.getElementById('return-msg').textContent = '⚠ 連線失敗，請稍後再試';
+            setReturnBusy(false);
+        }
+    }
+
+    function skipReturn() {
+        // 關閉歸還框 → 顯示提醒 → 2 秒後自動回到 main 畫面（也可直接按 OK）
+        document.getElementById('return-overlay').classList.remove('show');
+        pendingReturns = [];
+        const cb = () => {};
+        showMsg('下次登入還會再提醒您歸還', '🔔', cb);
+        setTimeout(() => { if (_msgCallback === cb) closeMsg(); }, 2000);
     }
 
     // ── 按鈕 ──
