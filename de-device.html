@@ -273,6 +273,24 @@
       color: var(--primary2);
       border: 1px solid #d8c5f0;
     }
+    /* 歸還狀態與備註（新增） */
+    .chip-return {
+      background: #e9f9ef;
+      color: #2b9348;
+      border: 1px solid #b7e4c7;
+    }
+    .chip-pending {
+      background: #fff4e6;
+      color: #e8590c;
+      border: 1px solid #ffd8a8;
+    }
+    .chip-note {
+      background: #f5f5f7;
+      color: #495057;
+      border: 1px solid #dee2e6;
+      white-space: normal;
+      word-break: break-word;
+    }
 
     /* ── 日期篩選區 ── */
     .filter-card {
@@ -587,7 +605,7 @@
 </div>
 
 <script>
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
   const POLL_MS = 5000;
 
   let allData = [];       // 全部資料快取
@@ -731,6 +749,12 @@
           <span class="chip chip-device">
             <span class="chip-label">設備</span>${esc(r.devices)}
           </span>
+          ${r.returnTime
+            ? `<span class="chip chip-return"><span class="chip-label">歸還時間</span>${esc(r.returnTime)}</span>`
+            : `<span class="chip chip-pending">未歸還</span>`}
+          ${r.note
+            ? `<span class="chip chip-note"><span class="chip-label">備註</span>${esc(r.note)}</span>`
+            : ''}
         </div>
       `;
       list.appendChild(item);
@@ -746,8 +770,14 @@
       if (json.status === 'ok') {
         allData = json.data;
         buildSelectors(allData);     // 填充下拉選單
-        if (!isFiltered) renderList(allData); // 篩選中不自動覆蓋
-        setStatus('ok', '已同步');
+        if (!isFiltered) renderList(allData);
+        else applyFilter();          // 篩選中也同步更新歸還時間、備註（修改）
+        // 檢查 GAS 是否已更新為會回傳歸還時間、備註的版本（新增）
+        if (allData.length && !('returnTime' in allData[0])) {
+          setStatus('err', 'GAS 尚未更新，讀不到歸還時間／備註');
+        } else {
+          setStatus('ok', '已同步');
+        }
         document.getElementById('last-sync').textContent =
           '更新 ' + new Date().toLocaleTimeString('zh-TW', { hour12: false });
       } else {
