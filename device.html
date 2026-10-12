@@ -401,6 +401,51 @@
       color: var(--ink2);
       font-family: 'Zen Maru Gothic', sans-serif;
     }
+
+    /* ── 未歸還提醒框（新增） ── */
+    .remind-overlay {
+      position: fixed; inset: 0;
+      background: rgba(30,40,80,0.45);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2100; padding: 20px;
+      opacity: 0; visibility: hidden;
+      transition: all 0.25s;
+    }
+    .remind-overlay.show { opacity: 1; visibility: visible; }
+    .remind-box {
+      background: var(--surface);
+      width: 100%; max-width: 400px;
+      border-radius: 20px;
+      padding: 24px 22px 20px;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.22);
+      text-align: center;
+    }
+    .remind-icon { font-size: 2.4rem; margin-bottom: 6px; }
+    .remind-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.15rem; font-weight: 700;
+      color: #e8590c; margin-bottom: 14px;
+    }
+    .remind-list {
+      list-style: none;
+      max-height: 45vh; overflow-y: auto;
+      text-align: left;
+      display: flex; flex-direction: column; gap: 8px;
+      margin-bottom: 18px;
+    }
+    .remind-list li {
+      background: #fff4e6;
+      border: 1.5px solid #ffd8a8;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .remind-list b { color: #d9480f; }
+    .remind-btns { display: flex; gap: 10px; }
+    .remind-btns .btn { padding: 13px; font-size: 1rem; }
   </style>
 </head>
 <body>
@@ -466,11 +511,24 @@
   </div>
 </div>
 
+<!-- ─── 未歸還提醒框（新增） ─── -->
+<div class="remind-overlay" id="remindOverlay">
+  <div class="remind-box">
+    <div class="remind-icon">⚠️</div>
+    <div class="remind-title">以下設備尚未歸還</div>
+    <ul class="remind-list" id="remindList"></ul>
+    <div class="remind-btns">
+      <button class="btn btn-reset"  id="remindCancel">取消</button>
+      <button class="btn btn-submit" id="remindOk">繼續送出</button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── Toast ─── -->
 <div class="toast" id="toast"></div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
 
   let selectedDevices  = new Set();
   let currentUserName  = '';
@@ -592,7 +650,85 @@
   document.getElementById('submitBtn').addEventListener('click', async function () {
     if (selectedDevices.size === 0) { showToast('請至少選擇一個設備', 'error'); return; }
 
-    const devices   = Array.from(selectedDevices);
+    const devices = Array.from(selectedDevices);
+
+    // 先檢查選的設備是否有其他人借了還沒還（新增）
+    showLoading(true);
+    const conflicts = await findUnreturned(devices);
+    showLoading(false);
+
+    if (conflicts && conflicts.length > 0) {
+      const ok = await showRemind(conflicts);
+      if (!ok) return;            // 按取消 → 不送出
+    }
+
+    await submitBooking(devices);
+
+    // GAS 未更新時，送出後再提示（避免被成功訊息蓋掉）
+    if (conflicts === null) {
+      setTimeout(() => showToast('⚠ 未歸還檢查失敗：GAS 尚未更新為新版本', 'error'), 3200);
+    }
+  });
+
+  /* 查詢選取設備中，其他人尚未歸還的記錄（新增） */
+  async function findUnreturned(devices) {
+    try {
+      const res  = await fetch(`${SCRIPT_URL}?action=getActiveBorrows`, { cache: 'no-store' });
+      const json = await res.json();
+      if (json.status !== 'ok' || !Array.isArray(json.data)) {
+        return null;   // GAS 尚未更新
+      }
+      const picked = devices.map(d => String(d).trim());   // 統一成文字比對
+      const list = [];
+      json.data.forEach(rec => {
+        (rec.devices || []).forEach(dev => {
+          dev = String(dev).trim();
+          if (picked.includes(dev)) list.push({ date: rec.date, name: rec.name, device: dev });
+        });
+      });
+      return list;
+    } catch {
+      return [];   // 查詢失敗時不擋送出
+    }
+  }
+
+  /* 顯示提醒框，回傳 true=繼續送出 / false=取消（新增） */
+  function showRemind(conflicts) {
+    return new Promise(resolve => {
+      const ul = document.getElementById('remindList');
+      ul.innerHTML = '';
+      conflicts.forEach(c => {
+        const li = document.createElement('li');
+        if (c.name === currentUserName) {
+          // 自己借的：改用「您」的說法
+          li.innerHTML = '您於 <b></b> 借用的 <b></b> 尚未歸還，記得歸還';
+          const b = li.querySelectorAll('b');
+          b[0].textContent = c.date;
+          b[1].textContent = c.device;
+        } else {
+          li.innerHTML = '請提醒 <b></b> 於 <b></b> 借用的 <b></b> 記得歸還';
+          const b = li.querySelectorAll('b');
+          b[0].textContent = c.name;
+          b[1].textContent = c.date;
+          b[2].textContent = c.device;
+        }
+        ul.appendChild(li);
+      });
+      const overlay = document.getElementById('remindOverlay');
+      overlay.classList.add('show');
+      const done = (val) => {
+        overlay.classList.remove('show');
+        document.getElementById('remindOk').onclick = null;
+        document.getElementById('remindCancel').onclick = null;
+        resolve(val);
+      };
+      document.getElementById('remindOk').onclick     = () => done(true);
+      document.getElementById('remindCancel').onclick = () => done(false);
+    });
+  }
+
+  /* 寫入借用記錄（原送出邏輯） */
+  async function submitBooking(devices) {
     const timestamp = new Date().toLocaleString('zh-TW');
 
     showLoading(true);
@@ -617,7 +753,7 @@
     } finally {
       showLoading(false);
     }
-  });
+  }
 
   /* ── Toast ── */
   let toastTimer;
