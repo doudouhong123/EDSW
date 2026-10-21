@@ -171,6 +171,54 @@
         #cancelAdmin:hover {
             background-color: #545b62;
         }
+        /* ── 忘記密碼（新增） ── */
+        #forgot {
+            background-color: #ffffff;
+            color: #764ba2;
+            border: 2px solid #764ba2;
+            width: 100%;
+            margin: 12px 0 0 0;
+        }
+        #forgot:hover {
+            background-color: #f3ecff;
+        }
+        .forgot-label {
+            font-size: 18px;
+            color: #555;
+            text-align: left;
+            margin-top: 6px;
+        }
+        .forgot-result {
+            display: none;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: center;
+            word-break: break-all;
+        }
+        .forgot-result.ok  { display: block; background: #e9f9ef; color: #2b7a3d; border: 2px solid #b7e4c7; }
+        .forgot-result.err { display: block; background: #fdecec; color: #c0392b; border: 2px solid #f5c2c2; }
+        .forgot-result .pw {
+            display: block;
+            font-size: 28px;
+            letter-spacing: 4px;
+            margin-top: 4px;
+            color: #1e7b34;
+        }
+        #submitForgot {
+            background-color: #764ba2;
+            color: white;
+        }
+        #submitForgot:hover { background-color: #5f3b85; }
+        #submitForgot:disabled { opacity: 0.6; cursor: not-allowed; }
+        #cancelForgot {
+            background-color: #6c757d;
+            color: white;
+        }
+        #cancelForgot:hover { background-color: #545b62; }
+
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -196,6 +244,7 @@
             <button id="login">登入</button>
         </div>
         <button id="admin">後台管理</button>
+        <button id="forgot">忘記密碼</button>
     </div>
 
     <div id="adminModal" class="modal">
@@ -209,6 +258,20 @@
             </div>
         </div>
     </div>
+    <!-- 忘記密碼對話框（新增） -->
+    <div id="forgotModal" class="modal">
+        <div class="modal-content">
+            <h2>忘記密碼</h2>
+            <div class="forgot-label">請輸入帳號</div>
+            <input type="text" id="forgotAccount" placeholder="帳號">
+            <div class="forgot-result" id="forgotResult"></div>
+            <div class="modal-buttons">
+                <button id="submitForgot">查詢</button>
+                <button id="cancelForgot">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function updateTime() {
             const now = new Date();
@@ -282,6 +345,73 @@
             if (e.target === modal) {
                 modal.style.display = 'none';
             }
+        });
+
+        // ══════════════════════════════
+        //  忘記密碼（新增）
+        // ══════════════════════════════
+        const FORGOT_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+
+        function openForgot() {
+            document.getElementById('forgotAccount').value = '';
+            const r = document.getElementById('forgotResult');
+            r.className = 'forgot-result';
+            r.innerHTML = '';
+            document.getElementById('submitForgot').disabled = false;
+            document.getElementById('submitForgot').textContent = '查詢';
+            document.getElementById('forgotModal').style.display = 'block';
+            document.getElementById('forgotAccount').focus();
+        }
+        function closeForgot() {
+            document.getElementById('forgotModal').style.display = 'none';
+        }
+        function showForgotResult(ok, html) {
+            const r = document.getElementById('forgotResult');
+            r.className = 'forgot-result ' + (ok ? 'ok' : 'err');
+            r.innerHTML = html;
+        }
+
+        async function submitForgot() {
+            const account = document.getElementById('forgotAccount').value.trim();
+            if (!account) { showForgotResult(false, '請輸入帳號'); return; }
+
+            const btn = document.getElementById('submitForgot');
+            btn.disabled = true;
+            btn.textContent = '查詢中…';
+            try {
+                const res  = await fetch(FORGOT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'forgotPassword', account })
+                });
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    // 用 textContent 填入，避免特殊字元造成問題
+                    showForgotResult(true, '帳號「<span id="fa"></span>」的密碼為：<span class="pw" id="fp"></span>');
+                    document.getElementById('fa').textContent = account;
+                    document.getElementById('fp').textContent = json.password;
+                } else {
+                    showForgotResult(false, json.message || '查無此帳號');
+                }
+            } catch {
+                showForgotResult(false, '連線失敗，請稍後再試');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '查詢';
+            }
+        }
+
+        document.getElementById('forgot').addEventListener('click', openForgot);
+        document.getElementById('submitForgot').addEventListener('click', submitForgot);
+        document.getElementById('cancelForgot').addEventListener('click', closeForgot);
+        document.getElementById('forgotAccount').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') submitForgot();
+        });
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeForgot();
+        });
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('forgotModal')) closeForgot();
         });
 
 // 登入按鈕點擊事件
