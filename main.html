@@ -201,6 +201,45 @@
         .return-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
         .return-msg { font-size: 0.9rem; text-align: center; min-height: 1.2em; color: #e05555; }
 
+        /* ── 設備未歸還提醒框（新增，與 device 頁相同） ── */
+        .remind-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); z-index: 680;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .remind-overlay.show { display: flex; }
+        .remind-box {
+            background: #fff; color: #333; border-radius: 18px;
+            padding: 24px 22px 20px; width: 100%; max-width: 380px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+            text-align: center;
+        }
+        .remind-icon { font-size: 2.2rem; margin-bottom: 6px; }
+        .remind-title { font-size: 1.15rem; font-weight: 700; color: #e8590c; margin-bottom: 14px; }
+        .remind-list {
+            list-style: none; margin: 0 0 18px; padding: 0;
+            max-height: 45vh; overflow-y: auto; text-align: left;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .remind-list li {
+            background: #fff4e6; border: 1.5px solid #ffd8a8;
+            border-radius: 12px; padding: 10px 14px;
+            font-size: 0.98rem; line-height: 1.6; color: #333;
+        }
+        .remind-list b { color: #d9480f; }
+        .remind-btns { display: flex; gap: 10px; }
+        .remind-btns button {
+            flex: 1; padding: 12px; border-radius: 10px; border: none;
+            font-size: 1rem; font-weight: 700; cursor: pointer;
+            box-shadow: none; backdrop-filter: none;
+        }
+        .remind-btns button::before { display: none; }
+        .btn-remind-cancel { background: #eceaf3; color: #666; }
+        .btn-remind-cancel:hover { background: #dddae8; }
+        .btn-remind-ok { background: #06d6a0; color: #fff; }
+        .btn-remind-ok:hover { background: #04b888; }
+        .confirm-btns button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
         #toast {
             position: fixed; top: 22px; left: 50%;
             transform: translateX(-50%) translateY(-20px);
@@ -261,6 +300,19 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- 設備未歸還提醒框（新增，與 device 頁相同） -->
+<div class="remind-overlay" id="remind-overlay">
+    <div class="remind-box">
+        <div class="remind-icon">⚠️</div>
+        <div class="remind-title">以下設備尚未歸還</div>
+        <ul class="remind-list" id="remind-list"></ul>
+        <div class="remind-btns">
+            <button class="btn-remind-cancel" id="remind-cancel">取消</button>
+            <button class="btn-remind-ok" id="remind-ok">繼續送出</button>
+        </div>
+    </div>
+</div>
 
 <!-- 歸還提示框 -->
 <div class="return-overlay" id="return-overlay">
@@ -552,6 +604,23 @@
         }
 
         submitting = true;
+        const submitBtn = document.querySelector('.btn-submit-dev');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '檢查中…';
+
+        // （新增）先檢查這次要借的設備，是否有人借了還沒還
+        const conflicts = await findUnreturned(scannedDevices);
+        if (conflicts && conflicts.length > 0) {
+            const ok = await showRemind(conflicts);
+            if (!ok) {                       // 按取消 → 回到確認框，不送出
+                submitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✅ 送出';
+                return;
+            }
+        }
+        submitBtn.textContent = '送出中…';
+
         const timestamp = new Date().toLocaleString('zh-TW');
         try {
             const res  = await fetch(SCRIPT_URL, {
@@ -575,7 +644,67 @@
             showToast('⚠ 連線失敗，請稍後再試');
         } finally {
             submitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✅ 送出';
         }
+    }
+
+    // ══════════════════════════════
+    //  設備未歸還檢查（新增，與 device 頁相同）
+    // ══════════════════════════════
+    // 回傳 [{ date, name, device }]；查詢失敗時回傳 [] 不擋送出
+    async function findUnreturned(devices) {
+        try {
+            const res  = await fetch(`${SCRIPT_URL}?action=getActiveBorrows`, { cache: 'no-store' });
+            const json = await res.json();
+            if (json.status !== 'ok' || !Array.isArray(json.data)) return [];
+            const picked = devices.map(d => String(d).trim());
+            const list = [];
+            json.data.forEach(rec => {
+                (rec.devices || []).forEach(dev => {
+                    dev = String(dev).trim();
+                    if (picked.includes(dev)) list.push({ date: rec.date, name: rec.name, device: dev });
+                });
+            });
+            return list;
+        } catch {
+            return [];
+        }
+    }
+
+    // 顯示提醒框，回傳 true = 繼續送出 / false = 取消
+    function showRemind(conflicts) {
+        return new Promise(resolve => {
+            const ul = document.getElementById('remind-list');
+            ul.innerHTML = '';
+            conflicts.forEach(c => {
+                const li = document.createElement('li');
+                if (c.name === currentUserName) {
+                    // 自己借的：改用「您」的說法
+                    li.innerHTML = '您於 <b></b> 借用的 <b></b> 尚未歸還，記得歸還';
+                    const b = li.querySelectorAll('b');
+                    b[0].textContent = c.date;
+                    b[1].textContent = c.device;
+                } else {
+                    li.innerHTML = '請提醒 <b></b> 於 <b></b> 借用的 <b></b> 記得歸還';
+                    const b = li.querySelectorAll('b');
+                    b[0].textContent = c.name;
+                    b[1].textContent = c.date;
+                    b[2].textContent = c.device;
+                }
+                ul.appendChild(li);
+            });
+            const overlay = document.getElementById('remind-overlay');
+            overlay.classList.add('show');
+            const done = (val) => {
+                overlay.classList.remove('show');
+                document.getElementById('remind-ok').onclick = null;
+                document.getElementById('remind-cancel').onclick = null;
+                resolve(val);
+            };
+            document.getElementById('remind-ok').onclick     = () => done(true);
+            document.getElementById('remind-cancel').onclick = () => done(false);
+        });
     }
 
     // ── Toast ──
