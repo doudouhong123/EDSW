@@ -292,6 +292,52 @@
       word-break: break-word;
     }
 
+    /* ── 提前預借標籤、提前預約按鍵、刪除鍵（新增） ── */
+    .reserve-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #c2255c;
+      background: #fff0f6;
+      border: 1px solid #fcc2d7;
+      border-radius: 7px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    .btn-reserve {
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #c2255c;
+      background: #fff;
+      border: 1px solid #fcc2d7;
+      border-radius: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reserve:hover { background: #fff0f6; }
+    .btn-reserve.active {
+      color: #fff;
+      background: linear-gradient(135deg, #e64980, #c2255c);
+      border-color: #c2255c;
+    }
+    .btn-del-record {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-family: inherit;
+      font-size: 0.7rem;
+      color: #e03131;
+      background: #fff5f5;
+      border: 1px solid #ffc9c9;
+      border-radius: 6px;
+      padding: 2px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-del-record:hover { background: #ffe3e3; }
+    .btn-del-record:disabled { opacity: 0.5; cursor: default; }
+    .record-top { flex-wrap: wrap; }
+
     /* ── 日期篩選區 ── */
     .filter-card {
       width: 100%;
@@ -572,7 +618,9 @@
 <!-- ─── 記錄卡片 ─── -->
 <div class="records-card">
   <div class="card-header">
-    <div class="card-header-title">🖥 設備借用記錄</div>
+    <div class="card-header-title">🖥 設備借用記錄
+      <button class="btn-reserve" id="btn-reserve" onclick="toggleReserve()">📅 提前預約</button>
+    </div>
     <span class="sync-hint">每 5 秒自動同步</span>
   </div>
   <div class="record-list" id="record-list">
@@ -610,6 +658,8 @@
 
   let allData = [];       // 全部資料快取
   let isFiltered = false; // 是否正在篩選中
+  let reserveOnly = false; // （新增）是否只顯示提前預借
+  let deleting = false;    // （新增）刪除中暫停重畫
 
   /* ── 時鐘 ── */
   function updateClock() {
@@ -690,21 +740,46 @@
       return;
     }
 
-    const filtered = allData.filter(r => {
-      const ymd = toYMD(r.time); // YYYY-MM-DD
-      const [ry, rm, rd] = ymd.split('-');
-      if (y && ry !== y) return false;
-      if (m && rm !== m) return false;
-      if (d && rd !== d) return false;
-      return true;
-    });
-
     isFiltered = true;
-    const label = [y ? y+'年' : '', m ? (+m)+'月' : '', d ? (+d)+'日' : ''].filter(Boolean).join(' ');
-    document.getElementById('filter-hint').textContent =
-      filtered.length > 0 ? `📅 ${label}，共找到 ${filtered.length} 筆` : `📭 ${label} 無借用記錄`;
+    refresh();
+  }
 
-    renderList(filtered);
+  /* ── （新增）依目前條件（日期篩選、提前預約）整理後再顯示 ── */
+  function refresh() {
+    if (deleting) return;
+    let rows = allData;
+
+    if (isFiltered) {
+      const y = document.getElementById('sel-year').value;
+      const m = document.getElementById('sel-month').value;
+      const d = document.getElementById('sel-day').value;
+      rows = rows.filter(r => {
+        const ymd = toYMD(r.time); // YYYY-MM-DD
+        const [ry, rm, rd] = ymd.split('-');
+        if (y && ry !== y) return false;
+        if (m && rm !== m) return false;
+        if (d && rd !== d) return false;
+        return true;
+      });
+      const label = [y ? y+'年' : '', m ? (+m)+'月' : '', d ? (+d)+'日' : ''].filter(Boolean).join(' ');
+      document.getElementById('filter-hint').textContent =
+        rows.length > 0 ? `📅 ${label}，共找到 ${rows.length} 筆` : `📭 ${label} 無借用記錄`;
+    }
+
+    if (reserveOnly) {
+      rows = rows.filter(r => r.reserveDate)
+        .sort((a, b) => String(a.reserveDate).localeCompare(String(b.reserveDate)) || (a.row || 0) - (b.row || 0));
+    }
+    renderList(rows);
+  }
+
+  /* ── （新增）提前預約按鍵：切換只顯示提前預借 ── */
+  function toggleReserve() {
+    reserveOnly = !reserveOnly;
+    const btn = document.getElementById('btn-reserve');
+    btn.classList.toggle('active', reserveOnly);
+    btn.textContent = reserveOnly ? '📋 顯示全部' : '📅 提前預約';
+    refresh();
   }
 
   /* ── 清除篩選 ── */
@@ -714,7 +789,7 @@
     document.getElementById('sel-day').value   = '';
     document.getElementById('filter-hint').textContent = '';
     isFiltered = false;
-    renderList(allData);
+    refresh();
   }
 
   /* ── 渲染記錄 ── */
@@ -725,7 +800,7 @@
 
     if (!rows || rows.length === 0) {
       list.innerHTML = `<div class="empty-state">
-        <span class="empty-icon">📭</span><p>目前尚無設備借用記錄</p></div>`;
+        <span class="empty-icon">📭</span><p>${reserveOnly ? '目前沒有提前預借記錄' : '目前尚無設備借用記錄'}</p></div>`;
       badge.style.display = 'none';
       return;
     }
@@ -741,6 +816,8 @@
         <div class="record-top">
           <span class="seq-bubble">${i + 1}</span>
           <span class="record-name">${esc(r.name)}</span>
+          ${r.reserveDate ? `<span class="reserve-tag">📅 提前預借 ${esc(r.reserveDate)}</span>` : ''}
+          <button class="btn-del-record" type="button">🗑 刪除</button>
         </div>
         <div class="record-chips">
           <span class="chip chip-date">
@@ -757,8 +834,43 @@
             : ''}
         </div>
       `;
+      item.querySelector('.btn-del-record').addEventListener('click', e => deleteRecord(r, e.currentTarget));
       list.appendChild(item);
     });
+  }
+
+  /* ── （新增）刪除一筆借用記錄 ── */
+  async function deleteRecord(r, btn) {
+    if (!r.row) {
+      alert('Apps Script 尚未更新為新版本，無法刪除。請部署新版本後再試。');
+      return;
+    }
+    const info = `${r.name}｜${formatDate(r.time)}｜${r.devices}`;
+    if (!confirm(`確定要刪除這筆借用記錄嗎？\n\n${info}\n\n刪除後 Google Sheet 中的這一列也會一起刪除，無法復原。`)) return;
+
+    deleting = true;
+    btn.disabled = true;
+    btn.textContent = '刪除中…';
+    setStatus('busy', '刪除中…');
+    try {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'deleteDeviceRecord', row: r.row, name: r.name, devices: r.devices })
+      });
+      const json = await res.json();
+      if (json.status === 'ok') {
+        setStatus('ok', '已刪除');
+      } else {
+        alert('⚠ ' + (json.message || '刪除失敗'));
+        setStatus('err', json.message || '刪除失敗');
+      }
+    } catch {
+      alert('⚠ 連線失敗，請稍後再試');
+      setStatus('err', '連線失敗');
+    }
+    deleting = false;
+    fetchData();
   }
 
   /* ── 拉取設備記錄 ── */
@@ -770,8 +882,7 @@
       if (json.status === 'ok') {
         allData = json.data;
         buildSelectors(allData);     // 填充下拉選單
-        if (!isFiltered) renderList(allData);
-        else applyFilter();          // 篩選中也同步更新歸還時間、備註（修改）
+        refresh();                   // （修改）依日期篩選／提前預約條件顯示
         // 檢查 GAS 是否已更新為會回傳歸還時間、備註的版本（新增）
         if (allData.length && !('returnTime' in allData[0])) {
           setStatus('err', 'GAS 尚未更新，讀不到歸還時間／備註');
