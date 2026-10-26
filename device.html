@@ -307,6 +307,51 @@
       font-size: 0.9rem;
     }
 
+    /* ── 用途下拉選單（新增） ── */
+    .purpose-card {
+      width: 100%; max-width: 520px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 1;
+      animation: slideDown 0.5s 0.19s ease both;
+    }
+    .purpose-label {
+      display: block;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      color: var(--primary2);
+      margin-bottom: 8px;
+    }
+    .purpose-label .req { color: var(--accent2); }
+    .purpose-select {
+      width: 100%;
+      padding: 12px 40px 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--ink);
+      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23764ba2' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .purpose-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+      background-color: var(--surface);
+    }
+    .purpose-select.error {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(245,87,108,0.15);
+    }
+
     /* ── 按鈕列 ── */
     .btn-row {
       width: 100%; max-width: 520px;
@@ -497,6 +542,17 @@
   </div>
 </div>
 
+<!-- ─── 用途（新增） ─── -->
+<div class="purpose-card">
+  <label class="purpose-label" for="purposeSelect">📝 用途 <span class="req">*</span></label>
+  <select class="purpose-select" id="purposeSelect">
+    <option value="">請選擇用途</option>
+    <option value="開會(科會、個案研討、讀書會、各項會議)">開會（科會、個案研討、讀書會、各項會議）</option>
+    <option value="科內活動">科內活動</option>
+    <option value="大廳活動">大廳活動</option>
+  </select>
+</div>
+
 <!-- ─── 按鈕 ─── -->
 <div class="btn-row">
   <button class="btn btn-submit" id="submitBtn">✅ 送出預約</button>
@@ -643,12 +699,28 @@
       c.style.display = 'flex';
     });
     document.getElementById('searchBox').value = '';
+    const p = document.getElementById('purposeSelect');   // （新增）
+    p.value = ''; p.classList.remove('error');
     updateSelectedCount();
+  });
+
+  /* （新增）選了用途就取消紅框 */
+  document.getElementById('purposeSelect').addEventListener('change', function () {
+    if (this.value) this.classList.remove('error');
   });
 
   /* ── 送出 ── */
   document.getElementById('submitBtn').addEventListener('click', async function () {
     if (selectedDevices.size === 0) { showToast('請至少選擇一個設備', 'error'); return; }
+
+    // （新增）用途必選
+    const purposeEl = document.getElementById('purposeSelect');
+    if (!purposeEl.value) {
+      purposeEl.classList.add('error');
+      purposeEl.focus();
+      showToast('請選擇用途', 'error');
+      return;
+    }
 
     const devices = Array.from(selectedDevices);
 
@@ -734,9 +806,10 @@
     showLoading(true);
     try {
       const deviceList = devices.join('、');
+      const purpose    = document.getElementById('purposeSelect').value;   // （新增）
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action:'device', timestamp, userName: currentUserName, devices: deviceList })
+        body: JSON.stringify({ action:'device', timestamp, userName: currentUserName, devices: deviceList, purpose })
       });
       const result = await res.json();
       if (!result.success) throw new Error(result.error || '寫入失敗');
@@ -747,6 +820,7 @@
       selectedDevices.clear();
       document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
       document.getElementById('searchBox').value = '';
+      document.getElementById('purposeSelect').value = '';   // （新增）
       updateSelectedCount();
     } catch {
       showToast('提交失敗，請稍後再試', 'error');
