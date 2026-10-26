@@ -23,7 +23,6 @@
             overflow-x: hidden;
         }
 
-        /* 背景動畫 */
         body::before {
             content: '';
             position: fixed;
@@ -71,14 +70,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .header {
@@ -146,18 +139,11 @@
         .form-group:nth-child(3) { animation-delay: 0.3s; }
 
         @keyframes formSlideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
         .form-group label {
-            display: block;
             margin-bottom: 10px;
             color: #34495e;
             font-weight: 600;
@@ -228,14 +214,8 @@
         }
 
         @keyframes errorSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .button-group {
@@ -247,14 +227,8 @@
         }
 
         @keyframes buttonSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .btn {
@@ -353,28 +327,13 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* 響應式設計 */
         @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-                margin: 10px;
-            }
-
-            .header h1 {
-                font-size: 28px;
-            }
-
-            .button-group {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .btn {
-                padding: 14px 20px;
-            }
+            .container { padding: 30px 20px; margin: 10px; }
+            .header h1 { font-size: 28px; }
+            .button-group { flex-direction: column; gap: 12px; }
+            .btn { padding: 14px 20px; }
         }
 
-        /* 成功動畫 */
         .success-message {
             position: fixed;
             top: 20px;
@@ -391,14 +350,8 @@
         }
 
         @keyframes successSlideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+            from { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
     </style>
 </head>
@@ -418,13 +371,7 @@
                     <i class="fas fa-user"></i>
                     姓名
                 </label>
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="請輸入姓名（僅限中文）"
-                    required
-                >
+                <input type="text" id="name" name="name" placeholder="請輸入姓名（僅限中文）" required>
                 <div class="error-message" id="nameError"></div>
             </div>
 
@@ -433,13 +380,7 @@
                     <i class="fas fa-at"></i>
                     帳號
                 </label>
-                <input
-                    type="text"
-                    id="account"
-                    name="account"
-                    placeholder="請輸入帳號"
-                    required
-                >
+                <input type="text" id="account" name="account" placeholder="請輸入帳號" required>
                 <div class="error-message" id="accountError"></div>
             </div>
 
@@ -448,13 +389,7 @@
                     <i class="fas fa-lock"></i>
                     密碼
                 </label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="請輸入密碼（6個數字）"
-                    required
-                >
+                <input type="password" id="password" name="password" placeholder="請輸入密碼（6個數字）" inputmode="numeric" required>
                 <div class="error-message" id="passwordError"></div>
             </div>
 
@@ -475,202 +410,123 @@
     </div>
 
     <script>
-        // Google Apps Script Web App URL - 請替換為你的App Script部署URL
+        // Google Apps Script Web App URL（與 de-name.html 相同）
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
-        // 更新時間顯示
+        // 時間顯示
         function updateTime() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            
-            document.getElementById('timeDisplay').textContent = 
-                `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+            const p = n => String(n).padStart(2, '0');
+            document.getElementById('timeDisplay').textContent =
+                `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())} ${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())}`;
         }
-
-        // 初始化時間
         updateTime();
         setInterval(updateTime, 1000);
 
-        // 驗證姓名（只允許中文）
         function validateName(name) {
-            const chineseRegex = /^[\u4e00-\u9fa5]+$/;
-            return chineseRegex.test(name);
+            return /^[\u4e00-\u9fff\u3400-\u4dbf]+$/.test(name);
         }
 
-        // 驗證密碼（只允許6個數字）
         function validatePassword(password) {
-            const passwordRegex = /^\d{6}$/;
-            return passwordRegex.test(password);
+            return /^\d{6}$/.test(password);
         }
 
-        // 清除錯誤訊息
         function clearErrorMessages() {
-            document.getElementById('nameError').classList.remove('show');
-            document.getElementById('accountError').classList.remove('show');
-            document.getElementById('passwordError').classList.remove('show');
-            
-            document.getElementById('name').classList.remove('error');
-            document.getElementById('account').classList.remove('error');
-            document.getElementById('password').classList.remove('error');
+            ['name', 'account', 'password'].forEach(id => {
+                document.getElementById(id + 'Error').classList.remove('show');
+                document.getElementById(id).classList.remove('error');
+            });
         }
 
-        // 顯示成功訊息
         function showSuccessMessage(message) {
-            // 移除現有的成功訊息
-            const existingMessage = document.querySelector('.success-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
+            const existing = document.querySelector('.success-message');
+            if (existing) existing.remove();
 
-            // 創建新的成功訊息
-            const successDiv = document.createElement('div');
-            successDiv.className = 'success-message';
-            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-            document.body.appendChild(successDiv);
+            const div = document.createElement('div');
+            div.className = 'success-message';
+            div.innerHTML = '<i class="fas fa-check-circle"></i> ';
+            div.appendChild(document.createTextNode(message));
+            document.body.appendChild(div);
 
-            // 2秒後自動移除
             setTimeout(() => {
-                if (successDiv.parentNode) {
-                    successDiv.style.animation = 'successSlideDown 0.5s ease-out reverse';
-                    setTimeout(() => successDiv.remove(), 500);
+                if (div.parentNode) {
+                    div.style.animation = 'successSlideDown 0.5s ease-out reverse';
+                    setTimeout(() => div.remove(), 500);
                 }
-            }, 2000);
+            }, 2500);
         }
 
-// 顯示錯誤訊息（加在 showSuccessMessage 函數下面）
-function showError(fieldId, message) {
-    const input = document.getElementById(fieldId);
-    const errorDiv = document.getElementById(fieldId + 'Error');
-    
-    input.classList.add('error');
-    errorDiv.textContent = message;
-    errorDiv.classList.add('show');
-}
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('error');
+            const errorDiv = document.getElementById(fieldId + 'Error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
 
-        // 姓名輸入實時驗證
-        document.getElementById('name').addEventListener('input', function(e) {
-            const value = e.target.value;
-            if (value && !validateName(value)) {
-                const cleanedValue = value.replace(/[^\u4e00-\u9fa5]/g, '');
-                e.target.value = cleanedValue;
+        // 姓名只留中文
+        document.getElementById('name').addEventListener('input', function (e) {
+            const v = e.target.value;
+            if (v && !validateName(v)) {
+                e.target.value = v.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, '');
             }
         });
 
-        // 密碼輸入實時驗證
-        document.getElementById('password').addEventListener('input', function(e) {
-            let value = e.target.value;
-            // 只允許數字
-            value = value.replace(/[^\d]/g, '');
-            // 限制為6個數字
-            if (value.length > 6) {
-                value = value.substring(0, 6);
-            }
-            e.target.value = value;
+        // 密碼只留 6 位數字
+        document.getElementById('password').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
         });
 
-        // 表單提交
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        // 送出 → 進入「待審核」，由 de-name.html 決定新增 / 取消 / 略過
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-
-            // 清除所有錯誤訊息
             clearErrorMessages();
 
-            // 取得表單資料
             const name = document.getElementById('name').value.trim();
             const account = document.getElementById('account').value.trim();
             const password = document.getElementById('password').value;
 
-            // 驗證
             let isValid = true;
+            if (!name) { showError('name', '請輸入姓名'); isValid = false; }
+            else if (!validateName(name)) { showError('name', '姓名只能輸入中文字'); isValid = false; }
 
-            if (!name) {
-                showError('name', '請輸入姓名');
-                isValid = false;
-            } else if (!validateName(name)) {
-                showError('name', '姓名只能輸入中文字');
-                isValid = false;
-            }
+            if (!account) { showError('account', '請輸入帳號'); isValid = false; }
 
-            if (!account) {
-                showError('account', '請輸入帳號');
-                isValid = false;
-            }
-
-            if (!password) {
-                showError('password', '請輸入密碼');
-                isValid = false;
-            } else if (!validatePassword(password)) {
-                showError('password', '密碼必須為6個數字');
-                isValid = false;
-            }
+            if (!password) { showError('password', '請輸入密碼'); isValid = false; }
+            else if (!validatePassword(password)) { showError('password', '密碼必須為6個數字'); isValid = false; }
 
             if (!isValid) return;
 
-            // 顯示載入動畫
             document.getElementById('loading').style.display = 'block';
             document.getElementById('submitBtn').disabled = true;
 
             try {
-                // 準備時間戳
-                const now = new Date();
-                const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-                // 發送資料到Google Apps Script
                 const response = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-        timestamp: timestamp,
-        name: name,
-        account: account,
-        password: password
-    })
-});
-
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'register', name, account, password })
+                });
                 const result = await response.json();
 
-                if (result.success) {
-                    showSuccessMessage('註冊成功！歡迎加入我們');
-                    // 重置表單
-                    setTimeout(() => {
-                        document.getElementById('registerForm').reset();
-                    }, 2000);
-                } else if (result.isDuplicate) {
-                    showError('account', '此帳號已重複');
+                if (result.status === 'ok' || result.success) {
+                    showSuccessMessage('已送出註冊申請，待管理者確認後生效');
+                    setTimeout(() => document.getElementById('registerForm').reset(), 2000);
+                } else if (result.status === 'dup' || result.isDuplicate) {
+                    showError('account', '此帳號已存在或正在審核中');
                     document.getElementById('account').focus();
                 } else {
-                    alert('註冊失敗，請稍後重試：' + (result.error || '未知錯誤'));
+                    alert('註冊失敗，請稍後重試：' + (result.error || result.message || '未知錯誤'));
                 }
             } catch (error) {
                 console.error('錯誤:', error);
-                console.error('錯誤詳情:', error.message);
-                console.error('錯誤類型:', error.name);
-                
-                // 檢查是否為網路錯誤
-                if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    alert('網路連線錯誤，請檢查網路連線或稍後重試');
-                } else if (error.message.includes('CORS')) {
-                    alert('跨域請求錯誤，請檢查 Google Apps Script 部署設定');
-                } else {
-                    alert('提交失敗：' + error.message + '\n\n請檢查 Google Apps Script URL 是否正確設置');
-                }
+                alert('連線失敗，請檢查網路連線，或確認 Google Apps Script 已重新部署');
             } finally {
-                // 隱藏載入動畫
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
             }
         });
 
-        // 返回按鈕
         function goBack() {
-            // 返回上一頁
             window.history.back();
-            // 或者返回到index.html
-            // window.location.href = 'index.html';
         }
     </script>
 </body>
