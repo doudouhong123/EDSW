@@ -460,6 +460,85 @@
     }
     .btn-reset:hover { background: #e2e8ff; color: var(--primary); border-color: var(--primary); }
 
+    /* ── 預借設備時間排程（新增） ── */
+    .schedule-card {
+      width: 100%; max-width: 520px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 18px;
+      box-shadow: 0 6px 24px var(--shadow);
+      z-index: 1;
+      animation: slideDown 0.5s 0.26s ease both;
+    }
+    .schedule-header {
+      background: linear-gradient(135deg, #fff9db, #fff3bf);
+      padding: 13px 18px;
+      border-bottom: 1.5px solid #ffe8a1;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      color: #d9480f;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .btn-refresh {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid #ffd8a8;
+      background: #fff;
+      color: #d9480f;
+      font-size: 1.05rem; font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .btn-refresh:hover { transform: rotate(90deg); }
+    .btn-refresh.spin { animation: spin 0.8s linear infinite; }
+
+    .schedule-body { overflow-x: auto; }
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .schedule-table th {
+      background: #fffbea;
+      color: #b35c00;
+      font-weight: 700;
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1.5px solid #ffe8a1;
+      white-space: nowrap;
+    }
+    .schedule-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #f1f3f5;
+      color: var(--ink);
+      vertical-align: top;
+      line-height: 1.45;
+    }
+    .schedule-table tr:last-child td { border-bottom: none; }
+    .schedule-table td.s-date { white-space: nowrap; font-weight: 700; color: #d9480f; }
+    .schedule-table td.s-name { white-space: nowrap; font-weight: 600; }
+    .schedule-table td.s-dev  { color: var(--primary2); font-weight: 600; }
+    .schedule-table td.s-purpose { color: var(--ink2); font-size: 0.82rem; }
+    .schedule-table tr.mine td { background: #f3f0ff; }
+    .today-tag {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 0 6px;
+      border-radius: 6px;
+      background: #f59f00;
+      color: #fff;
+      font-size: 0.68rem;
+      vertical-align: 1px;
+    }
+    .schedule-empty {
+      text-align: center;
+      padding: 28px 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
     /* ── 訊息 Toast ── */
     .toast {
       position: fixed;
@@ -641,6 +720,17 @@
 <div class="btn-row">
   <button class="btn btn-submit" id="submitBtn">✅ 送出預約</button>
   <button class="btn btn-reset"  id="resetBtn">🔄 重置選擇</button>
+</div>
+
+<!-- ─── 預借設備時間排程（新增） ─── -->
+<div class="schedule-card">
+  <div class="schedule-header">
+    <span>🗓 預借設備時間排程</span>
+    <button class="btn-refresh" id="scheduleRefresh" type="button" title="重新整理">↻</button>
+  </div>
+  <div class="schedule-body" id="scheduleBody">
+    <div class="schedule-empty">載入中…</div>
+  </div>
 </div>
 
 <!-- ─── Loading ─── -->
@@ -962,12 +1052,82 @@
       document.getElementById('purposeSelect').value = '';   // （新增）
       setReserveMode(false);                                  // （新增）
       updateSelectedCount();
+      if (reserveDate) loadSchedule();                        // （新增）預借後更新排程
     } catch {
       showToast('提交失敗，請稍後再試', 'error');
     } finally {
       showLoading(false);
     }
   }
+
+  /* ══════════ 預借設備時間排程（新增） ══════════ */
+  async function loadSchedule() {
+    const body = document.getElementById('scheduleBody');
+    const btn  = document.getElementById('scheduleRefresh');
+    btn.classList.add('spin');
+    try {
+      const res  = await fetch(`${SCRIPT_URL}?action=getReservations`, { cache: 'no-store' });
+      const json = await res.json();
+      if (json.status !== 'ok' || !Array.isArray(json.data)) {
+        body.innerHTML = '<div class="schedule-empty">⚠ 讀取失敗：請確認 Apps Script 已部署新版本</div>';
+        return;
+      }
+      renderSchedule(json.data, json.today);
+    } catch {
+      body.innerHTML = '<div class="schedule-empty">⚠ 連線失敗，請稍後再試</div>';
+    } finally {
+      btn.classList.remove('spin');
+    }
+  }
+
+  function renderSchedule(rows, today) {
+    const body = document.getElementById('scheduleBody');
+    body.innerHTML = '';
+    if (!rows.length) {
+      body.innerHTML = '<div class="schedule-empty">目前沒有提前預借的設備</div>';
+      return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'schedule-table';
+    table.innerHTML = '<thead><tr><th>提前預借時間</th><th>姓名</th><th>設備</th><th>用途</th></tr></thead>';
+    const tbody = document.createElement('tbody');
+
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      if (r.name === currentUserName) tr.classList.add('mine');
+
+      const tdDate = document.createElement('td');
+      tdDate.className = 's-date';
+      tdDate.textContent = r.reserveDate;
+      if (r.reserveDate === today) {
+        const tag = document.createElement('span');
+        tag.className = 'today-tag';
+        tag.textContent = '今天';
+        tdDate.appendChild(tag);
+      }
+
+      const tdName = document.createElement('td');
+      tdName.className = 's-name';
+      tdName.textContent = r.name;
+
+      const tdDev = document.createElement('td');
+      tdDev.className = 's-dev';
+      tdDev.textContent = r.devices;
+
+      const tdPur = document.createElement('td');
+      tdPur.className = 's-purpose';
+      tdPur.textContent = r.purpose || '—';
+
+      tr.append(tdDate, tdName, tdDev, tdPur);
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    body.appendChild(table);
+  }
+
+  document.getElementById('scheduleRefresh').addEventListener('click', loadSchedule);
 
   /* ── Toast ── */
   let toastTimer;
@@ -986,7 +1146,7 @@
 
   /* ── 初始化 ── */
   window.addEventListener('DOMContentLoaded', () => {
-    loadUserData();
+    loadUserData().then(loadSchedule);   // （修改）先取得姓名，排程才能標出自己的預借
     loadDeviceDB();
   });
 
