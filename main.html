@@ -652,12 +652,15 @@
     // ══════════════════════════════
     //  設備未歸還檢查（新增，與 device 頁相同）
     // ══════════════════════════════
-    // 回傳 [{ date, name, device }]；查詢失敗時回傳 [] 不擋送出
+    // 回傳 [{ date, name, device }]；查詢失敗時回傳 [] 不擋送出，但會提示
     async function findUnreturned(devices) {
         try {
             const res  = await fetch(`${SCRIPT_URL}?action=getActiveBorrows`, { cache: 'no-store' });
             const json = await res.json();
-            if (json.status !== 'ok' || !Array.isArray(json.data)) return [];
+            if (json.status !== 'ok' || !Array.isArray(json.data)) {
+                setTimeout(() => showToast('⚠ 未歸還檢查失敗：請確認 Apps Script 已部署新版本'), 2800);
+                return [];
+            }
             const picked = devices.map(d => String(d).trim());
             const list = [];
             json.data.forEach(rec => {
@@ -668,6 +671,7 @@
             });
             return list;
         } catch {
+            setTimeout(() => showToast('⚠ 未歸還檢查連線失敗'), 2800);
             return [];
         }
     }
