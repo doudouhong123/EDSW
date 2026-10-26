@@ -537,10 +537,13 @@
   <span id="last-sync"></span>
 </div>
 
+<!-- 待審核讀取狀況（有問題時才會出現） -->
+<div id="pending-diag" style="display:none;width:100%;max-width:480px;margin:-4px 0 12px;padding:8px 12px;border-radius:10px;background:#fde8e4;color:#d4634a;border:1px solid #f5c5bb;font-size:0.8rem;font-weight:600;z-index:1;"></div>
+
 <div class="table-card">
   <div class="table-header">
     <div class="table-header-title">🗂 會員名單</div>
-    <span style="font-size:0.75rem;color:var(--muted)">每 5 秒自動同步</span>
+    <span style="font-size:0.75rem;color:var(--muted)">每 5 秒自動同步 · v2</span>
   </div>
   <div class="member-list" id="member-list">
     <div class="empty-state">
@@ -653,7 +656,7 @@
 </div>
 
 <script>
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
   const POLL_MS = 5000;
 
   /* ── 時鐘 ── */
@@ -764,11 +767,28 @@
     }
   }
 
+  // 在狀態列顯示待審核讀取狀況（找問題用）
+  function setPendingDiag(text) {
+    const el = document.getElementById('pending-diag');
+    el.textContent = text;
+    el.style.display = text ? 'block' : 'none';
+  }
+
   async function fetchPending() {
     try {
       const res  = await fetch(GAS_URL + '?action=getPending', { cache: 'no-store' });
       const json = await res.json();
-      if (json.status !== 'ok') return;
+
+      // 舊版後端不認得 getPending，會回 {error:'Account not found'}
+      if (json.error === 'Account not found' || (!json.status && !json.data)) {
+        setPendingDiag('⚠ 後端還是舊版本，讀不到待審核。請在 Apps Script「部署 → 管理部署作業 → 編輯 → 新版本 → 部署」。');
+        return;
+      }
+      if (json.status !== 'ok') {
+        setPendingDiag('⚠ 待審核讀取失敗：' + (json.message || json.error || '未知錯誤'));
+        return;
+      }
+      setPendingDiag('');
 
       allPending = json.data || [];
       pendingQueue = allPending.filter(r => !skipped.has(r.account));
@@ -776,7 +796,9 @@
 
       // 沒有其他視窗開著時才自動跳出
       if (pendingQueue.length > 0 && !anyModalOpen()) showReview();
-    } catch { /* 靜默失敗，下次輪詢再試 */ }
+    } catch (err) {
+      setPendingDiag('⚠ 待審核連線失敗：' + err.message);
+    }
   }
 
   function showReview() {
