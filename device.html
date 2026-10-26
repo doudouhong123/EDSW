@@ -162,6 +162,76 @@
       animation: slideDown 0.5s 0.08s ease both;
     }
 
+    /* ── 提前預借（新增） ── */
+    .reserve-card {
+      width: 100%; max-width: 520px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 1;
+      animation: slideDown 0.5s 0.1s ease both;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .reserve-card.active {
+      border-color: #f59f00;
+      box-shadow: 0 4px 18px rgba(245,159,0,0.22);
+    }
+    .btn-reserve {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: 1.5px dashed #f59f00;
+      background: #fff9db;
+      color: #d9480f;
+      font-size: 1rem; font-weight: 700;
+      font-family: 'Noto Sans TC', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reserve:hover { background: #fff3bf; }
+    .btn-reserve:active { transform: scale(0.98); }
+    .reserve-card.active .btn-reserve {
+      border-style: solid;
+      background: linear-gradient(135deg, #fcc419, #f59f00);
+      color: #fff;
+    }
+    .reserve-date-wrap {
+      display: none;
+      margin-top: 12px;
+      flex-direction: column;
+    }
+    .reserve-card.active .reserve-date-wrap { display: flex; }
+    .reserve-date {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .reserve-date:focus {
+      border-color: #f59f00;
+      box-shadow: 0 0 0 3px rgba(245,159,0,0.18);
+      background: var(--surface);
+    }
+    .reserve-date.error {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(245,87,108,0.15);
+    }
+    .reserve-hint {
+      font-size: 0.82rem;
+      color: #b35c00;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
     /* ── 搜尋 ── */
     .search-card {
       width: 100%; max-width: 520px;
@@ -523,6 +593,18 @@
   📌 請選擇需要借用的設備，可複選；完成後按「送出預約」即可記錄。
 </div>
 
+<!-- ─── 提前預借（新增） ─── -->
+<div class="reserve-card" id="reserveCard">
+  <button class="btn-reserve" id="reserveBtn" type="button">
+    <span id="reserveBtnText">📅 提前預借設備</span>
+  </button>
+  <div class="reserve-date-wrap" id="reserveDateWrap">
+    <label class="purpose-label" for="reserveDate">📆 選擇預借日期 <span class="req">*</span></label>
+    <input type="date" class="reserve-date" id="reserveDate"/>
+    <div class="reserve-hint">選好日期後，再點選下方的設備並送出，即為該日期提前預借</div>
+  </div>
+</div>
+
 <!-- ─── 搜尋 ─── -->
 <div class="search-card">
   <div class="search-wrap">
@@ -703,11 +785,43 @@
     document.getElementById('searchBox').value = '';
     const p = document.getElementById('purposeSelect');   // （新增）
     p.value = ''; p.classList.remove('error');
+    setReserveMode(false);                                  // （新增）
     updateSelectedCount();
   });
 
   /* （新增）選了用途就取消紅框 */
   document.getElementById('purposeSelect').addEventListener('change', function () {
+    if (this.value) this.classList.remove('error');
+  });
+
+  /* ══════════ 提前預借（新增） ══════════ */
+  let reserveMode = false;
+
+  function ymd(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function setReserveMode(on) {
+    reserveMode = on;
+    const card  = document.getElementById('reserveCard');
+    const input = document.getElementById('reserveDate');
+    card.classList.toggle('active', on);
+    document.getElementById('reserveBtnText').textContent =
+      on ? '📅 提前預借模式（再按一次取消）' : '📅 提前預借設備';
+    document.getElementById('submitBtn').textContent = on ? '📅 送出預借' : '✅ 送出預約';
+    input.classList.remove('error');
+    if (on) {
+      // 只能選明天以後
+      const t = new Date(); t.setDate(t.getDate() + 1);
+      input.min = ymd(t);
+      if (!input.value) input.value = ymd(t);
+    } else {
+      input.value = '';
+    }
+  }
+
+  document.getElementById('reserveBtn').addEventListener('click', () => setReserveMode(!reserveMode));
+  document.getElementById('reserveDate').addEventListener('change', function () {
     if (this.value) this.classList.remove('error');
   });
 
@@ -724,19 +838,36 @@
       return;
     }
 
+    // （新增）提前預借模式：日期必選，且要是明天以後
+    let reserveDate = '';
+    if (reserveMode) {
+      const dateEl = document.getElementById('reserveDate');
+      reserveDate = dateEl.value;
+      if (!reserveDate || reserveDate < dateEl.min) {
+        dateEl.classList.add('error');
+        dateEl.focus();
+        showToast('請選擇明天以後的預借日期', 'error');
+        return;
+      }
+    }
+
     const devices = Array.from(selectedDevices);
 
     // 先檢查選的設備是否有其他人借了還沒還（新增）
-    showLoading(true);
-    const conflicts = await findUnreturned(devices);
-    showLoading(false);
+    // 提前預借是之後才用，現在誰借著不影響，所以不檢查
+    let conflicts = [];
+    if (!reserveMode) {
+      showLoading(true);
+      conflicts = await findUnreturned(devices);
+      showLoading(false);
+    }
 
     if (conflicts && conflicts.length > 0) {
       const ok = await showRemind(conflicts);
       if (!ok) return;            // 按取消 → 不送出
     }
 
-    await submitBooking(devices);
+    await submitBooking(devices, reserveDate);
 
     // GAS 未更新時，送出後再提示（避免被成功訊息蓋掉）
     if (conflicts === null) {
@@ -802,7 +933,7 @@
   }
 
   /* 寫入借用記錄（原送出邏輯） */
-  async function submitBooking(devices) {
+  async function submitBooking(devices, reserveDate) {
     const timestamp = new Date().toLocaleString('zh-TW');
 
     showLoading(true);
@@ -811,18 +942,25 @@
       const purpose    = document.getElementById('purposeSelect').value;   // （新增）
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action:'device', timestamp, userName: currentUserName, devices: deviceList, purpose })
+        body: JSON.stringify({
+          action:'device', timestamp, userName: currentUserName,
+          devices: deviceList, purpose,
+          reserveDate: reserveDate || ''                                     // （新增）提前預借日期
+        })
       });
       const result = await res.json();
       if (!result.success) throw new Error(result.error || '寫入失敗');
 
-      showToast(`✓ 已成功預約 ${deviceList}！`, 'success');
+      showToast(reserveDate
+        ? `✓ 已提前預借 ${deviceList}（${reserveDate}）！`
+        : `✓ 已成功預約 ${deviceList}！`, 'success');
 
       // 重置
       selectedDevices.clear();
       document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
       document.getElementById('searchBox').value = '';
       document.getElementById('purposeSelect').value = '';   // （新增）
+      setReserveMode(false);                                  // （新增）
       updateSelectedCount();
     } catch {
       showToast('提交失敗，請稍後再試', 'error');
