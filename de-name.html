@@ -42,7 +42,6 @@
       padding: 24px 14px 48px;
     }
 
-    /* ── 浮動裝飾 ── */
     .deco {
       position: fixed;
       pointer-events: none;
@@ -61,7 +60,6 @@
       50%      { transform: translateY(-12px) rotate(8deg); }
     }
 
-    /* ── Header ── */
     header {
       width: 100%;
       max-width: 480px;
@@ -81,7 +79,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* 標題列：圖示＋文字＋返回鍵 同一行 */
     .header-top {
       display: flex;
       align-items: center;
@@ -109,7 +106,6 @@
       flex-shrink: 0;
     }
 
-    /* 返回按鈕 */
     .btn-return {
       display: inline-flex;
       align-items: center;
@@ -134,7 +130,6 @@
     }
     .btn-return:active { transform: scale(0.96); }
 
-    /* 時鐘：標題下方獨立一行 */
     #clock {
       font-family: 'Zen Maru Gothic', sans-serif;
       font-size: 0.82rem;
@@ -144,7 +139,6 @@
       letter-spacing: 0.03em;
     }
 
-    /* ── Status bar ── */
     #status-bar {
       width: 100%;
       max-width: 480px;
@@ -186,7 +180,20 @@
       box-shadow: 0 2px 6px rgba(232,132,90,0.3);
     }
 
-    /* ── Table card ── */
+    /* 待審核提示徽章（可點擊重新開啟審核視窗） */
+    #pending-badge {
+      background: linear-gradient(135deg, var(--sky), #5d97bd);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Noto Sans TC', sans-serif;
+      box-shadow: 0 2px 6px rgba(93,151,189,0.3);
+    }
+
     .table-card {
       width: 100%;
       max-width: 480px;
@@ -215,11 +222,7 @@
       color: var(--warm2);
     }
 
-    /* 直向：每筆資料用卡片排列，不用橫向 table */
-    .member-list {
-      display: flex;
-      flex-direction: column;
-    }
+    .member-list { display: flex; flex-direction: column; }
 
     .member-card {
       padding: 14px 18px;
@@ -238,12 +241,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* 卡片第一行：序號＋姓名 */
-    .card-row-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .card-row-top { display: flex; align-items: center; gap: 10px; }
 
     .num-bubble {
       display: inline-flex;
@@ -258,13 +256,8 @@
       flex-shrink: 0;
     }
 
-    .member-name {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--ink);
-    }
+    .member-name { font-size: 1rem; font-weight: 700; color: var(--ink); }
 
-    /* 卡片第二行：帳號＋密碼＋日期 chips */
     .card-row-chips {
       display: flex;
       flex-wrap: wrap;
@@ -282,41 +275,18 @@
       font-weight: 500;
       white-space: nowrap;
     }
-    .chip-label {
-      font-size: 0.68rem;
-      opacity: 0.7;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    .chip-account {
-      background: #edf6f0;
-      color: var(--sage2);
-      border: 1px solid #c5dece;
-    }
+    .chip-label { font-size: 0.68rem; opacity: 0.7; font-weight: 600; letter-spacing: 0.04em; }
+    .chip-account { background: #edf6f0; color: var(--sage2); border: 1px solid #c5dece; }
     .chip-pwd {
-      background: #fff4ee;
-      color: var(--ink2);
-      border: 1px solid var(--border);
-      font-family: 'Zen Maru Gothic', monospace;
-      letter-spacing: 0.08em;
+      background: #fff4ee; color: var(--ink2); border: 1px solid var(--border);
+      font-family: 'Zen Maru Gothic', monospace; letter-spacing: 0.08em;
     }
-    .chip-date {
-      background: #f0f5ff;
-      color: var(--sky);
-      border: 1px solid #c5d9ee;
-    }
+    .chip-date { background: #f0f5ff; color: var(--sky); border: 1px solid #c5d9ee; }
 
-    /* 空白狀態 */
-    .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-      color: var(--muted);
-    }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
     .empty-icon { font-size: 2.2rem; display: block; margin-bottom: 10px; }
     .empty-state p { font-size: 0.9rem; }
 
-    /* ── Bottom bar：直向，按鈕全寬堆疊 ── */
     .bottom-bar {
       width: 100%;
       max-width: 480px;
@@ -369,7 +339,6 @@
     }
     .btn-del:hover { box-shadow: 0 6px 22px rgba(212,99,74,0.4); transform: translateY(-2px); }
 
-    /* ── Overlay ── */
     .overlay {
       display: none;
       position: fixed; inset: 0;
@@ -379,15 +348,9 @@
       justify-content: center;
       align-items: flex-end;
     }
-    .overlay.active {
-      display: flex;
-      animation: fadeIn 0.25s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; } to { opacity: 1; }
-    }
+    .overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* ── Modal：從底部滑入 ── */
     .modal {
       background: var(--white);
       border: 1.5px solid var(--border);
@@ -403,12 +366,8 @@
       box-shadow: 0 -10px 40px rgba(100,60,30,0.15);
       animation: slideUp 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
     }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to   { transform: translateY(0); }
-    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-    /* 拖曳把手 */
     .drag-handle {
       width: 40px; height: 4px;
       background: var(--border);
@@ -423,15 +382,11 @@
       font-size: 1.5rem;
       flex-shrink: 0;
     }
-    .modal-icon.add { background: linear-gradient(135deg, #e8f5ec, #c5e0ce); }
-    .modal-icon.del { background: linear-gradient(135deg, #fde8e4, #f5c5bb); }
+    .modal-icon.add    { background: linear-gradient(135deg, #e8f5ec, #c5e0ce); }
+    .modal-icon.del    { background: linear-gradient(135deg, #fde8e4, #f5c5bb); }
+    .modal-icon.review { background: linear-gradient(135deg, #e6f0f8, #c5d9ee); }
 
-    /* 圖示＋標題橫向排列 */
-    .modal-head {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .modal-head { display: flex; align-items: center; gap: 12px; }
 
     .modal h2 {
       font-family: 'Zen Maru Gothic', sans-serif;
@@ -440,19 +395,11 @@
       color: var(--ink);
       line-height: 1.3;
     }
-    .modal .subtitle {
-      font-size: 0.76rem;
-      color: var(--muted);
-      margin-top: 3px;
-    }
+    .modal .subtitle { font-size: 0.76rem; color: var(--muted); margin-top: 3px; }
 
     .field { display: flex; flex-direction: column; gap: 6px; }
 
-    label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--ink2);
-    }
+    label { font-size: 0.8rem; font-weight: 600; color: var(--ink2); }
 
     input[type="text"],
     input[type="password"] {
@@ -472,29 +419,19 @@
       box-shadow: 0 0 0 3px rgba(245,164,105,0.18);
       background: var(--white);
     }
-    input.error   { border-color: var(--warm3); box-shadow: 0 0 0 3px rgba(212,99,74,0.15); }
+    input.error    { border-color: var(--warm3); box-shadow: 0 0 0 3px rgba(212,99,74,0.15); }
     input.ok-field { border-color: var(--sage);  box-shadow: 0 0 0 3px rgba(122,171,138,0.18); }
 
     .field-hint { font-size: 0.74rem; color: var(--muted); }
     .field-hint.err { color: var(--warm3); font-weight: 600; }
     .field-hint.ok  { color: var(--sage2); }
 
-    .modal-msg {
-      font-size: 0.82rem;
-      padding: 8px 12px;
-      border-radius: 8px;
-      display: none;
-    }
+    .modal-msg { font-size: 0.82rem; padding: 8px 12px; border-radius: 8px; display: none; }
     .modal-msg.show { display: block; }
     .modal-msg.err  { background: #fde8e4; color: var(--warm3); border: 1px solid #f5c5bb; }
     .modal-msg.info { background: #edf6f0; color: var(--sage2); border: 1px solid #c5dece; }
 
-    .modal-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 
     .btn-submit {
       width: 100%;
@@ -508,6 +445,7 @@
       transition: all 0.2s;
     }
     .btn-submit:active { transform: scale(0.97); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
     .btn-submit.green {
       background: linear-gradient(135deg, var(--sage), var(--sage2));
       color: #fff;
@@ -532,6 +470,44 @@
       transition: background 0.2s;
     }
     .btn-cancel:hover { background: var(--cream); }
+    .btn-cancel:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── 審核視窗內容 ── */
+    .review-counter {
+      align-self: flex-start;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #5d97bd;
+      background: #e6f0f8;
+      border: 1px solid #c5d9ee;
+      border-radius: 20px;
+      padding: 2px 10px;
+    }
+
+    .review-question {
+      font-size: 1rem;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .review-question strong {
+      font-size: 1.25rem;
+      color: var(--warm3);
+      margin: 0 2px;
+    }
+
+    .review-detail {
+      background: var(--sand);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+    .review-detail div { display: flex; gap: 10px; }
+    .review-detail span:first-child { color: var(--muted); min-width: 56px; }
+    .review-detail span:last-child  { color: var(--ink); font-weight: 600; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -542,7 +518,6 @@
 <div class="deco">🍃</div>
 <div class="deco">🌼</div>
 
-<!-- ─── Header ─── -->
 <header>
   <div class="header-top">
     <div class="site-title">
@@ -554,15 +529,14 @@
   <div id="clock">載入中…</div>
 </header>
 
-<!-- ─── Status bar ─── -->
 <div id="status-bar">
   <div class="dot" id="dot"></div>
   <span id="status-text">連線中…</span>
   <span id="count-badge" style="display:none"></span>
+  <button id="pending-badge" style="display:none" onclick="reopenReview()"></button>
   <span id="last-sync"></span>
 </div>
 
-<!-- ─── 會員卡片清單 ─── -->
 <div class="table-card">
   <div class="table-header">
     <div class="table-header-title">🗂 會員名單</div>
@@ -576,10 +550,40 @@
   </div>
 </div>
 
-<!-- ─── Bottom bar ─── -->
 <div class="bottom-bar">
   <button class="btn btn-add" onclick="openAdd()">＋ 新增會員</button>
   <button class="btn btn-del" onclick="openDel()">－ 刪除會員</button>
+</div>
+
+<!-- ─── 註冊審核 Modal ─── -->
+<div class="overlay" id="review-overlay">
+  <div class="modal">
+    <div class="drag-handle"></div>
+    <div class="modal-head">
+      <div class="modal-icon review">📝</div>
+      <div>
+        <h2>新註冊申請</h2>
+        <p class="subtitle">來自註冊頁面送出的資料</p>
+      </div>
+    </div>
+
+    <span class="review-counter" id="review-counter"></span>
+
+    <p class="review-question">是否新增姓名 <strong id="review-name"></strong>？</p>
+
+    <div class="review-detail">
+      <div><span>帳號</span><span id="review-account"></span></div>
+      <div><span>申請時間</span><span id="review-time"></span></div>
+    </div>
+
+    <div class="modal-msg" id="review-msg"></div>
+
+    <div class="modal-actions">
+      <button class="btn-submit green" id="rv-approve" onclick="reviewAction('approve')">新增</button>
+      <button class="btn-submit red"   id="rv-reject"  onclick="reviewAction('reject')">取消</button>
+      <button class="btn-cancel"       id="rv-skip"    onclick="reviewAction('skip')">略過（下次再提醒）</button>
+    </div>
+  </div>
 </div>
 
 <!-- ─── 新增 Modal ─── -->
@@ -662,13 +666,11 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  /* ── 狀態 ── */
   function setStatus(state, msg) {
     document.getElementById('dot').className = 'dot ' + state;
     document.getElementById('status-text').textContent = msg;
   }
 
-  /* ── 日期格式 YYYY-MM-DD ── */
   function formatDate(raw) {
     if (!raw) return '—';
     const d = new Date(String(raw).replace(/\//g, '-'));
@@ -680,10 +682,11 @@
 
   function esc(s) {
     return (s ?? '').toString()
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  /* ── 渲染卡片清單（直向） ── */
+  /* ── 會員清單 ── */
   function renderList(rows) {
     const list  = document.getElementById('member-list');
     const badge = document.getElementById('count-badge');
@@ -718,7 +721,6 @@
     });
   }
 
-  /* ── 拉取資料 ── */
   async function fetchData() {
     setStatus('busy', '同步中…');
     try {
@@ -736,8 +738,129 @@
       setStatus('err', '連線失敗');
     }
   }
+
+  /* ══════════ 註冊審核 ══════════
+   * 新增：移到會員名單
+   * 取消：刪除這筆申請
+   * 略過：只在這次瀏覽中忽略（存在記憶體），重新進入 de-name.html 會再次提示
+   */
+  const skipped = new Set();   // 本次瀏覽略過的帳號
+  let pendingQueue = [];       // 尚待處理（未略過）的申請
+  let allPending = [];         // 全部待審核（含已略過）
+  let reviewing = null;        // 目前顯示的那一筆
+  let reviewBusy = false;
+
+  function anyModalOpen() {
+    return !!document.querySelector('.overlay.active');
+  }
+
+  function updatePendingBadge() {
+    const b = document.getElementById('pending-badge');
+    if (allPending.length > 0) {
+      b.style.display = 'inline-block';
+      b.textContent = `待審核 ${allPending.length}`;
+    } else {
+      b.style.display = 'none';
+    }
+  }
+
+  async function fetchPending() {
+    try {
+      const res  = await fetch(GAS_URL + '?action=getPending', { cache: 'no-store' });
+      const json = await res.json();
+      if (json.status !== 'ok') return;
+
+      allPending = json.data || [];
+      pendingQueue = allPending.filter(r => !skipped.has(r.account));
+      updatePendingBadge();
+
+      // 沒有其他視窗開著時才自動跳出
+      if (pendingQueue.length > 0 && !anyModalOpen()) showReview();
+    } catch { /* 靜默失敗，下次輪詢再試 */ }
+  }
+
+  function showReview() {
+    reviewing = pendingQueue[0];
+    if (!reviewing) { closeModal('review-overlay'); return; }
+
+    document.getElementById('review-counter').textContent =
+      `待審核 第 1 筆 / 共 ${pendingQueue.length} 筆`;
+    document.getElementById('review-name').textContent    = reviewing.name;
+    document.getElementById('review-account').textContent = reviewing.account;
+    document.getElementById('review-time').textContent    = reviewing.time || '—';
+    document.getElementById('review-msg').className = 'modal-msg';
+    setReviewButtons(false);
+    document.getElementById('review-overlay').classList.add('active');
+  }
+
+  function setReviewButtons(disabled) {
+    ['rv-approve','rv-reject','rv-skip'].forEach(id => {
+      document.getElementById(id).disabled = disabled;
+    });
+  }
+
+  function nextReview() {
+    pendingQueue = pendingQueue.filter(r => r.account !== reviewing.account);
+    if (pendingQueue.length > 0) showReview();
+    else { reviewing = null; closeModal('review-overlay'); }
+  }
+
+  async function reviewAction(kind) {
+    if (!reviewing || reviewBusy) return;
+
+    if (kind === 'skip') {
+      skipped.add(reviewing.account);
+      nextReview();
+      return;
+    }
+
+    reviewBusy = true;
+    setReviewButtons(true);
+    showMsg('review-msg', kind === 'approve' ? '新增中…' : '取消中…', 'info');
+
+    try {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: kind === 'approve' ? 'approvePending' : 'rejectPending',
+          account: reviewing.account
+        })
+      });
+      const json = await res.json();
+
+      if (json.status === 'ok') {
+        allPending = allPending.filter(r => r.account !== reviewing.account);
+        updatePendingBadge();
+        if (kind === 'approve') fetchData();
+        nextReview();
+      } else {
+        showMsg('review-msg', '⚠ ' + (json.message || '處理失敗'), 'err');
+        setReviewButtons(false);
+        fetchPending();
+      }
+    } catch {
+      showMsg('review-msg', '⚠ 連線失敗，請稍後再試', 'err');
+      setReviewButtons(false);
+    } finally {
+      reviewBusy = false;
+    }
+  }
+
+  // 點「待審核 N」徽章：把略過的也重新叫出來
+  function reopenReview() {
+    skipped.clear();
+    pendingQueue = [...allPending];
+    if (pendingQueue.length > 0) {
+      document.querySelectorAll('.overlay.active').forEach(o => o.classList.remove('active'));
+      showReview();
+    }
+  }
+
+  /* ── 啟動與輪詢 ── */
   fetchData();
-  setInterval(fetchData, POLL_MS);
+  fetchPending();
+  setInterval(() => { fetchData(); fetchPending(); }, POLL_MS);
 
   /* ── 驗證 ── */
   function validateName(input) {
@@ -771,14 +894,12 @@
     }
   }
 
-  /* ── Modal 訊息 ── */
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
     el.textContent = text;
     el.className = 'modal-msg show ' + type;
   }
 
-  /* ── Modal 開關 ── */
   function openAdd() {
     ['add-name','add-account','add-password'].forEach(id => {
       const el = document.getElementById(id);
@@ -802,7 +923,6 @@
     document.getElementById(id).classList.remove('active');
   }
 
-  /* ── 新增 ── */
   async function submitAdd() {
     const name     = document.getElementById('add-name').value.trim();
     const account  = document.getElementById('add-account').value.trim();
@@ -813,13 +933,11 @@
     if (!/^\d{6}$/.test(password)) { showMsg('add-msg','⚠ 密碼須為 6 位數字','err'); return; }
 
     showMsg('add-msg','送出中…','info');
-    const time = new Date().toLocaleString('zh-TW', { hour12: false });
-
     try {
       const res  = await fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action:'addMember', name, account, password, time })
+        body: JSON.stringify({ action:'addMember', name, account, password })
       });
       const json = await res.json();
       if (json.status === 'ok') { closeModal('add-overlay'); fetchData(); }
@@ -827,7 +945,6 @@
     } catch { showMsg('add-msg','⚠ 連線失敗','err'); }
   }
 
-  /* ── 刪除 ── */
   async function submitDel() {
     const account = document.getElementById('del-account').value.trim();
     if (!account) { showMsg('del-msg','⚠ 請輸入帳號','err'); return; }
@@ -845,8 +962,9 @@
     } catch { showMsg('del-msg','⚠ 連線失敗','err'); }
   }
 
-  /* ── 點背景關閉 ── */
+  // 點背景關閉（審核視窗除外，避免誤觸跳過決定）
   document.querySelectorAll('.overlay').forEach(el => {
+    if (el.id === 'review-overlay') return;
     el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
   });
 </script>
