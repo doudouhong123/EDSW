@@ -781,7 +781,10 @@
 
       // 舊版後端不認得 getPending，會回 {error:'Account not found'}
       if (json.error === 'Account not found' || (!json.status && !json.data)) {
-        setPendingDiag('⚠ 後端還是舊版本，讀不到待審核。請在 Apps Script「部署 → 管理部署作業 → 編輯 → 新版本 → 部署」。');
+        const id = GAS_URL.split('/s/')[1].split('/')[0];
+        setPendingDiag('⚠ 目前連到的網址跑的是舊程式（沒有 getPending）。這個頁面連的是：…'
+          + id.slice(0, 12) + '…' + id.slice(-8)
+          + '。請到 Apps Script「部署 → 管理部署作業」，確認這個網址就是你更新成新版本的那一個。');
         return;
       }
       if (json.status !== 'ok') {
