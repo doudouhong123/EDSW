@@ -453,7 +453,7 @@
             if (json.status === 'ok') {
                 // 關閉歸還框 → 回到 main 畫面
                 document.getElementById('return-overlay').classList.remove('show');
-                showToast(`✅ 已歸還 ${json.count || pendingReturns.length} 筆設備`);
+                showToast(`✅ 已歸還 ${json.count || pendingReturns.length} 筆設備，等待管理者確認完成`);
                 pendingReturns = [];
             } else {
                 document.getElementById('return-msg').textContent = '⚠ ' + (json.message || '歸還失敗');
