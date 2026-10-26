@@ -102,6 +102,22 @@
             font-size: 1rem; color: #5a3ea8; font-weight: 600; line-height: 1.7;
             min-height: 40px;
         }
+        /* ── 用途下拉選單（新增） ── */
+        .purpose-wrap { display: flex; flex-direction: column; gap: 6px; }
+        .purpose-label { font-size: 0.95rem; font-weight: 700; color: #555; }
+        .purpose-label .req { color: #e05555; }
+        .purpose-select {
+            width: 100%; padding: 11px 38px 11px 12px;
+            border-radius: 10px; border: 1.5px solid #d9cff0;
+            background: #faf8ff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237b4fc9' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;
+            appearance: none; -webkit-appearance: none;
+            font-size: 1rem; font-family: inherit; color: #333;
+            outline: none; cursor: pointer; box-sizing: border-box;
+        }
+        .purpose-select:focus { border-color: #7b4fc9; background-color: #fff; }
+        .purpose-select.error { border-color: #e05555; background-color: #fff5f5; }
+        .purpose-err { font-size: 0.85rem; color: #e05555; min-height: 1em; }
+
         .confirm-btns { display: flex; gap: 10px; }
         .confirm-btns button {
             flex: 1; padding: 12px; border-radius: 10px; border: none;
@@ -225,6 +241,17 @@
     <div class="confirm-dialog">
         <div class="confirm-title" id="confirm-title">登記以下設備嗎？</div>
         <div class="device-list" id="device-list"></div>
+        <!-- 用途（新增） -->
+        <div class="purpose-wrap">
+            <label class="purpose-label" for="purpose-select">📝 用途 <span class="req">*</span></label>
+            <select class="purpose-select" id="purpose-select">
+                <option value="">請選擇用途</option>
+                <option value="開會(科會、個案研討、讀書會、各項會議)">開會（科會、個案研討、讀書會、各項會議）</option>
+                <option value="科內活動">科內活動</option>
+                <option value="大廳活動">大廳活動</option>
+            </select>
+            <div class="purpose-err" id="purpose-err"></div>
+        </div>
         <div class="confirm-btns">
             <button class="btn-add-more" onclick="addMore()">＋ 新增</button>
             <button class="btn-submit-dev" onclick="submitDevices()">✅ 送出</button>
@@ -491,12 +518,40 @@
     function cancelConfirm() {
         // 清空清單，回到掃描頁
         scannedDevices = [];
+        resetPurpose();   // （新增）
         document.getElementById('confirm-overlay').classList.remove('show');
         openQR();
     }
 
+    // ── 用途（新增） ──
+    function resetPurpose() {
+        const sel = document.getElementById('purpose-select');
+        sel.value = '';
+        sel.classList.remove('error');
+        document.getElementById('purpose-err').textContent = '';
+    }
+    document.getElementById('purpose-select').addEventListener('change', function () {
+        if (this.value) {
+            this.classList.remove('error');
+            document.getElementById('purpose-err').textContent = '';
+        }
+    });
+
+    let submitting = false;
     async function submitDevices() {
-        if (!scannedDevices.length) return;
+        if (!scannedDevices.length || submitting) return;
+
+        // （新增）用途必選
+        const sel = document.getElementById('purpose-select');
+        const purpose = sel.value;
+        if (!purpose) {
+            sel.classList.add('error');
+            document.getElementById('purpose-err').textContent = '⚠ 請選擇用途';
+            sel.focus();
+            return;
+        }
+
+        submitting = true;
         const timestamp = new Date().toLocaleString('zh-TW');
         try {
             const res  = await fetch(SCRIPT_URL, {
@@ -506,16 +561,20 @@
                     action:   'device',
                     userName: currentUserName,
                     devices:  scannedDevices.join('、'),
+                    purpose,                       // （新增）
                     timestamp
                 })
             });
             const json = await res.json();
             document.getElementById('confirm-overlay').classList.remove('show');
             scannedDevices = [];
+            resetPurpose();   // （新增）
             if (json.success) showToast('✅ 登記成功！');
             else showToast('⚠ 登記失敗');
         } catch {
             showToast('⚠ 連線失敗，請稍後再試');
+        } finally {
+            submitting = false;
         }
     }
 
