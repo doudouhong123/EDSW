@@ -123,11 +123,36 @@
         .btn-check-skip:hover { background: #888898; }
         .check-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .check-warn {
-            display: none; margin-top: 18px; padding: 10px 12px; border-radius: 10px;
-            background: #fff5f5; border: 1px solid #ffc9c9; color: #e03131;
-            font-size: 0.9rem; font-weight: bold; text-align: left; line-height: 1.5;
+        /* ── 連線狀態列、待確認徽章（新增） ── */
+        #devices { position: relative; }
+        .pend-badge {
+            display: none; position: absolute; top: -8px; right: -8px;
+            min-width: 26px; height: 26px; padding: 0 7px; border-radius: 13px;
+            background: #e03131; color: #fff; font-size: 0.8rem; line-height: 26px;
+            box-shadow: 0 2px 8px rgba(224,49,49,0.45); animation: pop 0.3s ease-out;
         }
+        @keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+        .sys-status {
+            margin-top: 20px; padding: 10px 12px; border-radius: 10px;
+            background: #f4f5fb; border: 1px solid #e3e5f0;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.85rem; color: #555; text-align: left; line-height: 1.5;
+        }
+        .sys-status.err { background: #fff5f5; border-color: #ffc9c9; color: #c92a2a; font-weight: bold; }
+        .sys-dot { width: 9px; height: 9px; border-radius: 50%; background: #adb5bd; flex-shrink: 0; }
+        .sys-status.ok  .sys-dot { background: #2f9e44; box-shadow: 0 0 6px rgba(47,158,68,0.5); }
+        .sys-status.err .sys-dot { background: #e03131; }
+        .sys-text { flex: 1; }
+        .btn-recheck {
+            flex-shrink: 0; padding: 5px 10px; border-radius: 8px; border: 1px solid #c5cae9;
+            background: #fff; color: #5a3ea8; font-size: 0.78rem; font-weight: bold; cursor: pointer;
+        }
+        .btn-recheck:hover { background: #eef0ff; }
+        /* 提示框補充資訊 */
+        .check-progress { font-size: 0.8rem; color: #868e96; margin-top: -8px; }
+        .check-time { font-size: 0.85rem; color: #868e96; margin-top: -8px; }
+        .check-dev div { padding: 4px 0; border-bottom: 1px dashed #d8ccf5; }
+        .check-dev div:last-child { border-bottom: none; }
 
         @media (max-width: 480px) {
             .container {
@@ -149,19 +174,25 @@
         <div id="welcome">科務大大 你好</div>
         <div class="button-group">
             <button id="members">會員資料</button>
-            <button id="devices">設備系統</button>
+            <button id="devices">設備系統<span class="pend-badge" id="pend-badge"></span></button>
             <button id="supplies">文具系統</button>
             <button id="meals">訂餐系統</button>
             <button id="return">返回</button>
         </div>
-        <div class="check-warn" id="check-warn"></div>
+        <div class="sys-status" id="sys-status">
+            <span class="sys-dot"></span>
+            <span class="sys-text" id="sys-text">連線檢查中…</span>
+            <button class="btn-recheck" id="btn-recheck" title="重新檢查，包含先前略過的">🔄 重新檢查</button>
+        </div>
     </div>
 
     <!-- 歸還設備確認提示框（新增） -->
     <div class="check-overlay" id="check-overlay">
         <div class="check-box">
             <div class="check-icon">📦</div>
+            <div class="check-progress" id="check-progress"></div>
             <div class="check-text" id="check-text"></div>
+            <div class="check-time" id="check-time"></div>
             <div class="check-dev" id="check-dev"></div>
             <div class="check-note" id="check-note" style="display:none"></div>
             <div class="check-ask">請確認設備是否完整、有無異常？</div>
@@ -222,35 +253,66 @@
             try {
                 const res  = await fetch(SCRIPT_URL + '?action=getPendingChecks', { cache: 'no-store' });
                 const json = await res.json();
-                const warn = document.getElementById('check-warn');
                 if (json.status !== 'ok' || !Array.isArray(json.data)) {
-                    // （新增）讀不到待確認資料時，直接在畫面上顯示原因
-                    warn.textContent = '⚠ 讀不到歸還確認資料：Apps Script 這個網址還不是新版本（請部署新版本後用 ?action=ping 確認）';
-                    warn.style.display = 'block';
+                    // 讀不到待確認資料 → 再用 ping 查出實際版本，顯示在狀態列
+                    let ver = '舊版（沒有 ping 功能）';
+                    try {
+                        const p = await (await fetch(SCRIPT_URL + '?action=ping', { cache: 'no-store' })).json();
+                        if (p.version) ver = p.version;
+                    } catch {}
+                    setSys('err', `⚠ 這個網址目前的程式版本是「${ver}」，不是 return-check-v11。請在 Apps Script 把這個網址的部署更新為「新版本」。`);
+                    setBadge(0);
                     return;
                 }
-                warn.style.display = 'none';
+                totalPending = json.data.length;
+                setBadge(new Set(json.data.map(groupKey)).size);
 
                 // 同一人同一次歸還的多筆合併成一個提示框
                 const groups = new Map();
                 json.data.forEach(r => {
                     const key = groupKey(r);
                     if (skipped.has(key)) return;
-                    if (!groups.has(key)) groups.set(key, { key, name: r.name, items: [], notes: new Set(), rows: [] });
+                    if (!groups.has(key)) groups.set(key, { key, name: r.name, returnTime: r.returnTime, items: [], notes: new Set(), rows: [] });
                     const g = groups.get(key);
                     g.items.push(r.reserveDate ? `${r.reserveDate} 預借的 ${r.devices}` : `${r.borrowDate} 借的 ${r.devices}`);
                     g.rows.push({ row: r.row, name: r.name, devices: r.devices });
                     if (r.note) g.notes.add(r.note);
                 });
                 checkQueue = [...groups.values()];
+                const skippedNow = json.data.filter(r => skipped.has(groupKey(r))).length;
+                setSys('ok', json.data.length
+                    ? `已連線｜待確認 ${json.data.length} 筆` + (skippedNow ? `（其中 ${skippedNow} 筆已略過）` : '')
+                    : '已連線｜目前沒有待確認的歸還');
                 if (!showingKey) showNextCheck();
-            } catch { /* 連線失敗就等下次 */ }
+            } catch {
+                setSys('err', '⚠ 無法連線到 Apps Script，請確認網路或網址是否正確');
+            }
         }
+
+        let totalPending = 0;
+        function setSys(state, text) {
+            document.getElementById('sys-status').className = 'sys-status ' + state;
+            document.getElementById('sys-text').textContent = text;
+        }
+        function setBadge(n) {
+            const b = document.getElementById('pend-badge');
+            b.textContent = n + ' 待確認';
+            b.style.display = n ? 'inline-block' : 'none';
+        }
+        // 重新檢查：清除本次略過的紀錄，再查一次
+        document.getElementById('btn-recheck').addEventListener('click', () => {
+            skipped.clear();
+            setSys('', '重新檢查中…');
+            pollChecks();
+        });
 
         function showNextCheck() {
             const g = checkQueue.shift();
             if (!g) return;
             showingKey = g.key;
+            const left = checkQueue.length;
+            document.getElementById('check-progress').textContent = left ? `還有 ${left} 筆待確認` : '';
+            document.getElementById('check-time').textContent = g.returnTime ? '歸還時間：' + g.returnTime : '';
             const text = document.getElementById('check-text');
             text.innerHTML = '';
             const b = document.createElement('b');
@@ -267,7 +329,7 @@
             setCheckBusy(false);
 
             document.getElementById('btn-check-ok').onclick   = () => confirmCheck(g);
-            document.getElementById('btn-check-skip').onclick = () => { skipped.add(g.key); closeCheck(); };
+            document.getElementById('btn-check-skip').onclick = () => { skipped.add(g.key); closeCheck(); pollChecks(); };
             document.getElementById('check-overlay').classList.add('show');
         }
 
