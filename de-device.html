@@ -292,6 +292,14 @@
       word-break: break-word;
     }
 
+    /* 已確認（新增） */
+    .chip-confirm {
+      background: #e7f5ff;
+      color: #1971c2;
+      border: 1px solid #a5d8ff;
+      font-weight: 700;
+    }
+
     /* ── 提前預借標籤、提前預約按鍵、刪除鍵（新增） ── */
     .reserve-tag {
       font-size: 0.72rem;
@@ -829,6 +837,9 @@
           ${r.returnTime
             ? `<span class="chip chip-return"><span class="chip-label">歸還時間</span>${esc(r.returnTime)}</span>`
             : `<span class="chip chip-pending">未歸還</span>`}
+          ${r.confirm === '已確認'
+            ? `<span class="chip chip-confirm">✔ 已確認</span>`
+            : ''}
           ${r.note
             ? `<span class="chip chip-note"><span class="chip-label">備註</span>${esc(r.note)}</span>`
             : ''}
