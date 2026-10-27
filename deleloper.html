@@ -123,6 +123,12 @@
         .btn-check-skip:hover { background: #888898; }
         .check-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .check-warn {
+            display: none; margin-top: 18px; padding: 10px 12px; border-radius: 10px;
+            background: #fff5f5; border: 1px solid #ffc9c9; color: #e03131;
+            font-size: 0.9rem; font-weight: bold; text-align: left; line-height: 1.5;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 30px 20px;
@@ -148,6 +154,7 @@
             <button id="meals">訂餐系統</button>
             <button id="return">返回</button>
         </div>
+        <div class="check-warn" id="check-warn"></div>
     </div>
 
     <!-- 歸還設備確認提示框（新增） -->
@@ -167,7 +174,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
         function updateTime() {
             const now = new Date();
@@ -215,7 +222,14 @@
             try {
                 const res  = await fetch(SCRIPT_URL + '?action=getPendingChecks', { cache: 'no-store' });
                 const json = await res.json();
-                if (json.status !== 'ok' || !Array.isArray(json.data)) return;
+                const warn = document.getElementById('check-warn');
+                if (json.status !== 'ok' || !Array.isArray(json.data)) {
+                    // （新增）讀不到待確認資料時，直接在畫面上顯示原因
+                    warn.textContent = '⚠ 讀不到歸還確認資料：Apps Script 這個網址還不是新版本（請部署新版本後用 ?action=ping 確認）';
+                    warn.style.display = 'block';
+                    return;
+                }
+                warn.style.display = 'none';
 
                 // 同一人同一次歸還的多筆合併成一個提示框
                 const groups = new Map();
@@ -296,4 +310,3 @@
     </script>
 </body>
 </html>
-
