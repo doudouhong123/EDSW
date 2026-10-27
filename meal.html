@@ -114,6 +114,11 @@
     .order-row-item{color:var(--warm2);font-weight:700;}
     .order-row-drink{color:var(--sky2);font-weight:700;}
     .order-row-detail{color:var(--muted);font-size:1rem;}
+    /* 每一筆午餐／飲料：名稱、甜度冰塊、價錢同一行（新增） */
+    .order-line{display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow-x:auto;scrollbar-width:none;}
+    .order-line::-webkit-scrollbar{display:none;}
+    .order-line .order-row-detail{flex-shrink:0;}
+    .order-line .price{color:var(--warm2);font-weight:700;}
     .spinner{width:36px;height:36px;border:4px solid #fde8d4;border-top:4px solid var(--warm1);border-radius:50%;animation:spin 0.9s linear infinite;}
     @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     .loading-text{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;color:var(--ink2);}
@@ -348,17 +353,17 @@
           const parts = [];
           if (r.lunchItem) parts.push(
             `<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>` +
-            (r.lunchPrice ? `<span class="order-row-detail"> $${esc(r.lunchPrice)}</span>` : '')
+            (r.lunchPrice ? `<span class="order-row-detail price">$${esc(r.lunchPrice)}</span>` : '')
           );
           if (r.drinkItem) {
             let d = `<span class="order-row-drink">🧋 ${esc(r.drinkItem)}</span>`;
             const ex = [r.sugar, r.ice].filter(Boolean).join(' / ');
-            if (ex) d += `<span class="order-row-detail"> ${esc(ex)}</span>`;
-            if (r.drinkPrice) d += `<span class="order-row-detail"> $${esc(r.drinkPrice)}</span>`;
+            if (ex) d += `<span class="order-row-detail">${esc(ex)}</span>`;
+            if (r.drinkPrice) d += `<span class="order-row-detail price">$${esc(r.drinkPrice)}</span>`;
             parts.push(d);
           }
           if (r.notes) parts.push(`<span class="order-row-detail">📝 ${esc(r.notes)}</span>`);
-          html += `<div class="order-row">${parts.join('<br>')}</div>`;
+          html += `<div class="order-row">${parts.map(p => `<div class="order-line">${p}</div>`).join('')}</div>`;
         });
         html += `</div>`;
       });
@@ -509,8 +514,8 @@
     finally { btn.disabled=false; }
   }
 
-  /* ── 載入並顯示該日期訂單清單 ── */
-  async function loadOrderList(date) {
+  /* ── 載入並顯示單一日期訂單清單（改名，避免覆蓋上方的 loadOrderList）── */
+  async function loadOrderListByDate(date) {
     const wrap = document.getElementById('my-order-list');
     wrap.style.display = 'block';
     wrap.innerHTML = `<div style="text-align:center;padding:18px;color:var(--muted);font-size:0.88rem;">載入中…</div>`;
@@ -556,16 +561,16 @@
           <div class="order-person-name">👤 ${esc(nm)}</div>`;
         grouped[nm].forEach(r => {
           const parts = [];
-          if (r.lunchItem)  parts.push(`<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>${r.lunchPrice ? `<span class="order-row-detail"> $${esc(r.lunchPrice)}</span>` : ''}`);
+          if (r.lunchItem)  parts.push(`<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>${r.lunchPrice ? `<span class="order-row-detail price">$${esc(r.lunchPrice)}</span>` : ''}`);
           if (r.drinkItem) {
             let drinkDetail = `<span class="order-row-drink">🧋 ${esc(r.drinkItem)}</span>`;
             const extras = [r.sugar, r.ice].filter(Boolean).join(' / ');
-            if (extras) drinkDetail += `<span class="order-row-detail"> ${esc(extras)}</span>`;
-            if (r.drinkPrice) drinkDetail += `<span class="order-row-detail"> $${esc(r.drinkPrice)}</span>`;
+            if (extras) drinkDetail += `<span class="order-row-detail">${esc(extras)}</span>`;
+            if (r.drinkPrice) drinkDetail += `<span class="order-row-detail price">$${esc(r.drinkPrice)}</span>`;
             parts.push(drinkDetail);
           }
           if (r.notes) parts.push(`<span class="order-row-detail">📝 ${esc(r.notes)}</span>`);
-          html += `<div class="order-row">${parts.join('<br>')}</div>`;
+          html += `<div class="order-row">${parts.map(p => `<div class="order-line">${p}</div>`).join('')}</div>`;
         });
         html += `</div>`;
       });
