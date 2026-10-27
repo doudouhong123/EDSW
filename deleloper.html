@@ -85,6 +85,44 @@
             background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             margin-top: 10px;
         }
+        /* ── 歸還設備確認提示框（新增） ── */
+        .check-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 900;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .check-overlay.show { display: flex; }
+        .check-box {
+            background: #fff; color: #333; border-radius: 18px;
+            padding: 26px 22px 20px; width: 100%; max-width: 380px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; gap: 14px;
+            text-align: center; animation: slideUp 0.3s ease-out;
+        }
+        .check-icon { font-size: 2.2rem; }
+        .check-text { font-size: 1.05rem; line-height: 1.8; color: #444; }
+        .check-text b { color: #5a3ea8; }
+        .check-dev {
+            background: #f5f0ff; border-radius: 10px; padding: 10px 14px;
+            color: #5a3ea8; font-weight: 700; font-size: 1.05rem; line-height: 1.6;
+        }
+        .check-note {
+            background: #fff4e6; border: 1px solid #ffd8a8; border-radius: 10px;
+            padding: 8px 12px; font-size: 0.92rem; color: #d9480f; text-align: left;
+        }
+        .check-ask { font-size: 1rem; font-weight: bold; color: #e8590c; }
+        .check-msg { font-size: 0.88rem; color: #e03131; min-height: 1em; }
+        .check-btns { display: flex; gap: 10px; }
+        .check-btns button {
+            flex: 1; padding: 13px; border: none; border-radius: 10px;
+            font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer;
+        }
+        .btn-check-ok   { background: #06d6a0; }
+        .btn-check-ok:hover { background: #04b888; }
+        .btn-check-skip { background: #a0a0b0; }
+        .btn-check-skip:hover { background: #888898; }
+        .check-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
+
         @media (max-width: 480px) {
             .container {
                 padding: 30px 20px;
@@ -111,7 +149,26 @@
             <button id="return">返回</button>
         </div>
     </div>
+
+    <!-- 歸還設備確認提示框（新增） -->
+    <div class="check-overlay" id="check-overlay">
+        <div class="check-box">
+            <div class="check-icon">📦</div>
+            <div class="check-text" id="check-text"></div>
+            <div class="check-dev" id="check-dev"></div>
+            <div class="check-note" id="check-note" style="display:none"></div>
+            <div class="check-ask">請確認設備是否完整、有無異常？</div>
+            <div class="check-msg" id="check-msg"></div>
+            <div class="check-btns">
+                <button class="btn-check-ok" id="btn-check-ok">✅ 確認</button>
+                <button class="btn-check-skip" id="btn-check-skip">略過</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
+
         function updateTime() {
             const now = new Date();
             document.getElementById('time').innerText = now.toLocaleString('zh-TW');
@@ -141,6 +198,101 @@
                 window.location.href = 'index.html';
             }
         });
+
+        // ══════════════════════════════
+        //  歸還設備確認（新增）
+        //  main 頁按「歸還」後，這裡每 5 秒檢查一次，跳出提示框
+        //  確認 → Google Sheet「確認」欄寫入「已確認」
+        //  略過 → 這次不再跳出，下次進入此頁會再提醒
+        // ══════════════════════════════
+        const skipped = new Set();   // 本次已略過的群組
+        let checkQueue = [];         // [{ key, name, dateText, devices:[], rows:[], note }]
+        let showingKey = null;
+
+        function groupKey(r) { return r.name + '|' + r.returnTime; }
+
+        async function pollChecks() {
+            try {
+                const res  = await fetch(SCRIPT_URL + '?action=getPendingChecks', { cache: 'no-store' });
+                const json = await res.json();
+                if (json.status !== 'ok' || !Array.isArray(json.data)) return;
+
+                // 同一人同一次歸還的多筆合併成一個提示框
+                const groups = new Map();
+                json.data.forEach(r => {
+                    const key = groupKey(r);
+                    if (skipped.has(key)) return;
+                    if (!groups.has(key)) groups.set(key, { key, name: r.name, items: [], notes: new Set(), rows: [] });
+                    const g = groups.get(key);
+                    g.items.push(r.reserveDate ? `${r.reserveDate} 預借的 ${r.devices}` : `${r.borrowDate} 借的 ${r.devices}`);
+                    g.rows.push({ row: r.row, name: r.name, devices: r.devices });
+                    if (r.note) g.notes.add(r.note);
+                });
+                checkQueue = [...groups.values()];
+                if (!showingKey) showNextCheck();
+            } catch { /* 連線失敗就等下次 */ }
+        }
+
+        function showNextCheck() {
+            const g = checkQueue.shift();
+            if (!g) return;
+            showingKey = g.key;
+            const text = document.getElementById('check-text');
+            text.innerHTML = '';
+            const b = document.createElement('b');
+            b.textContent = g.name;
+            text.appendChild(b);
+            text.appendChild(document.createTextNode(' 已歸還以下設備'));
+            const dev = document.getElementById('check-dev');
+            dev.innerHTML = '';
+            g.items.forEach(t => { const d = document.createElement('div'); d.textContent = t; dev.appendChild(d); });
+            const note = document.getElementById('check-note');
+            if (g.notes.size) { note.textContent = '備註：' + [...g.notes].join('；'); note.style.display = ''; }
+            else note.style.display = 'none';
+            document.getElementById('check-msg').textContent = '';
+            setCheckBusy(false);
+
+            document.getElementById('btn-check-ok').onclick   = () => confirmCheck(g);
+            document.getElementById('btn-check-skip').onclick = () => { skipped.add(g.key); closeCheck(); };
+            document.getElementById('check-overlay').classList.add('show');
+        }
+
+        function setCheckBusy(busy) {
+            document.getElementById('btn-check-ok').disabled   = busy;
+            document.getElementById('btn-check-skip').disabled = busy;
+            document.getElementById('btn-check-ok').textContent = busy ? '處理中…' : '✅ 確認';
+        }
+
+        function closeCheck() {
+            document.getElementById('check-overlay').classList.remove('show');
+            showingKey = null;
+            setTimeout(showNextCheck, 300);
+        }
+
+        async function confirmCheck(g) {
+            setCheckBusy(true);
+            try {
+                const res  = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'confirmReturnCheck', rows: g.rows })
+                });
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    skipped.add(g.key);   // 避免在下次同步前又跳出
+                    closeCheck();
+                } else {
+                    document.getElementById('check-msg').textContent = '⚠ ' + (json.message || '確認失敗');
+                    setCheckBusy(false);
+                }
+            } catch {
+                document.getElementById('check-msg').textContent = '⚠ 連線失敗，請稍後再試';
+                setCheckBusy(false);
+            }
+        }
+
+        pollChecks();
+        setInterval(pollChecks, 5000);
     </script>
 </body>
 </html>
