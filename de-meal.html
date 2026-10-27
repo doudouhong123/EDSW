@@ -152,6 +152,12 @@
     .order-table tr:last-child td{border-bottom:none;}
     .order-table tr:hover td{background:#f5faff;}
     .order-empty{text-align:center;padding:28px;color:var(--muted);font-size:0.88rem;}
+    /* 訂單清單：餐點、甜度冰塊、價錢同一行（新增） */
+    .order-table td.one-line{white-space:nowrap;}
+    .ol-item{font-weight:600;}
+    .ol-opt{color:var(--sky2);font-size:0.72rem;margin-left:6px;}
+    .ol-price{color:var(--warm2);font-weight:700;font-family:'Zen Maru Gothic',sans-serif;margin-left:6px;}
+    .ol-none{color:#c9b8a8;}
     .order-count-badge{display:inline-block;background:#e8f4f8;color:#0288d1;font-size:0.72rem;font-weight:700;border-radius:20px;padding:2px 10px;margin-left:6px;border:1px solid #c0d8e4;}
     /* ── 總計表格 ── */
     .summary-wrap{margin-top:14px;}
@@ -581,8 +587,7 @@
         <div class="order-table-wrap">
           <table class="order-table">
             <thead><tr>
-              <th>姓名</th><th>餐點</th><th>餐點價錢</th>
-              <th>飲料</th><th>甜度</th><th>冰塊</th><th>飲料價錢</th><th>備註</th>
+              <th>姓名</th><th>🍱 午餐</th><th>🧋 飲料</th><th>備註</th>
             </tr></thead>
             <tbody id="order-tbody"></tbody>
           </table>
@@ -598,9 +603,10 @@
         tr.className = 'row-clickable';
         tr.title = '點擊編輯此筆資料';
         tr.innerHTML = `
-          <td>${esc(r.name)}</td><td>${esc(r.lunchItem)}</td><td>${esc(r.lunchPrice)}</td>
-          <td>${esc(r.drinkItem)}</td><td>${esc(r.sugar)}</td><td>${esc(r.ice)}</td>
-          <td>${esc(r.drinkPrice)}</td><td>${esc(r.notes)}</td>`;
+          <td class="one-line">${esc(r.name)}</td>
+          <td class="one-line">${lunchLine(r)}</td>
+          <td class="one-line">${drinkLine(r)}</td>
+          <td>${esc(r.notes)}</td>`;
         tr.addEventListener('click', () => openEditModal(r, idx, date));
         tbody.appendChild(tr);
       });
@@ -612,6 +618,23 @@
       btnArrange.style.display='block';
       document.getElementById('arrange-result').innerHTML='';
     } catch { result.innerHTML='<div class="order-empty">⚠ 載入失敗，請稍後再試</div>'; }
+  }
+
+  /* ── 訂單清單：組成同一行的文字（新增） ── */
+  function priceTag(p) {
+    const v = String(p ?? '').trim();
+    return v ? `<span class="ol-price">$${esc(v)}</span>` : '';
+  }
+  function lunchLine(r) {
+    if (!String(r.lunchItem ?? '').trim()) return '<span class="ol-none">—</span>';
+    return `<span class="ol-item">${esc(r.lunchItem)}</span>${priceTag(r.lunchPrice)}`;
+  }
+  function drinkLine(r) {
+    if (!String(r.drinkItem ?? '').trim()) return '<span class="ol-none">—</span>';
+    const opts = [r.sugar, r.ice].map(v => String(v ?? '').trim()).filter(Boolean).join('／');
+    return `<span class="ol-item">${esc(r.drinkItem)}</span>`
+         + (opts ? `<span class="ol-opt">${esc(opts)}</span>` : '')
+         + priceTag(r.drinkPrice);
   }
 
   /* ── 總計計算 ── */
