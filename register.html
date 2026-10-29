@@ -389,7 +389,7 @@
                     <i class="fas fa-lock"></i>
                     密碼
                 </label>
-                <input type="password" id="password" name="password" placeholder="請輸入密碼（6個數字）" inputmode="numeric" required>
+                <input type="password" id="password" name="password" placeholder="請輸入密碼（6個數字）" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" required>
                 <div class="error-message" id="passwordError"></div>
             </div>
 
@@ -463,18 +463,28 @@
             errorDiv.classList.add('show');
         }
 
-        // 姓名只留中文
-        document.getElementById('name').addEventListener('input', function (e) {
-            const v = e.target.value;
-            if (v && !validateName(v)) {
-                e.target.value = v.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, '');
-            }
-        });
+        // 輸入過濾（修正）：注音／拼音輸入法「組字中」時先不過濾，
+        // 否則 ㄅㄆㄇ 會被立刻刪掉，造成姓名打不出來
+        function attachFilter(el, cleanFn) {
+            let composing = false;
+            const apply = () => {
+                const v = cleanFn(el.value);
+                if (v !== el.value) el.value = v;
+            };
+            el.addEventListener('compositionstart', () => { composing = true; });
+            el.addEventListener('compositionend',   () => { composing = false; apply(); });
+            el.addEventListener('input', (e) => { if (!composing && !e.isComposing) apply(); });
+            el.addEventListener('blur', apply);
+        }
 
-        // 密碼只留 6 位數字
-        document.getElementById('password').addEventListener('input', function (e) {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
-        });
+        // 姓名只留中文
+        attachFilter(document.getElementById('name'),
+            v => v.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, ''));
+
+        // 密碼只留 6 位數字（全形數字自動轉半形）
+        attachFilter(document.getElementById('password'),
+            v => v.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+                  .replace(/\D/g, '').slice(0, 6));
 
         // 送出 → 進入「待審核」，由 de-name.html 決定新增 / 取消 / 略過
         document.getElementById('registerForm').addEventListener('submit', async function (e) {
@@ -483,7 +493,7 @@
 
             const name = document.getElementById('name').value.trim();
             const account = document.getElementById('account').value.trim();
-            const password = document.getElementById('password').value;
+            const password = document.getElementById('password').value.trim();
 
             let isValid = true;
             if (!name) { showError('name', '請輸入姓名'); isValid = false; }
@@ -525,8 +535,10 @@
             }
         });
 
+        // 返回（修正）：直接開啟本頁時沒有上一頁，改回登入頁
         function goBack() {
-            window.history.back();
+            if (document.referrer && history.length > 1) window.history.back();
+            else window.location.href = 'index.html';
         }
     </script>
 </body>
