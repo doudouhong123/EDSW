@@ -219,6 +219,19 @@
         }
         #cancelForgot:hover { background-color: #545b62; }
 
+        /* ── 登入訊息（新增） ── */
+        .login-msg {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: #fdecec;
+            color: #c0392b;
+            border: 2px solid #f5c2c2;
+            font-size: 18px;
+        }
+        #login:disabled { opacity: 0.7; cursor: wait; transform: none; }
+
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -243,6 +256,7 @@
             <button id="register">註冊</button>
             <button id="login">登入</button>
         </div>
+        <div id="loginMsg" class="login-msg"></div>
         <button id="admin">後台管理</button>
         <button id="forgot">忘記密碼</button>
     </div>
@@ -414,48 +428,82 @@
             if (e.target === document.getElementById('forgotModal')) closeForgot();
         });
 
-// 登入按鈕點擊事件
-document.getElementById('login').addEventListener('click', async function() {
-    const account = document.getElementById('account').value.trim();
-    const password = document.getElementById('password').value.trim();
+        // ══════════════════════════════
+        //  登入（修正：避免重複送出造成「登入失敗」誤報）
+        // ══════════════════════════════
+        const LOGIN_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
+        let loggingIn = false;   // 正在登入中 → 不接受第二次點擊
+        let leaving   = false;   // 已登入成功、正在跳轉 → 忽略任何錯誤
 
-    if (!account || !password) {
-        alert('請輸入帳號和密碼');
-        return;
-    }
-
-    try {
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
-
-        // 準備表單數據（Google Apps Script 要求）
-        const formData = new FormData();
-        formData.append('action', 'login');
-        formData.append('account', account);
-        formData.append('password', password);
-
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-        console.log('後端返回的結果:', result);
-
-        if (result.success) {
-            // ✅ 存帳號到 localStorage，跳轉主頁
-            localStorage.setItem('account', account);
-            window.location.href = 'main.html';
-        } else {
-            alert('帳號或密碼錯誤\n\n返回信息: ' + JSON.stringify(result));
+        function setLoginMsg(text) {
+            const el = document.getElementById('loginMsg');
+            el.textContent = text || '';
+            el.style.display = text ? 'block' : 'none';
         }
 
-    } catch (error) {
-        alert('登入失敗：' + error.message);
-    }
-});
+        async function postLogin(account, password) {
+            const formData = new FormData();
+            formData.append('action', 'login');
+            formData.append('account', account);
+            formData.append('password', password);
+            const response = await fetch(LOGIN_URL, { method: 'POST', body: formData });
+            return response.json();
+        }
+
+        async function doLogin() {
+            if (loggingIn || leaving) return;
+            const account  = document.getElementById('account').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (!account || !password) { setLoginMsg('請輸入帳號和密碼'); return; }
+
+            const btn = document.getElementById('login');
+            loggingIn = true;
+            btn.disabled = true;
+            btn.textContent = '登入中…';
+            setLoginMsg('');
+
+            try {
+                let result;
+                try {
+                    result = await postLogin(account, password);
+                } catch (e) {
+                    if (leaving) return;
+                    // 網路一時不穩或 Google 伺服器剛喚醒 → 自動再試一次
+                    await new Promise(r => setTimeout(r, 800));
+                    result = await postLogin(account, password);
+                }
+
+                if (result && result.success) {
+                    leaving = true;
+                    localStorage.setItem('account', account);
+                    window.location.href = 'main.html';
+                    return;
+                }
+                setLoginMsg('帳號或密碼錯誤，請再確認');
+            } catch (error) {
+                if (leaving) return;           // 已在跳轉中，不顯示錯誤
+                setLoginMsg('連線不穩，請稍後再按一次「登入」');
+            } finally {
+                if (!leaving) {
+                    loggingIn = false;
+                    btn.disabled = false;
+                    btn.textContent = '登入';
+                }
+            }
+        }
+
+        document.getElementById('login').addEventListener('click', doLogin);
+        // 在密碼欄按 Enter 也可以登入
+        document.getElementById('password').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') doLogin();
+        });
+        // 從 main 按「上一頁」回來時，讓按鈕恢復可用
+        window.addEventListener('pageshow', function () {
+            leaving = false; loggingIn = false;
+            const btn = document.getElementById('login');
+            btn.disabled = false; btn.textContent = '登入';
+        });
 
     </script>
-</body>
-</html>
 </body>
 </html>
