@@ -15,7 +15,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%);   /* 鼠尾草綠（修改） */
             animation: fadeIn 1s ease-in;
         }
         @keyframes fadeIn {
@@ -23,7 +23,8 @@
             to { opacity: 1; }
         }
         .container {
-            background: rgba(255, 255, 255, 0.9);
+            background: #fffaf0;                 /* 奶油白（修改） */
+            border: 1px solid #efe6d2;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -47,6 +48,11 @@
             color: #333;
             margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            /* 字距拉開並保持置中（修改）：letter-spacing 會在最後一字後多一格，用左側同寬補回 */
+            letter-spacing: 0.35em;
+            padding-left: 0.35em;
+            text-align: center;
+            white-space: nowrap;
         }
         input {
             width: 100%;
@@ -60,8 +66,8 @@
             box-sizing: border-box;
         }
         input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            border-color: #8fa682;
+            box-shadow: 0 0 10px rgba(143, 166, 130, 0.5);
             outline: none;
         }
         button {
@@ -219,6 +225,23 @@
         }
         #cancelForgot:hover { background-color: #545b62; }
 
+        /* ── 四個按鍵 2×2 置中排列（新增） ── */
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px auto 0;
+            width: 100%;
+        }
+        .button-grid button {
+            width: 100%;
+            margin: 0;
+            padding: 15px 10px;
+            white-space: nowrap;
+        }
+        .button-grid #admin,
+        .button-grid #forgot { margin: 0; }
+
         /* ── 登入訊息（新增） ── */
         .login-msg {
             display: none;
@@ -243,6 +266,7 @@
                 padding: 12px 20px;
                 font-size: 0.9em;
             }
+            .button-grid button { padding: 13px 6px; }
         }
     </style>
 </head>
@@ -252,13 +276,14 @@
         <div id="center">義大社工科</div>
         <input type="text" id="account" placeholder="帳號">
         <input type="password" id="password" placeholder="密碼" maxlength="6" pattern="[0-9]{6}">
-        <div class="button-row">
+        <!-- 四個按鍵：左欄 註冊／後台管理，右欄 登入／忘記密碼（修改） -->
+        <div class="button-grid">
             <button id="register">註冊</button>
             <button id="login">登入</button>
+            <button id="admin">後台管理</button>
+            <button id="forgot">忘記密碼</button>
         </div>
         <div id="loginMsg" class="login-msg"></div>
-        <button id="admin">後台管理</button>
-        <button id="forgot">忘記密碼</button>
     </div>
 
     <div id="adminModal" class="modal">
