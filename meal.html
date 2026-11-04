@@ -223,7 +223,13 @@
     }
   }
 
-  async function loadDates() {
+  // ── 自動更新（新增）──
+  const REFRESH_MS = 1000;      // 更新間隔（毫秒）：1000 = 每 1 秒
+  let lastDatesSig  = '';       // 上次日期資料，沒變就不重畫
+  let lastOrdersSig = '';       // 上次訂單資料，沒變就不重畫
+  let refreshing    = false;    // 上一輪還沒跑完就跳過，避免塞車
+
+  async function loadDates(silent = false) {
     try {
       // 同時載入菜單和結單日期
       const [menuRes, closeRes] = await Promise.all([
@@ -233,6 +239,17 @@
       const menuJson  = await menuRes.json();
       const closeJson = await closeRes.json();
       const closedSet = new Set(closeJson.status==='ok' ? closeJson.data : []);
+
+      // 資料沒變 → 不重畫日期按鈕，只檢查訂單清單（新增）
+      const datesSig = JSON.stringify([menuJson.data, closeJson.data]);
+      if (silent && datesSig === lastDatesSig) {
+        const same = [...(menuJson.data||[])]
+          .sort((a,b)=>new Date(String(b.date).replace(/\//g,'-'))-new Date(String(a.date).replace(/\//g,'-')))
+          .map(item => normalizeDate(item.date));
+        await loadAllOrderLists(same);
+        return;
+      }
+      lastDatesSig = datesSig;
 
       document.getElementById('dates-loading').style.display = 'none';
       document.getElementById('dates-card').style.display = 'block';
@@ -296,6 +313,7 @@
       await loadAllOrderLists(allDates);
 
     } catch {
+      if (silent) return;   // 自動更新失敗就等下一輪，不打擾畫面
       document.getElementById('dates-loading').innerHTML='<p style="color:#e05555;font-size:0.9rem;">⚠ 載入失敗，請稍後再試</p>';
     }
   }
@@ -303,10 +321,9 @@
   /* ── 載入所有日期訂單清單（常駐顯示）── */
   async function loadAllOrderLists(dates) {
     const wrap = document.getElementById('my-order-list');
-    wrap.style.display = 'none';
-    wrap.innerHTML = '';
-    if (!dates.length) return;
+    if (!dates.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; lastOrdersSig = ''; return; }
 
+    // 先抓資料，抓完再決定要不要重畫（避免每秒閃爍）
     const results = await Promise.all(
       dates.map(date =>
         fetch(`${GAS_URL}?action=getMealOrders&date=${encodeURIComponent(date)}`,{cache:'no-store'})
@@ -316,6 +333,12 @@
       )
     );
 
+    const ordersSig = JSON.stringify(results);
+    if (ordersSig === lastOrdersSig) return;   // 沒有新訂單 → 不動畫面
+    lastOrdersSig = ordersSig;
+
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
     const withData = results.filter(r => r.rows.length > 0);
     if (!withData.length) return;
 
@@ -592,6 +615,17 @@
 
   loadUser();
   loadDates();
+
+  // ── 每秒自動更新（新增）──
+  // 只在「選擇日期」頁、且畫面在前景時更新；填寫訂單時暫停，避免打斷輸入
+  setInterval(async () => {
+    if (refreshing) return;
+    if (document.hidden) return;
+    if (!document.getElementById('page-dates').classList.contains('active')) return;
+    refreshing = true;
+    try { await loadDates(true); }
+    finally { refreshing = false; }
+  }, REFRESH_MS);
 </script>
 </body>
 </html>
