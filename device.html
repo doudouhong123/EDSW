@@ -24,11 +24,12 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #8fa682; }   /* 頁面很長時，底部也維持綠色 */
 
     body {
       font-family: 'Noto Sans TC', sans-serif;
       font-size: 18px;
-      background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%) fixed;   /* 鼠尾草綠（修改） */
+      background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%);   /* 鼠尾草綠（修改） */
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -203,8 +204,16 @@
     }
     .reserve-card.active .reserve-date-wrap { display: flex; }
     .reserve-date {
+      display: block;
       width: 100%;
-      padding: 12px 14px;
+      max-width: 100%;
+      min-width: 0;                       /* 修正：iPhone 日期框預設最小寬度會撐出框外 */
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 46px;
+      line-height: 1.2;
+      padding: 10px 12px;
       border: 1.5px solid var(--border);
       border-radius: 12px;
       font-size: 1rem;
@@ -214,6 +223,8 @@
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
+    .reserve-date::-webkit-date-and-time-value { text-align: left; margin: 0; }
+    .reserve-date-wrap { min-width: 0; }
     .reserve-date:focus {
       border-color: #b08a35;
       box-shadow: 0 0 0 3px rgba(176,138,53,0.18);
@@ -301,18 +312,17 @@
     /* 設備格線 */
     .devices-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);   /* 方形按鍵一排三個（修改） */
-      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);   /* 方形按鍵一排兩個（修改：避免字被裁掉） */
+      gap: 14px;
       padding: 16px;
     }
-    @media (max-width: 360px) { .devices-grid { grid-template-columns: repeat(2, 1fr); } }
 
     .device-card {
       background: var(--bg);
       border: 1.5px solid var(--border);
       border-radius: 18px;                 /* 圓角方形（修改） */
       aspect-ratio: 1 / 1;                 /* 正方形 */
-      padding: 10px 8px;
+      padding: 12px 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -357,17 +367,20 @@
     }
 
     .device-icon {
-      font-size: 2.3rem;
-      margin-bottom: 6px;
+      font-size: 2.8rem;
+      margin-bottom: 8px;
       transition: transform 0.25s;
     }
     .device-card.selected .device-icon { transform: scale(1.12); }
 
     .device-name {
-      font-size: 0.92rem; font-weight: 600;
+      font-size: 1rem; font-weight: 600;
       color: inherit;
-      line-height: 1.25;
-      word-break: break-all;
+      line-height: 1.3;
+      display: block;
+      max-width: 100%;
+      word-break: keep-all;        /* 不在詞中間斷行（修改） */
+      overflow-wrap: normal;
     }
 
     /* 空狀態 */
@@ -823,7 +836,7 @@
       card.style.animation = 'rowIn 0.3s ease both';
       card.innerHTML = `
         <span class="device-icon">${deviceIcon(item.name)}</span>
-        <span class="device-name">${escHtml(item.name)}</span>
+        <span class="device-name">${nameWithBreaks(item.name)}</span>
       `;
       card.addEventListener('click', function () {
         const dev = this.dataset.device;
@@ -838,6 +851,7 @@
       });
       grid.appendChild(card);
     });
+    requestAnimationFrame(fitDeviceNames);   // 畫完後檢查名稱寬度（新增）
   }
 
   /* ── 依設備名稱挑選圖示（新增）：關鍵字由上往下比對，先比對到的優先 ── */
@@ -879,6 +893,25 @@
     for (const [re, ic] of ICON_RULES) if (re.test(s)) return ic;
     return '📦';   // 比對不到時的預設圖示
   }
+  // 只在「自然斷點」允許換行：空白、括號前、－、／、、 之後（新增）
+  function nameWithBreaks(name) {
+    return escHtml(name)
+      .replace(/([\s、\/／\-－_])/g, '$1<wbr>')
+      .replace(/([（(])/g, '<wbr>$1');
+  }
+  // 名稱放不下時自動縮小字級，而不是把字切一半（新增）
+  function fitDeviceNames() {
+    document.querySelectorAll('.device-name').forEach(el => {
+      el.style.fontSize = '';
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      while (el.scrollWidth > el.clientWidth + 1 && size > 11) {
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+    });
+  }
+  window.addEventListener('resize', () => { clearTimeout(window._fitT); window._fitT = setTimeout(fitDeviceNames, 150); });
+
   function escHtml(s) {
     return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
