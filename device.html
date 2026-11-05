@@ -203,37 +203,45 @@
       flex-direction: column;
     }
     .reserve-card.active .reserve-date-wrap { display: flex; }
-    .reserve-date {
-      display: block;
+    /* ── 預借日期框（修改：修正手機超出框架） ── */
+    .date-box {
+      position: relative;
       width: 100%;
-      max-width: 100%;
-      min-width: 0;                       /* 修正：iPhone 日期框預設最小寬度會撐出框外 */
-      box-sizing: border-box;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 46px;
-      line-height: 1.2;
-      padding: 10px 12px;
+      height: 44px;
       border: 1.5px solid var(--border);
       border-radius: 12px;
-      font-size: 1rem;
-      font-family: 'Noto Sans TC', sans-serif;
-      color: var(--ink);
       background: var(--bg);
-      outline: none;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px;
+      overflow: hidden;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .reserve-date::-webkit-date-and-time-value { text-align: left; margin: 0; }
-    .reserve-date-wrap { min-width: 0; }
-    .reserve-date:focus {
+    .date-box-text { font-size: 1rem; color: var(--ink); white-space: nowrap; }
+    .date-box-ic   { font-size: 1.05rem; }
+    .date-box:focus-within {
       border-color: #b08a35;
       box-shadow: 0 0 0 3px rgba(176,138,53,0.18);
       background: var(--surface);
     }
-    .reserve-date.error {
+    .date-box.error {
       border-color: var(--accent2);
       box-shadow: 0 0 0 3px rgba(192,80,77,0.15);
     }
+    /* 真正的日期欄位：透明蓋在框上，點框就會跳出手機的日期選擇器 */
+    .reserve-date {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      border: 0; margin: 0; padding: 0;
+      min-width: 0;
+      -webkit-appearance: none; appearance: none;
+      font-size: 16px;               /* 避免 iPhone 點擊時自動放大畫面 */
+      cursor: pointer;
+    }
+    .reserve-date::-webkit-calendar-picker-indicator {
+      position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+    }
+    .reserve-date-wrap { min-width: 0; }
     .reserve-hint {
       font-size: 0.82rem;
       color: #8a6420;
@@ -312,7 +320,7 @@
     /* 設備格線 */
     .devices-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);   /* 方形按鍵一排兩個（修改：避免字被裁掉） */
+      grid-template-columns: repeat(2, minmax(0, 1fr));   /* 固定一排兩個，長名稱也不會把欄位撐開（修改） */
       gap: 14px;
       padding: 16px;
     }
@@ -333,6 +341,7 @@
       position: relative;
       overflow: hidden;
       min-height: 0;
+      min-width: 0;
       box-shadow: 0 2px 8px var(--shadow);
     }
     .device-card::after {
@@ -694,7 +703,12 @@
   </button>
   <div class="reserve-date-wrap" id="reserveDateWrap">
     <label class="purpose-label" for="reserveDate">📆 選擇預借日期 <span class="req">*</span></label>
-    <input type="date" class="reserve-date" id="reserveDate"/>
+    <!-- 日期框（修改）：外框由我們自己畫，原生日期欄位透明疊在上面，手機上不會再撐出框外 -->
+    <div class="date-box" id="reserveDateBox">
+      <span class="date-box-text" id="reserveDateText">請選擇日期</span>
+      <span class="date-box-ic">📅</span>
+      <input type="date" class="reserve-date" id="reserveDate"/>
+    </div>
     <div class="reserve-hint">選好日期後，再點選下方的設備並送出，即為該日期提前預借</div>
   </div>
 </div>
@@ -904,9 +918,17 @@
     document.querySelectorAll('.device-name').forEach(el => {
       el.style.fontSize = '';
       let size = parseFloat(getComputedStyle(el).fontSize);
-      while (el.scrollWidth > el.clientWidth + 1 && size > 11) {
+      el.style.wordBreak = '';
+      el.style.textWrap = '';
+      while (el.scrollWidth > el.clientWidth + 1 && size > 12) {
         size -= 0.5;
         el.style.fontSize = size + 'px';
+      }
+      // 名稱特別長、縮到最小還放不下 → 平均分成兩行（不會只切掉一兩個字）
+      if (el.scrollWidth > el.clientWidth + 1) {
+        el.style.fontSize = '13px';
+        el.style.wordBreak = 'normal';
+        el.style.textWrap = 'balance';
       }
     });
   }
@@ -968,6 +990,19 @@
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
+  // 日期框顯示文字（新增）：2026-11-06 → 2026/11/06（週五）
+  function syncDateText() {
+    const v = document.getElementById('reserveDate').value;
+    const el = document.getElementById('reserveDateText');
+    if (!v) { el.textContent = '請選擇日期'; return; }
+    const d = new Date(v + 'T00:00:00');
+    const w = ['日','一','二','三','四','五','六'][d.getDay()];
+    el.textContent = v.replace(/-/g, '/') + `（週${w}）`;
+  }
+  function setDateError(on) {
+    document.getElementById('reserveDateBox').classList.toggle('error', on);
+  }
+
   function setReserveMode(on) {
     reserveMode = on;
     const card  = document.getElementById('reserveCard');
@@ -976,7 +1011,7 @@
     document.getElementById('reserveBtnText').textContent =
       on ? '📅 提前預借模式（再按一次取消）' : '📅 提前預借設備';
     document.getElementById('submitBtn').textContent = on ? '📅 送出預借' : '✅ 送出預約';
-    input.classList.remove('error');
+    setDateError(false);
     if (on) {
       // 只能選明天以後
       const t = new Date(); t.setDate(t.getDate() + 1);
@@ -985,12 +1020,15 @@
     } else {
       input.value = '';
     }
+    syncDateText();
   }
 
   document.getElementById('reserveBtn').addEventListener('click', () => setReserveMode(!reserveMode));
-  document.getElementById('reserveDate').addEventListener('change', function () {
-    if (this.value) this.classList.remove('error');
-  });
+  ['change', 'input'].forEach(ev =>
+    document.getElementById('reserveDate').addEventListener(ev, function () {
+      syncDateText();
+      if (this.value) setDateError(false);
+    }));
 
   /* ── 送出 ── */
   document.getElementById('submitBtn').addEventListener('click', async function () {
@@ -1011,8 +1049,7 @@
       const dateEl = document.getElementById('reserveDate');
       reserveDate = dateEl.value;
       if (!reserveDate || reserveDate < dateEl.min) {
-        dateEl.classList.add('error');
-        dateEl.focus();
+        setDateError(true);
         showToast('請選擇明天以後的預借日期', 'error');
         return;
       }
