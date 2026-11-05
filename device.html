@@ -7,18 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:       #eef2f7;
-      --surface:  #ffffff;
-      --primary:  #667eea;
-      --primary2: #764ba2;
-      --accent:   #f093fb;
-      --accent2:  #f5576c;
-      --success:  #28a745;
-      --ink:      #2c3e50;
-      --ink2:     #5a6a7a;
-      --muted:    #8e9eb0;
-      --border:   #e2e8f0;
-      --shadow:   rgba(102,126,234,0.10);
+      /* 鼠尾草綠 × 奶油白 × 霧藍（修改，與登入頁、主畫面一致） */
+      --bg:       #f5efe1;   /* 輸入框、卡片內底：淡奶油 */
+      --surface:  #fffaf0;   /* 背板：奶油白 */
+      --primary:  #5c7fa3;   /* 霧藍（與主畫面「設備」圓圈同色） */
+      --primary2: #4a6a8a;
+      --accent:   #b8694a;   /* 陶土橘 */
+      --accent2:  #c0504d;   /* 錯誤提示：柔和紅 */
+      --success:  #6b8f5e;   /* 成功：橄欖綠 */
+      --ink:      #3f4d38;
+      --ink2:     #5d6a55;
+      --muted:    #8a917e;
+      --border:   #e8dfc9;
+      --shadow:   rgba(86,105,79,0.12);
       --radius:   18px;
     }
 
@@ -27,10 +28,7 @@
     body {
       font-family: 'Noto Sans TC', sans-serif;
       font-size: 18px;
-      background: var(--bg);
-      background-image:
-        radial-gradient(circle at 12% 18%, rgba(102,126,234,0.12) 0%, transparent 45%),
-        radial-gradient(circle at 88% 82%, rgba(118,75,162,0.10) 0%, transparent 42%);
+      background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%) fixed;   /* 鼠尾草綠（修改） */
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -93,7 +91,7 @@
       display: flex; align-items: center; justify-content: center;
       font-family: 'Zen Maru Gothic', sans-serif;
       font-size: 1rem; font-weight: 700;
-      box-shadow: 0 2px 8px rgba(102,126,234,0.35);
+      box-shadow: 0 2px 8px rgba(92,127,163,0.35);
       flex-shrink: 0;
     }
 
@@ -120,7 +118,7 @@
       font-family: 'Noto Sans TC', sans-serif;
       cursor: pointer;
       border: 1.5px solid var(--border);
-      background: #f0f4ff;
+      background: #f3ede0;
       color: var(--muted);
       transition: all 0.2s;
       flex-shrink: 0;
@@ -149,13 +147,13 @@
     /* 說明文字 */
     .intro-card {
       width: 100%; max-width: 520px;
-      background: linear-gradient(135deg, #eef1ff, #e8ecff);
-      border: 1.5px solid #d0d8ff;
+      background: linear-gradient(135deg, #eef3f7, #e3ebf2);
+      border: 1.5px solid #c9d7e4;
       border-radius: 14px;
       padding: 13px 18px;
       margin-bottom: 14px;
       font-size: 0.95rem;
-      color: #5060aa;
+      color: #46617d;
       line-height: 1.65;
       text-align: center;
       z-index: 1;
@@ -176,26 +174,26 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .reserve-card.active {
-      border-color: #f59f00;
-      box-shadow: 0 4px 18px rgba(245,159,0,0.22);
+      border-color: #b08a35;
+      box-shadow: 0 4px 18px rgba(176,138,53,0.22);
     }
     .btn-reserve {
       width: 100%;
       padding: 13px;
       border-radius: 12px;
-      border: 1.5px dashed #f59f00;
-      background: #fff9db;
-      color: #d9480f;
+      border: 1.5px dashed #b08a35;
+      background: #faf3df;
+      color: #8a5a14;
       font-size: 1rem; font-weight: 700;
       font-family: 'Noto Sans TC', sans-serif;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-reserve:hover { background: #fff3bf; }
+    .btn-reserve:hover { background: #f3e8c8; }
     .btn-reserve:active { transform: scale(0.98); }
     .reserve-card.active .btn-reserve {
       border-style: solid;
-      background: linear-gradient(135deg, #fcc419, #f59f00);
+      background: linear-gradient(135deg, #c9a24a, #b08a35);
       color: #fff;
     }
     .reserve-date-wrap {
@@ -217,17 +215,17 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .reserve-date:focus {
-      border-color: #f59f00;
-      box-shadow: 0 0 0 3px rgba(245,159,0,0.18);
+      border-color: #b08a35;
+      box-shadow: 0 0 0 3px rgba(176,138,53,0.18);
       background: var(--surface);
     }
     .reserve-date.error {
       border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(245,87,108,0.15);
+      box-shadow: 0 0 0 3px rgba(192,80,77,0.15);
     }
     .reserve-hint {
       font-size: 0.82rem;
-      color: #b35c00;
+      color: #8a6420;
       margin-top: 6px;
       line-height: 1.5;
     }
@@ -265,7 +263,7 @@
     }
     .search-box:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+      box-shadow: 0 0 0 3px rgba(92,127,163,0.15);
       background: var(--surface);
     }
 
@@ -282,7 +280,7 @@
     }
 
     .devices-card-header {
-      background: linear-gradient(135deg, #f0f3ff, #e8ecff);
+      background: linear-gradient(135deg, #eef3f7, #e3ebf2);
       padding: 14px 18px;
       border-bottom: 1.5px solid var(--border);
       font-family: 'Zen Maru Gothic', sans-serif;
@@ -303,16 +301,18 @@
     /* 設備格線 */
     .devices-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);   /* 方形按鍵一排三個（修改） */
       gap: 12px;
       padding: 16px;
     }
+    @media (max-width: 360px) { .devices-grid { grid-template-columns: repeat(2, 1fr); } }
 
     .device-card {
       background: var(--bg);
       border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 14px;
+      border-radius: 18px;                 /* 圓角方形（修改） */
+      aspect-ratio: 1 / 1;                 /* 正方形 */
+      padding: 10px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -322,18 +322,19 @@
       transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
       position: relative;
       overflow: hidden;
-      min-height: 110px;
+      min-height: 0;
+      box-shadow: 0 2px 8px var(--shadow);
     }
     .device-card::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(102,126,234,0.06), rgba(118,75,162,0.06));
+      background: linear-gradient(135deg, rgba(92,127,163,0.06), rgba(86,105,79,0.06));
       opacity: 0; transition: opacity 0.25s;
     }
     .device-card:hover {
       transform: translateY(-3px);
       border-color: var(--primary);
-      box-shadow: 0 6px 20px rgba(102,126,234,0.18);
+      box-shadow: 0 6px 20px rgba(92,127,163,0.18);
     }
     .device-card:hover::after { opacity: 1; }
 
@@ -342,7 +343,7 @@
       border-color: transparent;
       color: #fff;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102,126,234,0.32);
+      box-shadow: 0 6px 20px rgba(92,127,163,0.32);
     }
     .device-card.selected::after { opacity: 0; }
 
@@ -356,16 +357,17 @@
     }
 
     .device-icon {
-      font-size: 2.6rem;
-      margin-bottom: 9px;
+      font-size: 2.3rem;
+      margin-bottom: 6px;
       transition: transform 0.25s;
     }
     .device-card.selected .device-icon { transform: scale(1.12); }
 
     .device-name {
-      font-size: 1rem; font-weight: 600;
+      font-size: 0.92rem; font-weight: 600;
       color: inherit;
-      line-height: 1.3;
+      line-height: 1.25;
+      word-break: break-all;
     }
 
     /* 空狀態 */
@@ -405,7 +407,7 @@
       font-size: 1rem;
       font-family: 'Noto Sans TC', sans-serif;
       color: var(--ink);
-      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23764ba2' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;
+      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235c7fa3' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;
       appearance: none;
       -webkit-appearance: none;
       outline: none;
@@ -414,12 +416,12 @@
     }
     .purpose-select:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+      box-shadow: 0 0 0 3px rgba(92,127,163,0.15);
       background-color: var(--surface);
     }
     .purpose-select.error {
       border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(245,87,108,0.15);
+      box-shadow: 0 0 0 3px rgba(192,80,77,0.15);
     }
 
     /* ── 按鈕列 ── */
@@ -448,17 +450,17 @@
     .btn-submit {
       background: linear-gradient(135deg, var(--primary), var(--primary2));
       color: #fff;
-      box-shadow: 0 4px 16px rgba(102,126,234,0.32);
+      box-shadow: 0 4px 16px rgba(92,127,163,0.32);
     }
-    .btn-submit:hover { box-shadow: 0 6px 22px rgba(102,126,234,0.42); transform: translateY(-2px); }
+    .btn-submit:hover { box-shadow: 0 6px 22px rgba(92,127,163,0.42); transform: translateY(-2px); }
     .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
     .btn-reset {
-      background: #f0f4ff;
+      background: #f3ede0;
       color: var(--muted);
       border: 1.5px solid var(--border);
     }
-    .btn-reset:hover { background: #e2e8ff; color: var(--primary); border-color: var(--primary); }
+    .btn-reset:hover { background: #e3ebf2; color: var(--primary); border-color: var(--primary); }
 
     /* ── 預借設備時間排程（新增） ── */
     .schedule-card {
@@ -473,12 +475,12 @@
       animation: slideDown 0.5s 0.26s ease both;
     }
     .schedule-header {
-      background: linear-gradient(135deg, #fff9db, #fff3bf);
+      background: linear-gradient(135deg, #faf3df, #f3e8c8);
       padding: 13px 18px;
-      border-bottom: 1.5px solid #ffe8a1;
+      border-bottom: 1.5px solid #eadbb4;
       font-family: 'Zen Maru Gothic', sans-serif;
       font-size: 1rem; font-weight: 700;
-      color: #d9480f;
+      color: #8a5a14;
       display: flex; align-items: center; justify-content: space-between;
     }
     .btn-refresh {
@@ -486,7 +488,7 @@
       border-radius: 50%;
       border: 1.5px solid #ffd8a8;
       background: #fff;
-      color: #d9480f;
+      color: #8a5a14;
       font-size: 1.05rem; font-weight: 700;
       cursor: pointer;
       transition: transform 0.3s;
@@ -501,12 +503,12 @@
       font-size: 0.88rem;
     }
     .schedule-table th {
-      background: #fffbea;
-      color: #b35c00;
+      background: #fbf5e6;
+      color: #8a6420;
       font-weight: 700;
       text-align: left;
       padding: 9px 10px;
-      border-bottom: 1.5px solid #ffe8a1;
+      border-bottom: 1.5px solid #eadbb4;
       white-space: nowrap;
     }
     .schedule-table td {
@@ -517,17 +519,17 @@
       line-height: 1.45;
     }
     .schedule-table tr:last-child td { border-bottom: none; }
-    .schedule-table td.s-date { white-space: nowrap; font-weight: 700; color: #d9480f; }
+    .schedule-table td.s-date { white-space: nowrap; font-weight: 700; color: #8a5a14; }
     .schedule-table td.s-name { white-space: nowrap; font-weight: 600; }
     .schedule-table td.s-dev  { color: var(--primary2); font-weight: 600; }
     .schedule-table td.s-purpose { color: var(--ink2); font-size: 0.82rem; }
-    .schedule-table tr.mine td { background: #f3f0ff; }
+    .schedule-table tr.mine td { background: #eaf0f5; }
     .today-tag {
       display: inline-block;
       margin-left: 4px;
       padding: 0 6px;
       border-radius: 6px;
-      background: #f59f00;
+      background: #b08a35;
       color: #fff;
       font-size: 0.68rem;
       vertical-align: 1px;
@@ -559,13 +561,13 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-    .toast.success { background: #28a745; color: #fff; }
-    .toast.error   { background: #e05555; color: #fff; }
+    .toast.success { background: #6b8f5e; color: #fff; }
+    .toast.error   { background: #c0504d; color: #fff; }
 
     /* ── Loading ── */
     .loading-overlay {
       position: fixed; inset: 0;
-      background: rgba(30,40,80,0.45);
+      background: rgba(40,52,36,0.45);
       backdrop-filter: blur(4px);
       display: flex; align-items: center; justify-content: center;
       z-index: 2000;
@@ -599,7 +601,7 @@
     /* ── 未歸還提醒框（新增） ── */
     .remind-overlay {
       position: fixed; inset: 0;
-      background: rgba(30,40,80,0.45);
+      background: rgba(40,52,36,0.45);
       backdrop-filter: blur(4px);
       display: flex; align-items: center; justify-content: center;
       z-index: 2100; padding: 20px;
@@ -637,7 +639,7 @@
       line-height: 1.6;
       color: var(--ink);
     }
-    .remind-list b { color: #d9480f; }
+    .remind-list b { color: #8a5a14; }
     .remind-btns { display: flex; gap: 10px; }
     .remind-btns .btn { padding: 13px; font-size: 1rem; }
   </style>
@@ -812,7 +814,6 @@
     selectedDevices.clear();
     updateSelectedCount();
 
-    const icons = ['💻','📽️','🔊','🖱️','📷','🖨️','📺','🎙️'];
 
     items.forEach((item, i) => {
       const card = document.createElement('div');
@@ -821,8 +822,8 @@
       card.style.animationDelay = (i * 0.06) + 's';
       card.style.animation = 'rowIn 0.3s ease both';
       card.innerHTML = `
-        <span class="device-icon">${icons[i % icons.length]}</span>
-        <span class="device-name">${item.name}</span>
+        <span class="device-icon">${deviceIcon(item.name)}</span>
+        <span class="device-name">${escHtml(item.name)}</span>
       `;
       card.addEventListener('click', function () {
         const dev = this.dataset.device;
@@ -837,6 +838,49 @@
       });
       grid.appendChild(card);
     });
+  }
+
+  /* ── 依設備名稱挑選圖示（新增）：關鍵字由上往下比對，先比對到的優先 ── */
+  const ICON_RULES = [
+    [/攝影機|錄影機|攝像|webcam|視訊鏡頭/i,           '📹'],
+    [/相機|單眼|camera/i,                              '📷'],
+    [/錄音筆|錄音/i,                                   '🎙️'],
+    [/麥克風|mic/i,                                    '🎤'],
+    [/投影幕|布幕|銀幕/i,                              '🖼️'],
+    [/投影機|投影|projector/i,                         '📽️'],
+    [/筆電|筆記型|筆記本電腦|laptop|notebook|macbook/i,'💻'],
+    [/桌機|電腦主機|主機|desktop|pc/i,                 '🖥️'],
+    [/平板|ipad|tablet/i,                              '📱'],
+    [/手機|phone|iphone/i,                             '📱'],
+    [/螢幕|顯示器|monitor/i,                           '🖥️'],
+    [/電視|tv/i,                                       '📺'],
+    [/耳機|headphone|earphone/i,                       '🎧'],
+    [/喇叭|音響|擴音|音箱|speaker/i,                   '🔊'],
+    [/印表機|列印|printer/i,                           '🖨️'],
+    [/掃描器|scanner/i,                                '📠'],
+    [/簡報筆|雷射筆|翻頁筆|pointer/i,                  '🖊️'],
+    [/滑鼠|mouse/i,                                    '🖱️'],
+    [/鍵盤|keyboard/i,                                 '⌨️'],
+    [/行動電源|充電寶|電池|battery/i,                  '🔋'],
+    [/延長線|插座|電源線|變壓器|充電器|充電線|電源/i,  '🔌'],
+    [/hdmi|vga|轉接|傳輸線|連接線|線材/i,              '🔗'],
+    [/隨身碟|usb|記憶卡|sd卡/i,                        '💾'],
+    [/硬碟|ssd|hdd/i,                                  '💽'],
+    [/光碟|dvd|cd/i,                                   '💿'],
+    [/分享器|路由器|網路|wifi|基地台/i,                '📶'],
+    [/腳架|三腳架|tripod/i,                            '📐'],
+    [/白板|看板|海報架/i,                              '📋'],
+    [/計算機|calculator/i,                             '🧮'],
+    [/護貝/i,                                          '📄'],
+    [/燈|light/i,                                      '💡'],
+  ];
+  function deviceIcon(name) {
+    const s = String(name || '');
+    for (const [re, ic] of ICON_RULES) if (re.test(s)) return ic;
+    return '📦';   // 比對不到時的預設圖示
+  }
+  function escHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   /* 已選數量標籤 */
