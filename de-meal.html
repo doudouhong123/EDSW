@@ -585,9 +585,31 @@
     } catch {}
   }
 
+  /* ── 從 Google Sheet 讀取已建立的日期（修正：原本只讀這台裝置的本機紀錄）── */
+  async function syncMealData() {
+    try {
+      const res  = await fetch(`${GAS_URL}?action=getMealMenu`,{cache:'no-store'});
+      const json = await res.json();
+      if (json.status !== 'ok' || !Array.isArray(json.data)) return false;
+      const fresh = {};
+      json.data.forEach(item => {
+        if (!item.date) return;
+        fresh[item.date] = { lunch: item.lunch || '', drink: item.drink || '' };
+        menuCache[item.date] = item;
+      });
+      mealData = fresh;   // 以 Google Sheet 為準，其他裝置新增/刪除的也會同步
+      localStorage.setItem('de_meal_data', JSON.stringify(mealData));
+      return true;
+    } catch { return false; }   // 連不上時沿用本機紀錄
+  }
+
   async function renderDateButtons() {
-    await loadClosedDates();
     const body=document.getElementById('dates-body'),count=document.getElementById('dates-count');
+    if (!body.querySelector('.date-btn')) {
+      body.innerHTML=`<div class="dates-empty"><span class="dates-empty-icon">⏳</span><p>載入中…</p></div>`;
+    }
+    const [synced] = await Promise.all([syncMealData(), loadClosedDates()]);
+    if (!synced) showToast('⚠ 無法連線 Google Sheets，目前顯示的是這台裝置的紀錄');
     const keys=Object.keys(mealData).sort().reverse();
     body.innerHTML='';
     if (!keys.length) {
