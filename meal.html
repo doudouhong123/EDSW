@@ -122,6 +122,25 @@
     .spinner{width:36px;height:36px;border:4px solid #fde8d4;border-top:4px solid var(--warm1);border-radius:50%;animation:spin 0.9s linear infinite;}
     @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     .loading-text{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;color:var(--ink2);}
+
+    /* ── 菜單照片（新增）── */
+    .tag-menu{background:#f3e5f5;color:#7b1fa2;border:1px solid #e1bee7;}
+    .menu-view{border:1.5px dashed var(--border);border-radius:12px;padding:12px;background:#fffaf6;display:flex;flex-direction:column;gap:8px;}
+    .menu-view.drink{border-color:#b2e8f5;background:#f5fcff;}
+    .menu-view-title{font-size:0.9rem;font-weight:700;color:var(--warm2);}
+    .menu-view.drink .menu-view-title{color:var(--sky2);}
+    .menu-view-title small{font-size:0.72rem;color:var(--muted);font-weight:500;margin-left:6px;}
+    .menu-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+    .menu-strip img{flex:0 0 auto;width:120px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:zoom-in;}
+    .menu-strip img:only-child{width:100%;aspect-ratio:auto;max-height:420px;object-fit:contain;}
+
+    /* ── 菜單照片放大檢視（新增）── */
+    .menu-viewer{position:fixed;inset:0;background:rgba(20,12,6,0.9);z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;}
+    .menu-viewer.show{display:flex;}
+    .menu-viewer img{max-width:100%;max-height:calc(100dvh - 110px);object-fit:contain;border-radius:8px;background:#fff;}
+    .mv-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;color:#fff;font-size:0.85rem;}
+    .mv-btn{min-width:44px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;font-size:0.85rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;text-decoration:none;text-align:center;}
+    .mv-btn:hover{background:rgba(255,255,255,0.25);}
   </style>
 </head>
 <body>
@@ -162,6 +181,7 @@
   <div class="section-card" id="lunch-section" style="display:none">
     <div class="section-header lunch">🍱 午餐<span class="shop-badge lunch" id="lunch-shop-badge"></span></div>
     <div class="section-body">
+      <div class="menu-view" id="lunch-menu-view" style="display:none"></div>
       <div id="lunch-items-wrap"></div>
       <button class="btn-add-item lunch-add" onclick="addLunchItem()">＋ 新增午餐</button>
     </div>
@@ -170,6 +190,7 @@
   <div class="section-card" id="drink-section" style="display:none">
     <div class="section-header drink">🧋 飲料<span class="shop-badge drink" id="drink-shop-badge"></span></div>
     <div class="section-body">
+      <div class="menu-view drink" id="drink-menu-view" style="display:none"></div>
       <div id="drink-items-wrap"></div>
       <button class="btn-add-item drink-add" onclick="addDrinkItem()">＋ 新增飲料</button>
     </div>
@@ -268,7 +289,8 @@
         const isClosed = closedSet.has(dateStr);
         const tags=[
           item.lunch?`<span class="tag tag-lunch">🍱 ${esc(item.lunch)}</span>`:'',
-          item.drink?`<span class="tag tag-drink">🧋 ${esc(item.drink)}</span>`:''
+          item.drink?`<span class="tag tag-drink">🧋 ${esc(item.drink)}</span>`:'',
+          ((item.lunchMenu||[]).length||(item.drinkMenu||[]).length)?`<span class="tag tag-menu">📷 有菜單</span>`:''
         ].filter(Boolean).join('');
         const btn=document.createElement('button');
         btn.className='date-btn';
@@ -417,12 +439,14 @@
       document.getElementById('lunch-shop-badge').textContent='🏪 '+item.lunch;
       document.getElementById('lunch-items-wrap').innerHTML='';
       lunchCount=0; addLunchItem();
+      renderMenuView('lunch', item.lunchMenu);   // （新增）顯示午餐菜單照片
     } else { document.getElementById('lunch-section').style.display='none'; }
     if (item.drink) {
       document.getElementById('drink-section').style.display='block';
       document.getElementById('drink-shop-badge').textContent='🏪 '+item.drink;
       document.getElementById('drink-items-wrap').innerHTML='';
       drinkCount=0; addDrinkItem();
+      renderMenuView('drink', item.drinkMenu);   // （新增）顯示飲料菜單照片
     } else { document.getElementById('drink-section').style.display='none'; }
     document.getElementById('note-section').style.display='block';
     document.getElementById('order-notes').value='';
@@ -481,6 +505,28 @@
         <input type="text" class="drink-item-price" placeholder="請輸入價錢"
                inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/></div>`;
     wrap.appendChild(div);
+  }
+
+  /* ── 顯示後台上傳的菜單照片（新增）── */
+  function renderMenuView(type, refs) {
+    const box = document.getElementById(type + '-menu-view');
+    const list = Array.isArray(refs) ? refs : [];
+    box.innerHTML = '';
+    if (!list.length) { box.style.display = 'none'; return; }
+    box.style.display = 'flex';
+    box.innerHTML = `<div class="menu-view-title">📖 ${type==='lunch'?'午餐':'飲料'}菜單<small>點照片可放大</small></div>`;
+    const strip = document.createElement('div');
+    strip.className = 'menu-strip';
+    list.forEach((ref, i) => {
+      const img = document.createElement('img');
+      img.alt = (type==='lunch'?'午餐':'飲料') + '菜單第 ' + (i+1) + ' 張';
+      img.loading = 'lazy';
+      img.onerror = () => menuImgFallback(img, ref, 1000);
+      img.src = menuImgSrc(ref, list.length === 1 ? 1000 : 400);
+      img.addEventListener('click', () => openMenuViewer(list, i));
+      strip.appendChild(img);
+    });
+    box.appendChild(strip);
   }
 
   function removeItem(id) { const el=document.getElementById(id); if(el) el.remove(); }
@@ -605,6 +651,69 @@
       wrap.innerHTML = '';
       wrap.style.display = 'none';
     }
+  }
+
+  /* ── 菜單照片：網址與放大檢視（新增）── */
+  function isMenuRef(x) { return !/^(https?:|data:)/.test(x); }   // 雲端硬碟檔案 ID
+  function menuImgSrc(x, w) {
+    return isMenuRef(x) ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(x)}&sz=w${w || 600}` : x;
+  }
+  function menuImgFallback(img, x, w) {   // 縮圖網址失敗時換另一個網址
+    if (img.dataset.fb || !isMenuRef(x)) return;
+    img.dataset.fb = '1';
+    img.src = `https://lh3.googleusercontent.com/d/${encodeURIComponent(x)}=w${w || 1600}`;
+  }
+  let mvList = [], mvIdx = 0;
+  function ensureMenuViewer() {
+    let v = document.getElementById('menu-viewer');
+    if (v) return v;
+    v = document.createElement('div');
+    v.id = 'menu-viewer'; v.className = 'menu-viewer';
+    v.setAttribute('role', 'dialog'); v.setAttribute('aria-label', '菜單照片');
+    v.innerHTML = `<img id="mv-img" alt="菜單照片"/>
+      <div class="mv-bar">
+        <button class="mv-btn" id="mv-prev" aria-label="上一張">‹</button>
+        <span id="mv-count"></span>
+        <button class="mv-btn" id="mv-next" aria-label="下一張">›</button>
+        <a class="mv-btn" id="mv-open" target="_blank" rel="noopener">原圖</a>
+        <button class="mv-btn" id="mv-close">✕ 關閉</button>
+      </div>`;
+    document.body.appendChild(v);
+    v.addEventListener('click', e => { if (e.target === v) closeMenuViewer(); });
+    v.querySelector('#mv-prev').onclick = () => { mvIdx = (mvIdx - 1 + mvList.length) % mvList.length; showMenuViewer(); };
+    v.querySelector('#mv-next').onclick = () => { mvIdx = (mvIdx + 1) % mvList.length; showMenuViewer(); };
+    v.querySelector('#mv-close').onclick = closeMenuViewer;
+    document.addEventListener('keydown', e => {
+      if (!v.classList.contains('show')) return;
+      if (e.key === 'Escape') closeMenuViewer();
+      if (e.key === 'ArrowLeft'  && mvList.length > 1) v.querySelector('#mv-prev').click();
+      if (e.key === 'ArrowRight' && mvList.length > 1) v.querySelector('#mv-next').click();
+    });
+    return v;
+  }
+  function openMenuViewer(list, idx) {
+    if (!list || !list.length) return;
+    mvList = list; mvIdx = idx || 0;
+    ensureMenuViewer().classList.add('show');
+    showMenuViewer();
+  }
+  function showMenuViewer() {
+    const x = mvList[mvIdx];
+    const img = document.getElementById('mv-img');
+    img.dataset.fb = '';
+    img.onerror = () => menuImgFallback(img, x, 2000);
+    img.src = menuImgSrc(x, 2000);
+    const many = mvList.length > 1;
+    document.getElementById('mv-prev').style.display = many ? '' : 'none';
+    document.getElementById('mv-next').style.display = many ? '' : 'none';
+    document.getElementById('mv-count').textContent = many ? `${mvIdx + 1} / ${mvList.length}` : '';
+    const open = document.getElementById('mv-open');
+    if (x.startsWith('data:')) open.style.display = 'none';
+    else { open.style.display = ''; open.href = isMenuRef(x) ? `https://drive.google.com/file/d/${x}/view` : x; }
+  }
+  function closeMenuViewer() {
+    const v = document.getElementById('menu-viewer');
+    if (v) v.classList.remove('show');
   }
 
   function hideMsg(){document.getElementById('form-msg').className='form-msg';}
