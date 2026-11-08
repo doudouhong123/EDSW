@@ -154,6 +154,7 @@
     .order-empty{text-align:center;padding:28px;color:var(--muted);font-size:0.88rem;}
     /* 訂單清單：餐點、甜度冰塊、價錢同一行（新增） */
     .order-table td.one-line{white-space:nowrap;}
+    .order-table td.notes-cell{min-width:160px;white-space:normal;word-break:break-word;line-height:1.5;}   /* 備註欄加寬（新增） */
     .ol-item{font-weight:600;}
     .ol-opt{color:var(--sky2);font-size:0.72rem;margin-left:6px;}
     .ol-price{color:var(--warm2);font-weight:700;font-family:'Zen Maru Gothic',sans-serif;margin-left:6px;}
@@ -755,7 +756,7 @@
           <td class="one-line">${esc(r.name)}</td>
           <td class="one-line">${lunchLine(r)}</td>
           <td class="one-line">${drinkLine(r)}</td>
-          <td>${esc(r.notes)}</td>`;
+          <td class="notes-cell">${esc(r.notes)}</td>`;
         tr.addEventListener('click', () => openEditModal(r, idx, date));
         tbody.appendChild(tr);
       });
