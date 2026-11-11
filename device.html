@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>設備預約系統</title>
+  <title>義大社工科｜設備</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -76,6 +76,25 @@
       justify-content: space-between;
       margin-bottom: 10px;
     }
+
+    /* 標題（修改）：圖示＋義大社工科｜設備 */
+    .site-title {
+      display: flex; align-items: center; gap: 9px;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--primary2);
+      white-space: nowrap;
+    }
+    .title-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.05rem;
+      box-shadow: 0 2px 8px rgba(92,127,163,0.35);
+      flex-shrink: 0;
+    }
+    .welcome { font-size: 0.9rem; font-weight: 700; color: var(--primary2); }
 
     /* 使用者資訊 */
     .user-block {
@@ -676,18 +695,13 @@
 <!-- ─── Header ─── -->
 <header>
   <div class="header-row">
-    <div class="user-block">
-      <div class="user-avatar" id="userAvatar">U</div>
-      <div>
-        <div class="user-name" id="userName">載入中…</div>
-        <div class="user-sub">設備預約系統</div>
-      </div>
-    </div>
+    <!-- 標題（修改）：圖示＋義大社工科｜設備，與訂餐、文具頁一致 -->
+    <div class="site-title"><div class="title-icon">💻</div>義大社工科｜設備</div>
     <button class="btn-return" id="backBtn">← 返回</button>
   </div>
   <div class="time-row">
     <span class="time-display" id="timeDisplay">--:--:--</span>
-    <span style="font-size:0.78rem;color:var(--muted)">義大社工科</span>
+    <span class="welcome" id="userName">載入中…</span>
   </div>
 </header>
 
@@ -814,8 +828,7 @@
     } catch {
       currentUserName = '訪客';
     }
-    document.getElementById('userName').textContent = currentUserName;
-    document.getElementById('userAvatar').textContent = currentUserName.charAt(0).toUpperCase();
+    document.getElementById('userName').textContent = '👋 ' + currentUserName;
   }
 
   /* ── 動態載入設備 ── */
