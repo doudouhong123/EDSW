@@ -3,27 +3,33 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>文具登記</title>
+  <title>義大社工科｜文具登記</title>
+  <meta name="theme-color" content="#d5ebe8"/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:      #f5f0eb;
-      --cream:   #fdf8f3;
-      --warm1:   #e8a87c;
-      --warm2:   #d4724a;
-      --warm3:   #b85c38;
-      --sage:    #7aab8a;
-      --sage2:   #5d9170;
-      --sky:     #7bafc9;
-      --blush:   #f2c4a8;
-      --ink:     #3a2a1e;
-      --ink2:    #6b4c3b;
-      --muted:   #a08878;
-      --border:  #e2d0c0;
+      /* 配色（修改）：主色 深湖藍 #2E6F8E｜輔色 藍綠 #4FA3A5｜淺色 薄荷 #A8D5D1｜背景 霧白 #F2F7F6｜強調 暖橘 #F2A65A */
+      --bg:      #F2F7F6;
+      --cream:   #f7fbfa;
+      --warm1:   #4FA3A5;
+      --warm2:   #2E6F8E;
+      --warm3:   #235a74;
+      --sage:    #4FA3A5;
+      --sage2:   #1f7a6c;
+      --sky:     #4FA3A5;
+      --blush:   #A8D5D1;
+      --accent:  #F2A65A;
+      --danger:  #b8433a;
+      --ink:     #24404d;
+      --ink2:    #2f5566;
+      --muted:   #5f7a85;
+      --border:  #b9dcd8;
       --white:   #ffffff;
-      --shadow:  rgba(90,50,20,0.10);
+      --shadow:  rgba(46,111,142,0.16);
       --radius:  16px;
     }
+    /* 背景填滿整個畫面，不留白底（修改） */
+    html { min-height: 100%; background: #F2F7F6; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,9 +38,10 @@
       font-size: 17px; /* ← 基準字體放大 */
       background: var(--bg);
       background-image:
-        radial-gradient(circle at 10% 15%, rgba(232,168,124,0.15) 0%, transparent 50%),
-        radial-gradient(circle at 88% 82%, rgba(122,171,138,0.12) 0%, transparent 45%);
-      min-height: 100vh;
+        radial-gradient(circle at 8% 10%, rgba(168,213,209,0.75) 0%, transparent 50%),
+        radial-gradient(circle at 92% 88%, rgba(242,166,90,0.30) 0%, transparent 45%);
+      background-attachment: fixed;
+      min-height: 100vh; min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -102,7 +109,7 @@
       border-radius: 9px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1rem;
-      box-shadow: 0 2px 8px rgba(212,114,74,0.35);
+      box-shadow: 0 2px 8px rgba(46,111,142,0.35);
       flex-shrink: 0;
     }
 
@@ -117,7 +124,7 @@
       font-family: 'Noto Sans TC', sans-serif;
       cursor: pointer;
       border: 1.5px solid var(--border);
-      background: #fdf5ee;
+      background: #eef7f5;
       color: var(--muted);
       transition: all 0.2s;
     }
@@ -160,7 +167,7 @@
     }
 
     .form-card-header {
-      background: linear-gradient(135deg, #fef0e4, #fde8d4);
+      background: linear-gradient(135deg, #3d86a6, #2E6F8E);
       padding: 14px 20px;
       border-bottom: 1.5px solid var(--border);
       font-family: 'Zen Maru Gothic', sans-serif;
@@ -192,12 +199,12 @@
       gap: 5px;
     }
 
-    .field-label .req { color: var(--warm3); }
+    .field-label .req { color: #c2410c; }
 
     input[type="text"],
     input[type="search"],
     textarea {
-      background: #fdf8f3;
+      background: #f7fbfa;
       border: 1.5px solid var(--border);
       border-radius: 12px;
       color: var(--ink);
@@ -210,7 +217,7 @@
     }
     input:focus, textarea:focus {
       border-color: var(--warm1);
-      box-shadow: 0 0 0 3px rgba(232,168,124,0.18);
+      box-shadow: 0 0 0 3px rgba(79,163,165,0.25);
       background: var(--white);
     }
 
@@ -266,7 +273,7 @@
       cursor: pointer;
       font-size: 1rem;
       color: var(--ink);
-      background: #fdf5ee;
+      background: #eef7f5;
       border: 1px solid transparent;
       transition: all 0.15s;
       display: flex;
@@ -311,7 +318,7 @@
       font-size: 0.85rem;
       color: var(--muted);
     }
-    .qty-hint.err { color: var(--warm3); font-weight: 600; }
+    .qty-hint.err { color: var(--danger); font-weight: 600; }
 
     /* ── 訊息 ── */
     .form-msg {
@@ -321,8 +328,8 @@
       display: none;
     }
     .form-msg.show { display: block; }
-    .form-msg.ok  { background: #edf6f0; color: var(--sage2); border: 1px solid #c5dece; }
-    .form-msg.err { background: #fde8e4; color: var(--warm3); border: 1px solid #f5c5bb; }
+    .form-msg.ok  { background: #e2f3f0; color: #17604f; border: 1px solid #A8D5D1; }
+    .form-msg.err { background: #fde8e4; color: var(--danger); border: 1px solid #f5c5bb; }
 
     /* ── 按鈕 ── */
     .form-actions {
@@ -358,7 +365,7 @@
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     .btn-back {
-      background: #f5ede4;
+      background: #e6f2f0;
       color: var(--muted);
       border: 1.5px solid var(--border);
     }
@@ -370,6 +377,85 @@
       background: linear-gradient(to right, transparent, var(--border), transparent);
       margin: 4px 0;
     }
+    /* ══════════ 鮮艷＋立體感（修改）══════════ */
+    header, .form-card {
+      border: 1.5px solid #9ccfca;
+      box-shadow: 0 4px 0 #a9d6d1, 0 16px 30px rgba(46,111,142,0.24);
+    }
+    .site-title { color: #2E6F8E; }
+    .title-icon {
+      background: linear-gradient(145deg, #5cb8ba, #2E6F8E);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 3px 0 #1f536b, 0 6px 12px rgba(46,111,142,0.35);
+    }
+    .btn-return {
+      background: linear-gradient(180deg, #ffffff, #dff0ee);
+      border-color: #9ccfca; color: #235a74;
+      box-shadow: 0 3px 0 #a9d6d1;
+    }
+    .btn-return:hover { background: linear-gradient(180deg, #ffffff, #cfe9e5); transform: translateY(-1px); }
+    .btn-return:active { transform: translateY(3px); box-shadow: none; }
+    #welcome { color: #2E6F8E; }
+
+    /* 標題列：深湖藍色帶＋暖橘底線 */
+    .form-card-header {
+      color: #ffffff;
+      border-bottom: 4px solid #F2A65A;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.28);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* 輸入框：微微內凹 */
+    input[type="text"], input[type="search"], textarea {
+      background: #ffffff;
+      border-color: #9ccfca;
+      box-shadow: inset 0 2px 5px rgba(46,111,142,0.14);
+    }
+    input:focus, textarea:focus {
+      border-color: #4FA3A5;
+      box-shadow: inset 0 2px 5px rgba(46,111,142,0.10), 0 0 0 3px rgba(79,163,165,0.28);
+    }
+
+    /* 搜尋結果：一顆顆凸起的選項 */
+    .suggestions-box {
+      border-color: #9ccfca; background: #f2f9f8;
+      box-shadow: 0 4px 0 #a9d6d1, 0 12px 22px rgba(46,111,142,0.2);
+    }
+    .suggestion-item {
+      background: linear-gradient(180deg, #ffffff, #e3f3f1);
+      border: 1px solid #b9dcd8; margin-bottom: 7px;
+      box-shadow: 0 3px 0 #b3d9d4;
+    }
+    .suggestion-item:hover {
+      background: linear-gradient(180deg, #d9efec, #A8D5D1);
+      border-color: #4FA3A5; transform: translateY(-1px);
+    }
+    .suggestion-item:active { transform: translateY(3px); box-shadow: none; }
+    .suggestion-item .item-dot { background: #F2A65A; box-shadow: 0 0 0 3px rgba(242,166,90,0.25); }
+
+    /* 已選文具：藍綠色立體標籤 */
+    .selected-tag {
+      background: linear-gradient(180deg, #5cb8ba, #3d8f96);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 4px 0 #2b6e74;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      align-self: flex-start;
+    }
+
+    /* 送出按鈕：暖橘色實體按鍵，按下會下沉 */
+    .btn-submit {
+      background: linear-gradient(180deg, #f8bd7e, #F2A65A);
+      color: #3d2200;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), 0 6px 0 #c97a2c, 0 14px 22px rgba(201,122,44,0.32);
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), 0 8px 0 #c97a2c, 0 18px 26px rgba(201,122,44,0.36);
+    }
+    .btn-submit:active { transform: translateY(5px); box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), 0 1px 0 #c97a2c; }
+    .btn-submit:disabled { transform: none; }
+    .divider { height: 2px; background: linear-gradient(to right, transparent, #A8D5D1, transparent); }
+    .deco { opacity: 0.14; }
+    /* 隱藏瀏覽器內建的清除鈕，避免和自訂的 ✕ 重疊 */
+    input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
   </style>
 </head>
 <body>
@@ -579,7 +665,7 @@
         // 高亮關鍵字
         const highlighted = item.replace(
           new RegExp(`(${kw.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g,'\\')).join('|')})`, 'g'),
-          '<mark style="background:rgba(232,168,124,0.4);color:var(--warm3);border-radius:3px;padding:0 1px;font-weight:700">$1</mark>'
+          '<mark style="background:rgba(242,166,90,0.5);color:#5a3200;border-radius:3px;padding:0 1px;font-weight:700">$1</mark>'
         );
         div.innerHTML = `<span class="item-dot"></span><span>${highlighted}</span>`;
         div.addEventListener('click', () => selectItem(item));
