@@ -2,9 +2,15 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#a3b594">
     <title>登入後頁面</title>
     <style>
+        /* 背景填滿整個畫面，不留白（修改）：畫在 html 上並固定，捲動或手機邊緣都是鼠尾草綠 */
+        html {
+            min-height: 100%;
+            background: #8fa682 linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%) fixed;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-size: 20px;
@@ -14,8 +20,10 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            min-height: 100dvh;                  /* 手機網址列收合時也填滿 */
             margin: 0;
-            background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%);   /* 鼠尾草綠（修改，與登入頁一致） */
+            background: transparent;             /* 背景改畫在 html 上（修改） */
+            padding: 24px 0; box-sizing: border-box;   /* 螢幕較矮時上下仍留綠色邊 */
             color: #fff;
             overflow-x: hidden;
         }
