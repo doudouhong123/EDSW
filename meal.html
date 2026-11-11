@@ -3,20 +3,25 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#F6F9F2"/>
   <title>義大社工科｜訂餐</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:#fff8f0;--white:#ffffff;--warm1:#ff8c42;--warm2:#e8641a;--warm3:#c44d0a;
-      --yellow:#ffd166;--green:#06d6a0;--green2:#04a87e;--sky:#4fc3f7;--sky2:#0288d1;
-      --purple:#9c6fde;--purple2:#7b4fc9;--ink:#2d1b0e;--ink2:#5a3825;--muted:#a07858;
-      --border:#f0d8c0;--shadow:rgba(200,80,10,0.10);--danger:#e05555;
+      /* 配色（修改）：主色 森林綠 #3F7D58｜輔色 嫩葉綠 #7FB77E｜強調 晨光黃 #F4D35E｜背景 淺綠白 #F6F9F2｜文字 墨綠灰 #33413A */
+      --bg:#F6F9F2;--white:#ffffff;--warm1:#7FB77E;--warm2:#3F7D58;--warm3:#2f6044;
+      --yellow:#F4D35E;--green:#7FB77E;--green2:#3F7D58;--sky:#F4D35E;--sky2:#7a6200;
+      --purple:#7FB77E;--purple2:#3F7D58;--ink:#33413A;--ink2:#33413A;--muted:#66756b;
+      --border:#d7e4cd;--shadow:rgba(63,125,88,0.12);--danger:#c94f4f;
     }
+    /* 背景填滿整個畫面，不留白（修改） */
+    html{min-height:100%;background:#F6F9F2;}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--bg);
-      background-image:radial-gradient(circle at 10% 20%,rgba(255,140,66,0.10) 0%,transparent 50%),
-        radial-gradient(circle at 90% 80%,rgba(6,214,160,0.07) 0%,transparent 45%);
-      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      background-image:radial-gradient(circle at 10% 15%,rgba(127,183,126,0.22) 0%,transparent 50%),
+        radial-gradient(circle at 90% 85%,rgba(244,211,94,0.16) 0%,transparent 45%);
+      background-attachment:fixed;
+      min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;
       padding:24px 14px 56px;color:var(--ink);}
     .deco{position:fixed;pointer-events:none;opacity:0.07;z-index:0;animation:floatY 8s ease-in-out infinite;}
     .deco:nth-child(1){top:5%;left:3%;font-size:1.8rem;animation-delay:0s;}
@@ -33,9 +38,9 @@
       box-shadow:0 4px 20px var(--shadow);z-index:1;animation:slideDown 0.5s ease both;}
     .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .site-title{display:flex;align-items:center;gap:9px;font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
-    .title-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--warm1),var(--warm3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(200,80,10,0.3);flex-shrink:0;}
-    .btn-return{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#fff8f4;color:var(--muted);transition:all 0.2s;}
-    .btn-return:hover{background:#ffe8d8;border-color:var(--warm1);color:var(--warm3);transform:translateX(-2px);}
+    .title-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--warm1),var(--warm3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(63,125,88,0.3);flex-shrink:0;}
+    .btn-return{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#f8fbf5;color:var(--muted);transition:all 0.2s;}
+    .btn-return:hover{background:#e3f0da;border-color:var(--warm1);color:var(--warm3);transform:translateX(-2px);}
     .header-info{display:flex;align-items:center;justify-content:space-between;}
     #clock{font-size:0.8rem;color:var(--muted);font-family:'Zen Maru Gothic',sans-serif;}
     #welcome{font-size:0.85rem;color:var(--warm2);font-weight:600;}
@@ -44,33 +49,33 @@
     .page.active{display:flex;animation:fadeIn 0.35s ease;}
 
     .dates-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
-    .dates-header{background:linear-gradient(135deg,#fff3e0,#ffe0b2);padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:var(--warm2);display:flex;align-items:center;gap:7px;}
+    .dates-header{background:linear-gradient(135deg,#e7f2de,#d2e6c6);padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:var(--warm2);display:flex;align-items:center;gap:7px;}
     .dates-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
-    .date-btn{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid var(--border);background:linear-gradient(135deg,#fff8f3,#fef0e4);font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;animation:rowIn 0.3s ease both;box-shadow:0 2px 8px rgba(200,80,10,0.08);}
-    .date-btn:hover{background:linear-gradient(135deg,#ffe8d0,#ffd8b8);transform:translateY(-2px);box-shadow:0 4px 14px rgba(200,80,10,0.18);}
+    .date-btn{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid var(--border);background:linear-gradient(135deg,#fbfdf8,#edf5e6);font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;animation:rowIn 0.3s ease both;box-shadow:0 2px 8px rgba(63,125,88,0.08);}
+    .date-btn:hover{background:linear-gradient(135deg,#e3f0da,#cfe4c2);transform:translateY(-2px);box-shadow:0 4px 14px rgba(63,125,88,0.18);}
     .date-btn-left{display:flex;align-items:center;gap:10px;}
     .date-tags{display:flex;gap:6px;margin-top:5px;}
     .tag{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;}
-    .tag-lunch{background:#fff3e0;color:var(--warm2);border:1px solid #ffd8b0;}
-    .tag-drink{background:#e0f7fa;color:var(--sky2);border:1px solid #b2e8f5;}
+    .tag-lunch{background:#e7f2de;color:var(--warm2);border:1px solid #bfd9b3;}
+    .tag-drink{background:#fdf6d4;color:var(--sky2);border:1px solid #ecd77a;}
     .dates-empty{padding:40px 18px;text-align:center;color:var(--muted);}
     .dates-empty-icon{font-size:2.2rem;display:block;margin-bottom:10px;}
     .dates-empty p{font-size:0.88rem;}
 
-    .order-date-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);border-radius:8px;padding:5px 14px;font-size:0.88rem;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;border:1px solid #ffd8b0;}
+    .order-date-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#e7f2de,#d2e6c6);color:var(--warm2);border-radius:8px;padding:5px 14px;font-size:0.88rem;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;border:1px solid #bfd9b3;}
     .section-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
     .section-header{padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
-    .section-header.lunch{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);}
-    .section-header.drink{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:var(--sky2);}
+    .section-header.lunch{background:linear-gradient(135deg,#e7f2de,#d2e6c6);color:var(--warm2);}
+    .section-header.drink{background:linear-gradient(135deg,#fdf6d4,#f8e89a);color:var(--sky2);}
     .shop-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:auto;}
-    .shop-badge.lunch{background:#fff3e0;color:var(--warm2);border:1px solid #ffd8b0;}
-    .shop-badge.drink{background:#e0f7fa;color:var(--sky2);border:1px solid #b2e8f5;}
+    .shop-badge.lunch{background:#e7f2de;color:var(--warm2);border:1px solid #bfd9b3;}
+    .shop-badge.drink{background:#fdf6d4;color:var(--sky2);border:1px solid #ecd77a;}
     .section-body{padding:18px;display:flex;flex-direction:column;gap:14px;}
 
     .field{display:flex;flex-direction:column;gap:6px;}
     .field label{font-size:1rem;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:4px;}
-    .field input[type="text"],.field input[type="number"],.field select{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s,box-shadow 0.2s;appearance:none;-webkit-appearance:none;}
-    .field input:focus,.field select:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);background:var(--white);}
+    .field input[type="text"],.field input[type="number"],.field select{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#f8fbf5;outline:none;transition:border-color 0.2s,box-shadow 0.2s;appearance:none;-webkit-appearance:none;}
+    .field input:focus,.field select:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(63,125,88,0.18);background:var(--white);}
     .select-wrap{position:relative;}
     .select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.9rem;}
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -79,25 +84,25 @@
 
     .form-msg{font-size:0.82rem;padding:9px 14px;border-radius:10px;display:none;}
     .form-msg.show{display:block;}
-    .form-msg.ok{background:#e8f5ec;color:var(--green2);border:1px solid #b8e0c8;}
+    .form-msg.ok{background:#e7f2de;color:#2f6044;border:1px solid #bfd9b3;}
     .form-msg.err{background:#fde8e4;color:var(--danger);border:1px solid #f5c5bb;}
 
-    .btn-row{width:100%;max-width:500px;display:flex;gap:12px;z-index:1;}
+    .btn-row{width:100%;max-width:500px;display:flex;gap:12px;z-index:1;margin-top:16px;}
     .btn{flex:1;padding:16px;border-radius:14px;border:none;font-size:1.1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
     .btn:active{transform:scale(0.97);}
-    .btn-submit{background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#fff;box-shadow:0 4px 14px rgba(200,80,10,0.28);}
-    .btn-submit:hover{box-shadow:0 6px 20px rgba(200,80,10,0.38);transform:translateY(-2px);}
+    .btn-submit{background:linear-gradient(135deg,#4b8f67,#3F7D58);color:#fff;box-shadow:0 4px 14px rgba(63,125,88,0.28);}
+    .btn-submit:hover{box-shadow:0 6px 20px rgba(63,125,88,0.38);transform:translateY(-2px);}
     .btn-submit:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
-    .btn-back{background:#fff3e8;color:var(--muted);border:1.5px solid var(--border);}
-    .btn-back:hover{background:#ffe0c8;color:var(--warm3);border-color:var(--warm1);}
+    .btn-back{background:#eef5e8;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-back:hover{background:#dcebd2;color:var(--warm3);border-color:var(--warm1);}
 
     .btn-add-item{width:100%;padding:13px;border-radius:12px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-size:1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;}
-    .btn-add-item.lunch-add{border-color:#ffd8b0;color:var(--warm2);}
-    .btn-add-item.lunch-add:hover{background:#fff3e8;border-color:var(--warm1);}
-    .btn-add-item.drink-add{border-color:#b2e8f5;color:var(--sky2);}
-    .btn-add-item.drink-add:hover{background:#e0f7fa;border-color:var(--sky);}
+    .btn-add-item.lunch-add{border-color:#bfd9b3;color:var(--warm2);}
+    .btn-add-item.lunch-add:hover{background:#eef5e8;border-color:var(--warm1);}
+    .btn-add-item.drink-add{border-color:#ecd77a;color:var(--sky2);}
+    .btn-add-item.drink-add:hover{background:#fdf6d4;border-color:var(--sky);}
 
-    .order-item{border:1px solid var(--border);border-radius:12px;padding:16px;background:#fffaf6;display:flex;flex-direction:column;gap:12px;position:relative;animation:rowIn 0.3s ease both;}
+    .order-item{border:1px solid var(--border);border-radius:12px;padding:16px;background:#fafcf7;display:flex;flex-direction:column;gap:12px;position:relative;animation:rowIn 0.3s ease both;}
     .order-item+.order-item{margin-top:12px;}
     .item-header{display:flex;align-items:center;justify-content:space-between;font-size:1rem;font-weight:700;color:var(--muted);}
     .btn-remove-item{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--danger);padding:4px 8px;border-radius:6px;transition:background 0.2s;}
@@ -105,11 +110,11 @@
 
     /* ── 訂單清單 ── */
     .order-list-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);animation:rowIn 0.4s ease both;width:100%;max-width:500px;}
-    .order-list-header{background:linear-gradient(135deg,#e8f4f8,#d8ecf4);padding:14px 20px;font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:#0288d1;border-bottom:1.5px solid #c0d8e4;}
-    .order-person-block{padding:14px 20px;border-bottom:1px solid #f0f4f8;}
+    .order-list-header{background:#3F7D58;padding:14px 20px;font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:#ffffff;border-bottom:3px solid #F4D35E;}
+    .order-person-block{padding:14px 20px;border-bottom:1px solid #e6eee0;}
     .order-person-block:last-child{border-bottom:none;}
     .order-person-name{font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-    .order-row{display:flex;flex-direction:column;gap:5px;padding:10px 14px;border-radius:12px;background:#fffaf5;border:1px solid var(--border);margin-bottom:8px;font-size:1.1rem;line-height:1.7;}
+    .order-row{display:flex;flex-direction:column;gap:5px;padding:10px 14px;border-radius:12px;background:#fafcf7;border:1px solid var(--border);margin-bottom:8px;font-size:1.1rem;line-height:1.7;}
     .order-row:last-child{margin-bottom:0;}
     .order-row-item{color:var(--warm2);font-weight:700;}
     .order-row-drink{color:var(--sky2);font-weight:700;}
@@ -119,14 +124,13 @@
     .order-line::-webkit-scrollbar{display:none;}
     .order-line .order-row-detail{flex-shrink:0;}
     .order-line .price{color:var(--warm2);font-weight:700;}
-    .spinner{width:36px;height:36px;border:4px solid #fde8d4;border-top:4px solid var(--warm1);border-radius:50%;animation:spin 0.9s linear infinite;}
+    .spinner{width:36px;height:36px;border:4px solid #dcebd2;border-top:4px solid var(--warm1);border-radius:50%;animation:spin 0.9s linear infinite;}
     @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     .loading-text{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;color:var(--ink2);}
 
     /* ── 菜單照片（新增）── */
-    .tag-menu{background:#f3e5f5;color:#7b1fa2;border:1px solid #e1bee7;}
-    .menu-view{border:1.5px dashed var(--border);border-radius:12px;padding:12px;background:#fffaf6;display:flex;flex-direction:column;gap:8px;}
-    .menu-view.drink{border-color:#b2e8f5;background:#f5fcff;}
+        .menu-view{border:1.5px dashed var(--border);border-radius:12px;padding:12px;background:#fafcf7;display:flex;flex-direction:column;gap:8px;}
+    .menu-view.drink{border-color:#ecd77a;background:#fffcec;}
     .menu-view-title{font-size:0.9rem;font-weight:700;color:var(--warm2);}
     .menu-view.drink .menu-view-title{color:var(--sky2);}
     .menu-view-title small{font-size:0.72rem;color:var(--muted);font-weight:500;margin-left:6px;}
@@ -197,13 +201,13 @@
   </div>
 
   <div class="section-card" id="note-section" style="display:none">
-    <div class="section-header" style="background:linear-gradient(135deg,#f3e5f5,#e1bee7);color:#7b1fa2;">📝 備註</div>
+    <div class="section-header" style="background:linear-gradient(135deg,#eef4e8,#e2ecd9);color:#33413A;">📝 備註</div>
     <div class="section-body">
       <div class="field">
         <textarea id="order-notes" placeholder="可填寫特殊需求或說明（選填）"
           style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
                  font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);
-                 background:#fff8f4;outline:none;min-height:80px;resize:vertical;line-height:1.6;"></textarea>
+                 background:#f8fbf5;outline:none;min-height:80px;resize:vertical;line-height:1.6;"></textarea>
       </div>
     </div>
   </div>
@@ -289,8 +293,7 @@
         const isClosed = closedSet.has(dateStr);
         const tags=[
           item.lunch?`<span class="tag tag-lunch">🍱 ${esc(item.lunch)}</span>`:'',
-          item.drink?`<span class="tag tag-drink">🧋 ${esc(item.drink)}</span>`:'',
-          ((item.lunchMenu||[]).length||(item.drinkMenu||[]).length)?`<span class="tag tag-menu">📷 有菜單</span>`:''
+          item.drink?`<span class="tag tag-drink">🧋 ${esc(item.drink)}</span>`:''
         ].filter(Boolean).join('');
         const btn=document.createElement('button');
         btn.className='date-btn';
