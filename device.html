@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>義大社工科｜設備</title>
+  <meta name="theme-color" content="#b4d39b"/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -683,6 +684,133 @@
     .remind-list b { color: #8a5a14; }
     .remind-btns { display: flex; gap: 10px; }
     .remind-btns .btn { padding: 13px; font-size: 1rem; }
+    /* ══════════ 鮮艷＋立體感（修改）══════════ */
+    :root {
+      --primary:  #3f84c9;   /* 亮一階的藍 */
+      --primary2: #2c629c;
+      --border:   #e0d2ab;
+      --shadow:   rgba(45,75,35,0.20);
+    }
+    html { background: #86b06f; }
+    body { background: linear-gradient(135deg, #c3dda8 0%, #86b06f 100%) fixed; min-height: 100dvh; }
+
+    /* 卡片：下緣厚度＋較深陰影，浮在背景上 */
+    header, .reserve-card, .search-card, .devices-card, .purpose-card, .schedule-card {
+      box-shadow: 0 4px 0 #d6c898, 0 14px 28px rgba(45,75,35,0.24);
+    }
+    .title-icon {
+      background: linear-gradient(145deg, #5a9fe0, #2c629c);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 3px 0 #1f4a78, 0 6px 12px rgba(44,98,156,0.35);
+    }
+    .btn-return {
+      background: linear-gradient(180deg, #ffffff, #f1e7cc);
+      border-color: #d6c898; color: #2c629c;
+      box-shadow: 0 3px 0 #d2c193;
+    }
+    .btn-return:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #1f4a78; }
+    .btn-return:active { transform: translateY(3px); box-shadow: none; }
+
+    .intro-card {
+      background: linear-gradient(135deg, #e0efff, #c2dcf8);
+      border-color: #9cc3ec; color: #1d4c7e; font-weight: 500;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 4px 0 #a5c6e8, 0 10px 18px rgba(44,98,156,0.16);
+    }
+
+    /* 提前預借：亮黃色實體按鍵 */
+    .btn-reserve {
+      border: 1.5px solid #d9a520;
+      background: linear-gradient(180deg, #ffeeb5, #f6cf5a);
+      color: #4f3600;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 5px 0 #c9951a, 0 10px 16px rgba(201,149,26,0.22);
+    }
+    .btn-reserve:hover { background: linear-gradient(180deg, #fff3c9, #f3c84a); }
+    .btn-reserve:active { transform: translateY(4px); box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 1px 0 #c9951a; }
+    .reserve-card.active { border-color: #d9a520; }
+    .reserve-card.active .btn-reserve {
+      background: linear-gradient(180deg, #f6c445, #e0a21c);
+      color: #3d2a00;
+      transform: translateY(3px);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.18), 0 2px 0 #a97a10;
+    }
+
+    /* 輸入框：微微內凹 */
+    .search-box, .purpose-select, .date-box {
+      background-color: #ffffff;
+      border-color: #d6c898;
+      box-shadow: inset 0 2px 5px rgba(45,75,35,0.14);
+    }
+
+    /* 設備區標題：飽和藍色帶 */
+    .devices-card-header {
+      background: linear-gradient(135deg, #4f96db, #2c629c);
+      color: #ffffff; border-bottom: none;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.14);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    #selected-count {
+      background: #f6cf5a; color: #3d2a00; text-shadow: none;
+      box-shadow: 0 2px 0 #c9951a; padding: 3px 12px;
+    }
+
+    /* 設備按鍵：凸起的方塊，選取後按下去並變成藍色 */
+    .device-card {
+      background: linear-gradient(180deg, #ffffff, #f4ecd6);
+      border: 1.5px solid #d6c898;
+      box-shadow: inset 0 2px 0 #ffffff, 0 6px 0 #cfbe8e, 0 12px 18px rgba(45,75,35,0.18);
+    }
+    .device-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+      box-shadow: inset 0 2px 0 #ffffff, 0 9px 0 #cfbe8e, 0 16px 22px rgba(45,75,35,0.22);
+    }
+    .device-card.selected {
+      background: linear-gradient(180deg, #4f96db, #2c629c);
+      border-color: #1f4a78;
+      transform: translateY(4px);
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.22), 0 2px 0 #1f4a78;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .device-card.selected::before {
+      content: '✓';
+      top: 8px; right: 8px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #f6cf5a; color: #3d2a00;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; text-shadow: none;
+      box-shadow: 0 2px 0 #c9951a;
+    }
+    .device-icon { filter: drop-shadow(0 4px 4px rgba(0,0,0,0.22)); }
+
+    /* 主要按鈕：有厚度，按下會下沉 */
+    .btn-submit {
+      background: linear-gradient(180deg, #4f96db, #2c629c);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 5px 0 #1f4a78, 0 12px 22px rgba(44,98,156,0.35);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 7px 0 #1f4a78, 0 16px 26px rgba(44,98,156,0.4);
+    }
+    .btn-submit:active { transform: translateY(4px); box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 1px 0 #1f4a78; }
+    .btn-reset {
+      background: linear-gradient(180deg, #ffffff, #f1e7cc);
+      border-color: #d6c898; color: #5d6a55;
+      box-shadow: 0 5px 0 #d2c193, 0 10px 16px rgba(45,75,35,0.12);
+    }
+    .btn-reset:active { transform: translateY(4px); box-shadow: 0 1px 0 #d2c193; }
+
+    /* 預借排程：亮黃色標題 */
+    .schedule-header {
+      background: linear-gradient(135deg, #fbdc77, #efb935);
+      color: #4a3200; border-bottom: none;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.55), inset 0 -3px 0 rgba(122,90,0,0.18);
+    }
+    .btn-refresh { border-color: #c9951a; color: #4a3200; box-shadow: 0 2px 0 #c9951a; }
+    .schedule-table th { background: #fff3cf; color: #6b4a00; border-bottom-color: #efd58a; }
+    .schedule-table td.s-date { color: #7a5200; }
+    .schedule-table tr.mine td { background: #dcebfb; }
+    .today-tag { background: #e0a21c; color: #3d2a00; font-weight: 700; }
+    .remind-box, .loading-box { box-shadow: 0 5px 0 #d6c898, 0 18px 40px rgba(0,0,0,0.3); }
   </style>
 </head>
 <body>
