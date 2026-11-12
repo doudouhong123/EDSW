@@ -684,6 +684,16 @@
     .db-msg{color:var(--hz)!important;}
     .db-header-title{color:var(--hz)!important;text-shadow:0 0 8px rgba(255,196,0,.4)!important;}
     .db-header{border-bottom-color:var(--hz)!important;}
+    /* ── 借用記錄：標籤一行一個、向左對齊；字太長時整個記錄區可左右滑（修改）── */
+    .record-list{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .record-item{width:max-content;min-width:100%;}
+    .record-chips{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;padding-left:0;}
+    .record-chips .chip,.record-chips .chip-note{white-space:nowrap!important;word-break:normal!important;}
+    .record-top .btn-del-record{margin-left:8px;}   /* 刪除鍵緊貼姓名，長記錄時不會被推到畫面外 */
+    /* ── 新增設備：輸入框可縮短，新增鍵一定看得到（修改）── */
+    .db-add-form{gap:8px;}
+    .db-input{min-width:0;width:100%;flex:1 1 auto;}
+    .btn-db-add{flex:0 0 auto;white-space:nowrap;}
   </style>
   <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
   <style>
