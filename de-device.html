@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
+  <meta name="theme-color" content="#11151a"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>義大社工科｜設備記錄</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
@@ -585,6 +586,105 @@
       background: #fffafd;
     }
   </style>
+  <!-- ══════════ 工業科技風（與後台 deleloper 同步，修改）══════════ -->
+  <style>
+    :root{--st0:#0d1014;--st1:#161b21;--st2:#212831;--ln:#3a4552;--tx:#e7edf3;--mu:#98a6b4;
+      --hz:#ffc400;--cy:#00d2ff;--or:#ff6a13;--gr:#3cff6a;--rd:#ff4d4d;}
+    html{min-height:100%;background-color:var(--st0);
+      background-image:radial-gradient(circle at 15% 10%,rgba(0,210,255,.16),transparent 42%),
+        radial-gradient(circle at 85% 90%,rgba(255,106,19,.16),transparent 45%),
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+        repeating-linear-gradient(45deg,#12161b 0 6px,#0f1317 6px 12px);
+      background-size:auto,auto,28px 28px,28px 28px,auto;background-attachment:fixed;color-scheme:dark;}
+    body{background:transparent!important;background-image:none!important;color:var(--tx)!important;
+      min-height:100vh;min-height:100dvh;font-family:'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif!important;}
+    /* 金屬面板 */
+    header,.ind-panel{position:relative;overflow:hidden;
+      background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(180deg,var(--st2),var(--st1))!important;
+      border:1px solid var(--ln)!important;border-radius:16px!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.5),0 5px 0 #07090c,0 18px 36px rgba(0,0,0,.55)!important;}
+    header{padding-top:22px!important;}
+    header::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;
+      background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
+    .site-title{min-width:0;color:#fff!important;letter-spacing:1px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,196,0,.3);font-family:inherit!important;font-weight:900!important;}
+    .title-icon{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;}
+    #clock{display:inline-block;font-family:Consolas,'Courier New',monospace!important;font-weight:700;color:var(--cy)!important;
+      text-shadow:0 0 8px rgba(0,210,255,.7);background:#07090c;border:1px solid #1f2a33;border-radius:8px;
+      padding:4px 12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.8);}
+    header #clock{display:block;width:fit-content;margin:0 auto;}
+    /* 返回：方形金屬鍵＋警示斜紋，和後台一致 */
+    .btn-return{position:relative;overflow:hidden;border-radius:8px!important;border:2px solid var(--hz)!important;
+      background:linear-gradient(180deg,#3a4450,#1d232a)!important;color:var(--hz)!important;
+      padding:6px 20px!important;font-weight:900!important;letter-spacing:2px;white-space:nowrap;flex-shrink:0;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;transform:none!important;}
+    .btn-return::before,.btn-return::after{content:'';position:absolute;top:0;bottom:0;width:7px;
+      background:repeating-linear-gradient(-45deg,var(--hz) 0 4px,#111 4px 8px);}
+    .btn-return::before{left:0}.btn-return::after{right:0}
+    .btn-return:hover{color:#fff!important;}
+    .btn-return:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 #07090c!important;}
+    /* 狀態列 */
+    #status-bar{background:#0b0e12;border:1px solid #26303a;border-radius:8px;padding:5px 10px;box-shadow:inset 0 2px 5px rgba(0,0,0,.8);}
+    #status-text,#last-sync{color:var(--mu)!important;}
+    .dot.ok{background:var(--gr)!important;box-shadow:0 0 8px var(--gr)!important;}
+    .dot.err{background:var(--rd)!important;box-shadow:0 0 8px var(--rd)!important;}
+    .dot.busy{background:var(--cy)!important;box-shadow:0 0 8px var(--cy)!important;}
+    /* 區塊標題列：深色＋青色底線 */
+    .ind-head{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;
+      box-shadow:0 2px 10px rgba(0,210,255,.18);}
+    .ind-head-title{color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
+    .ind-count{background:linear-gradient(180deg,#ffd84d,var(--hz))!important;color:#2a1d00!important;font-weight:900!important;
+      box-shadow:0 2px 0 #7a5200!important;}
+    /* 列表 */
+    .ind-row{border-bottom:1px solid #2b343e!important;}
+    .ind-row:hover{background:rgba(0,210,255,.06)!important;}
+    .ind-seq{background:radial-gradient(circle at 35% 30%,#8ff0ff,#00b4e6 55%,#00415e)!important;color:#00202e!important;
+      font-weight:900!important;box-shadow:0 2px 0 #00293b,0 0 8px rgba(0,210,255,.5);}
+    .ind-name{color:#fff!important;}
+    .empty-state{color:var(--mu)!important;}
+    mark{background:rgba(255,196,0,.28)!important;color:var(--hz)!important;}
+    /* 輸入欄 */
+    .ind-input{background:#0b0e12!important;color:var(--tx)!important;border:1px solid #33404c!important;
+      box-shadow:inset 0 2px 5px rgba(0,0,0,.8)!important;}
+    .ind-input:focus{border-color:var(--cy)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(0,210,255,.2)!important;}
+    .ind-input::placeholder{color:#6b7885;}
+    /* 立體按鍵 */
+    .ind-btn{border:none!important;border-radius:10px!important;font-weight:900!important;transition:transform .1s,box-shadow .1s!important;}
+    .ind-btn:active{transform:translateY(3px)!important;}
+    .ind-cy{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #005a78,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-hz{background:linear-gradient(180deg,#ffe066,var(--hz))!important;color:#2a1d00!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 4px 0 #8a6200,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-gr{background:linear-gradient(180deg,#6cf08a,#22b545)!important;color:#04210b!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #0d5a1e,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-rd{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-gy{background:linear-gradient(180deg,#4a5562,#2b333c)!important;color:#dfe6ec!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 0 #0d1014!important;}
+    .ind-cy:active,.ind-hz:active,.ind-gr:active,.ind-rd:active,.ind-gy:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
+    .ind-sm-del{background:linear-gradient(180deg,#3a2226,#24161a)!important;color:#ff8a8a!important;border:1px solid #7a1f1f!important;
+      border-radius:6px!important;box-shadow:0 2px 0 #07090c!important;}
+    .ind-sm-del:hover{background:linear-gradient(180deg,#d42020,#8f0f0f)!important;color:#fff!important;}
+    /* 標籤 chips：深底＋發光字 */
+    .ind-chip{background:#0b0e12!important;border:1px solid #2f3b46!important;}
+    .c-cy{color:#7fe6ff!important;border-color:rgba(0,210,255,.45)!important;}
+    .c-hz{color:#ffd84d!important;border-color:rgba(255,196,0,.45)!important;}
+    .c-gr{color:#7dff9e!important;border-color:rgba(60,255,106,.4)!important;}
+    .c-or{color:#ffb27a!important;border-color:rgba(255,106,19,.5)!important;background:rgba(255,106,19,.1)!important;}
+    .c-bl{color:#a5d8ff!important;border-color:rgba(120,190,255,.5)!important;background:rgba(0,120,255,.12)!important;}
+    .c-mu{color:#c3ccd5!important;}
+    .c-pk{color:#ff9ec4!important;border-color:rgba(255,80,150,.5)!important;background:rgba(255,80,150,.1)!important;}
+    .chip-label,.chip-lbl{opacity:.7;}
+    @media (max-width:400px){.site-title{font-size:.9rem!important;gap:7px!important;letter-spacing:0;} .btn-return{padding:6px 14px!important;letter-spacing:1px;}}
+  </style>
+  <style>
+    .card-header,.db-header{}
+    .filter-title,.filter-hint{color:var(--hz)!important;font-family:inherit!important;font-weight:900!important;}
+    .filter-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300d2ff' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 10px center!important;}
+    .sync-hint,.db-count{color:var(--mu)!important;}
+    .btn-reserve{background:#0b0e12!important;color:#ff9ec4!important;border:1px solid rgba(255,80,150,.5)!important;box-shadow:0 2px 0 #07090c;}
+    .btn-reserve.active{background:linear-gradient(180deg,#ff6fa8,#c2255c)!important;color:#fff!important;}
+    .db-add-form,.db-msg{background:#12171c!important;border-top-color:#33404c!important;}
+    .db-msg{color:var(--hz)!important;}
+    .db-header-title{color:var(--hz)!important;text-shadow:0 0 8px rgba(255,196,0,.4)!important;}
+    .db-header{border-bottom-color:var(--hz)!important;}
+  </style>
   <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
   <style>
     html.fade-in { background: #0d1014; }
@@ -627,29 +727,29 @@
 <div id="status-bar">
   <div class="dot" id="dot"></div>
   <span id="status-text">連線中…</span>
-  <span id="count-badge" style="display:none"></span>
+  <span class="ind-count" id="count-badge" style="display:none"></span>
   <span id="last-sync"></span>
 </div>
 
 <!-- ─── 日期篩選 ─── -->
-<div class="filter-card">
+<div class="filter-card ind-panel">
   <div class="filter-title">🔍 依日期查詢</div>
   <div class="filter-row">
-    <select class="filter-select" id="sel-year"><option value="">年</option></select>
-    <select class="filter-select" id="sel-month"><option value="">月</option></select>
-    <select class="filter-select" id="sel-day"><option value="">日</option></select>
+    <select class="filter-select ind-input" id="sel-year"><option value="">年</option></select>
+    <select class="filter-select ind-input" id="sel-month"><option value="">月</option></select>
+    <select class="filter-select ind-input" id="sel-day"><option value="">日</option></select>
   </div>
   <div class="filter-actions">
-    <button class="btn-filter search" onclick="applyFilter()">🔍 查詢</button>
-    <button class="btn-filter reset-f" onclick="resetFilter()">✕ 清除</button>
+    <button class="btn-filter search ind-btn ind-cy" onclick="applyFilter()">🔍 查詢</button>
+    <button class="btn-filter reset-f ind-btn ind-gy" onclick="resetFilter()">✕ 清除</button>
   </div>
   <div class="filter-hint" id="filter-hint"></div>
 </div>
 
 <!-- ─── 記錄卡片 ─── -->
-<div class="records-card">
-  <div class="card-header">
-    <div class="card-header-title">🖥 設備借用記錄
+<div class="records-card ind-panel">
+  <div class="card-header ind-head">
+    <div class="card-header-title ind-head-title">🖥 設備借用記錄
       <button class="btn-reserve" id="btn-reserve" onclick="toggleReserve()">📅 提前預約</button>
     </div>
     <span class="sync-hint">每 5 秒自動同步</span>
@@ -663,9 +763,9 @@
 </div>
 
 <!-- ─── 設備資料庫管理 ─── -->
-<div class="db-card">
-  <div class="db-header">
-    <div class="db-header-title">🗄 設備資料庫</div>
+<div class="db-card ind-panel">
+  <div class="db-header ind-head">
+    <div class="db-header-title ind-head-title">🗄 設備資料庫</div>
     <span class="db-count" id="db-count">載入中…</span>
   </div>
   <div class="db-list" id="db-list">
@@ -677,8 +777,8 @@
   <!-- 新增表單 -->
   <div class="db-add-form">
     <span class="db-add-icon">➕</span>
-    <input type="text" class="db-input" id="db-input-name" placeholder="輸入設備名稱" maxlength="20" autocomplete="off"/>
-    <button class="btn-db-add" onclick="submitAddDevice()">新增</button>
+    <input type="text" class="db-input ind-input" id="db-input-name" placeholder="輸入設備名稱" maxlength="20" autocomplete="off"/>
+    <button class="btn-db-add ind-btn ind-hz" onclick="submitAddDevice()">新增</button>
   </div>
   <div class="db-msg" id="db-msg"></div>
 </div>
@@ -841,30 +941,30 @@
 
     rows.forEach((r, i) => {
       const item = document.createElement('div');
-      item.className = 'record-item';
+      item.className = 'record-item ind-row';
       item.style.animationDelay = (i * 0.04) + 's';
       item.innerHTML = `
         <div class="record-top">
-          <span class="seq-bubble">${i + 1}</span>
-          <span class="record-name">${esc(r.name)}</span>
-          ${r.reserveDate ? `<span class="reserve-tag">📅 提前預借 ${esc(r.reserveDate)}</span>` : ''}
-          <button class="btn-del-record" type="button">🗑 刪除</button>
+          <span class="seq-bubble ind-seq">${i + 1}</span>
+          <span class="record-name ind-name">${esc(r.name)}</span>
+          ${r.reserveDate ? `<span class="reserve-tag ind-chip c-pk">📅 提前預借 ${esc(r.reserveDate)}</span>` : ''}
+          <button class="btn-del-record ind-sm-del" type="button">🗑 刪除</button>
         </div>
         <div class="record-chips">
-          <span class="chip chip-date">
+          <span class="chip chip-date ind-chip c-cy">
             <span class="chip-label">時間</span>${formatDate(r.time)}
           </span>
-          <span class="chip chip-device">
+          <span class="chip chip-device ind-chip c-hz">
             <span class="chip-label">設備</span>${esc(r.devices)}
           </span>
           ${r.returnTime
-            ? `<span class="chip chip-return"><span class="chip-label">歸還時間</span>${esc(r.returnTime)}</span>`
-            : `<span class="chip chip-pending">未歸還</span>`}
+            ? `<span class="chip chip-return ind-chip c-gr"><span class="chip-label">歸還時間</span>${esc(r.returnTime)}</span>`
+            : `<span class="chip chip-pending ind-chip c-or">未歸還</span>`}
           ${r.confirm === '已確認'
-            ? `<span class="chip chip-confirm">✔ 已確認</span>`
+            ? `<span class="chip chip-confirm ind-chip c-bl">✔ 已確認</span>`
             : ''}
           ${r.note
-            ? `<span class="chip chip-note"><span class="chip-label">備註</span>${esc(r.note)}</span>`
+            ? `<span class="chip chip-note ind-chip c-mu"><span class="chip-label">備註</span>${esc(r.note)}</span>`
             : ''}
         </div>
       `;
@@ -958,12 +1058,12 @@
     count.textContent = `共 ${items.length} 項`;
     items.forEach((item, i) => {
       const div = document.createElement('div');
-      div.className = 'db-item';
+      div.className = 'db-item ind-row';
       div.style.animationDelay = (i * 0.04) + 's';
       div.innerHTML = `
         <span class="db-item-icon">${esc(item.icon) || '📦'}</span>
-        <span class="db-item-name">${esc(item.name)}</span>
-        <button class="btn-db-del" onclick="submitDelDevice('${esc(item.name)}')">刪除</button>
+        <span class="db-item-name ind-name">${esc(item.name)}</span>
+        <button class="btn-db-del ind-sm-del" onclick="submitDelDevice('${esc(item.name)}')">刪除</button>
       `;
       list.appendChild(div);
     });
