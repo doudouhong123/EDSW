@@ -343,6 +343,39 @@
     .field label.btn-upload.drink-up{background:rgba(0,210,255,.08)!important;border-color:var(--cy)!important;color:#7fe6ff!important;}
     .menu-thumb .new-badge{background:var(--hz)!important;color:#2a1d00!important;}
   </style>
+  <!-- ── 版面調整（修改）── -->
+  <style>
+    /* 1. 選擇日期對話框：日期輸入框改為適中寬度 */
+    .dialog-field{align-items:center;}
+    .dialog-field label{align-self:center;}
+    .dialog-field input[type="date"]{width:220px!important;max-width:100%;min-width:0;height:44px;
+      -webkit-appearance:none;appearance:none;text-align:center;font-size:1rem!important;padding:8px 12px!important;}
+    .dialog-field input[type="date"]::-webkit-date-and-time-value{text-align:center;}
+
+    /* 2. 已建立的日期：日期、週幾、結單狀態排整齊；太長時可在框內往右滑 */
+    .dates-body{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .date-btn{display:flex!important;align-items:center;gap:12px;white-space:nowrap;
+      width:max-content!important;min-width:100%;justify-content:space-between;}
+    .date-btn-left{flex:1 0 auto;min-width:270px;}   /* 每列左邊同寬，右邊的結單／刪除鍵上下對齊 */
+    .date-main{display:flex;align-items:center;gap:8px;font-size:1rem;}
+    .date-wk{font-size:.8rem;color:var(--mu);font-weight:700;background:#0b0e12;border:1px solid #2f3b46;border-radius:6px;padding:1px 7px;}
+    .closed-badge{font-size:.72rem;font-weight:900;color:#ff9a9a;background:rgba(255,77,77,.12);border:1px solid #7a1f1f;border-radius:6px;padding:1px 7px;}
+    .date-btn-tags{flex-wrap:nowrap;}
+    .date-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .date-actions .btn-close-date,.date-actions .btn-delete-date{min-width:62px;text-align:center;white-space:nowrap;}
+    .date-btn.is-closed{opacity:.75;border-left-color:#ff4d4d!important;}
+
+    /* 3. 訂單查詢：字放大（仍維持手機版），太長可往右滑 */
+    .order-table,.summary-table,.arrange-table{font-size:.95rem!important;}
+    .order-table th,.summary-table th,.arrange-table th{font-size:.88rem;padding:10px!important;}
+    .order-table td,.summary-table td,.arrange-table td{padding:10px!important;white-space:nowrap;}
+    .order-table td.notes-cell{white-space:nowrap!important;min-width:0!important;}
+    .ol-opt{font-size:.85rem!important;}
+    .order-count-badge{font-size:.85rem!important;}
+    .order-count-line{font-size:.9rem!important;}
+    .summary-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .summary-title{font-size:1rem!important;}
+  </style>
   <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
   <style>
     html.fade-in { background: #0d1014; }
@@ -798,17 +831,16 @@
         data.drink?`<span class="tag tag-drink">🧋 ${esc(data.drink)}</span>`:''
       ].filter(Boolean).join('');
       const btn=document.createElement('button');
-      btn.className='date-btn';btn.style.animationDelay=(i*0.06)+'s';
-      if (isClosed) btn.style.opacity='0.7';
+      btn.className='date-btn'+(isClosed?' is-closed':'');btn.style.animationDelay=(i*0.06)+'s';
       btn.innerHTML=`
         <div class="date-btn-left">
           <span class="date-btn-icon">${isClosed?'🔒':'📅'}</span>
           <div>
-            <div style="font-size:1rem;">${label} <span style="font-size:0.78rem;opacity:0.7;">（週${weekday}）</span>${isClosed?'<span style="font-size:0.7rem;background:#fde8e4;color:#e05555;border-radius:6px;padding:1px 6px;margin-left:6px;">已結單</span>':''}</div>
+            <div class="date-main">${label}<span class="date-wk">週${weekday}</span>${isClosed?'<span class="closed-badge">🔒 已結單</span>':''}</div>
             <div class="date-btn-tags" style="margin-top:5px;">${tags}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div class="date-actions">
           <span style="font-size:1.1rem;opacity:0.4;">›</span>
           <button class="btn-close-date${isClosed?' closed':''}"
             onclick="event.stopPropagation();toggleCloseDate('${dateKey}',${isClosed})">
@@ -921,7 +953,7 @@
       const rows=json.data;
       const nameCount = {}; // 追蹤每個姓名出現次數（用於 rowIndex）
       result.innerHTML=`
-        <div style="font-size:0.78rem;color:#0288d1;font-weight:700;margin-top:10px;margin-bottom:4px;">
+        <div class="order-count-line" style="font-size:0.78rem;color:#0288d1;font-weight:700;margin-top:10px;margin-bottom:4px;">
           共 <span class="order-count-badge">${rows.length} 筆</span>
           <span style="font-size:0.7rem;color:var(--muted);font-weight:400;margin-left:6px;">（點擊列可編輯）</span>
         </div>
