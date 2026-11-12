@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="theme-color" content="#6f9a5d">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>會員註冊</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -353,6 +354,68 @@
             from { opacity: 0; transform: translateX(-50%) translateY(-100%); }
             to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+        /* ══════════ 社工科配色＋立體鮮豔（修改）══════════
+           與登入頁、主頁一致：鼠尾草綠背景＋奶油白面板，強調色加深加亮 */
+        :root{
+            --sw-green:#5f8a4f; --sw-green-d:#3f6534; --sw-green-l:#9cc17f;
+            --sw-sage:#8fa682;  --sw-sage-l:#b5c4a6;
+            --sw-cream:#fffaf0; --sw-cream-d:#efe6d2;
+            --sw-amber:#f2a93b; --sw-amber-d:#b8741a;
+            --sw-ink:#33413a;
+        }
+        html{min-height:100%;background-color:var(--sw-sage);
+            background-image:linear-gradient(135deg,#c3d6ae 0%,#8fb07a 55%,#6f9a5d 100%);background-attachment:fixed;}
+        body{background:transparent!important;min-height:100vh;min-height:100dvh;}
+        body::before{background:
+            radial-gradient(circle at 15% 85%,rgba(255,250,240,.35) 0%,transparent 45%),
+            radial-gradient(circle at 85% 15%,rgba(242,169,59,.25) 0%,transparent 45%),
+            radial-gradient(circle at 50% 50%,rgba(95,138,79,.25) 0%,transparent 55%)!important;}
+
+        /* 奶油白立體面板 */
+        .container{background:linear-gradient(180deg,#fffdf7,var(--sw-cream))!important;backdrop-filter:none;
+            border:1px solid var(--sw-cream-d)!important;
+            box-shadow:inset 0 2px 0 #fff,0 8px 0 #c9bc9f,0 10px 0 #a8996f,0 24px 50px rgba(40,60,30,.35)!important;}
+        .container::before{height:8px!important;
+            background:linear-gradient(90deg,var(--sw-green-d),var(--sw-green),var(--sw-green-l),var(--sw-amber))!important;}
+
+        /* 標題：立體圓章圖示＋綠色字 */
+        .header .icon{width:84px;height:84px;margin:0 auto 14px;border-radius:50%;
+            display:flex;align-items:center;justify-content:center;font-size:38px!important;color:#fff!important;
+            background:radial-gradient(circle at 35% 28%,#b9de9c 0%,var(--sw-green) 55%,var(--sw-green-d) 100%);
+            box-shadow:inset 0 -6px 12px rgba(0,0,0,.25),inset 0 4px 8px rgba(255,255,255,.45),0 6px 0 #2f4d27,0 12px 22px rgba(40,70,30,.35);}
+        .header .icon i{filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));}
+        .header h1{background:none!important;color:var(--sw-green-d)!important;-webkit-text-fill-color:var(--sw-green-d)!important;
+            text-shadow:0 2px 0 #fff,0 4px 0 #c9d9b8,0 6px 10px rgba(40,70,30,.25);animation:none!important;letter-spacing:4px;}
+        .time-display{background:#fff!important;color:var(--sw-green-d)!important;font-weight:700!important;
+            border:2px solid var(--sw-sage-l)!important;box-shadow:0 3px 0 var(--sw-sage-l)!important;animation:none!important;}
+
+        /* 欄位 */
+        .form-group label{color:var(--sw-ink)!important;}
+        .form-group label i{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;
+            color:#fff!important;font-size:13px!important;background:linear-gradient(180deg,var(--sw-green-l),var(--sw-green));
+            box-shadow:0 2px 0 var(--sw-green-d);}
+        .form-group input{background:#fff!important;border:2px solid #d9e3cd!important;
+            box-shadow:inset 0 3px 6px rgba(60,90,50,.12)!important;color:var(--sw-ink);}
+        .form-group input:focus{border-color:var(--sw-green)!important;transform:none!important;
+            box-shadow:inset 0 3px 6px rgba(60,90,50,.12),0 0 0 4px rgba(95,138,79,.22)!important;}
+        .form-group input.error{border-color:#e05555!important;background:#fff5f3!important;}
+
+        /* 立體按鍵：送出＝森林綠，返回＝暖灰 */
+        .btn{border-radius:14px!important;font-weight:800!important;letter-spacing:2px!important;transition:transform .1s,box-shadow .1s!important;}
+        .btn-submit{background:linear-gradient(180deg,#8fc46f,var(--sw-green))!important;color:#fff!important;
+            text-shadow:0 1px 1px rgba(0,0,0,.3);
+            box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 6px 0 var(--sw-green-d),0 12px 20px rgba(40,70,30,.3)!important;}
+        .btn-back{background:linear-gradient(180deg,#d8cdb4,#b3a588)!important;color:#3f3626!important;
+            box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 6px 0 #7f7258,0 12px 20px rgba(60,50,30,.25)!important;}
+        .btn:hover{transform:translateY(-2px)!important;filter:brightness(1.05);}
+        .btn:active{transform:translateY(5px)!important;}
+        .btn-submit:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 1px 0 var(--sw-green-d)!important;}
+        .btn-back:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 1px 0 #7f7258!important;}
+        .btn-submit:disabled{background:#c7cfbf!important;box-shadow:0 4px 0 #9aa48f!important;transform:none!important;}
+
+        .spinner{border-color:rgba(95,138,79,.25)!important;border-top-color:var(--sw-green)!important;box-shadow:none!important;}
+        .loading p{color:var(--sw-green-d)!important;}
+        .success-message{background:linear-gradient(180deg,#8fc46f,var(--sw-green))!important;box-shadow:0 5px 0 var(--sw-green-d),0 12px 28px rgba(40,70,30,.35)!important;}
     </style>
 </head>
 <body>
