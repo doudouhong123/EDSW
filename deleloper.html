@@ -2,183 +2,370 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#11151a">
     <title>後台管理</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ══════════ 工業科技風（修改）══════════
+           底色：鋼鐵灰 / 碳黑；強調：警示黃、安全橘、電光青、訊號綠 */
+        :root {
+            --steel-0: #0d1014;
+            --steel-1: #161b21;
+            --steel-2: #212831;
+            --line:    #3a4552;
+            --text:    #e7edf3;
+            --muted:   #98a6b4;
+            --hazard:  #ffc400;
+            --cyan:    #00d2ff;
+            --ball:    clamp(170px, 52vw, 210px);   /* 立體球直徑 */
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* 背景填滿：碳纖維斜紋＋細網格＋邊角光暈 */
+        html {
+            min-height: 100%;
+            background-color: var(--steel-0);
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(0,210,255,0.16), transparent 42%),
+                radial-gradient(circle at 85% 90%, rgba(255,106,19,0.16), transparent 45%),
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+                repeating-linear-gradient(45deg, #12161b 0 6px, #0f1317 6px 12px);
+            background-size: auto, auto, 28px 28px, 28px 28px, auto;
+            background-attachment: fixed;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Segoe UI', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            min-height: 100vh; min-height: 100dvh;
+            padding: 24px 14px;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--text);
+            background: transparent;
         }
+
+        /* ── 金屬面板 ── */
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 500px;
+            position: relative;
+            width: 100%; max-width: 480px;
+            padding: 34px 22px 24px;
+            border-radius: 22px;
+            background:
+                linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0) 40%),
+                linear-gradient(180deg, var(--steel-2), var(--steel-1));
+            border: 1px solid var(--line);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.12),
+                inset 0 -2px 0 rgba(0,0,0,0.5),
+                0 6px 0 #07090c,
+                0 24px 50px rgba(0,0,0,0.6);
             text-align: center;
-            animation: slideUp 0.8s ease-out;
+            overflow: hidden;
+            animation: slideUp 0.7s ease-out;
         }
+        /* 上緣警示斜紋帶 */
+        .container::before {
+            content: '';
+            position: absolute; left: 0; right: 0; top: 0; height: 10px;
+            background: repeating-linear-gradient(-45deg, var(--hazard) 0 14px, #111 14px 28px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+        /* 四角鉚釘 */
+        .rivet {
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #d9e1e8, #6b7785 55%, #2b333c);
+            box-shadow: 0 1px 1px rgba(0,0,0,0.7);
+        }
+        .rivet.tl { top: 20px; left: 14px; }  .rivet.tr { top: 20px; right: 14px; }
+        .rivet.bl { bottom: 14px; left: 14px; } .rivet.br { bottom: 14px; right: 14px; }
         @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translateY(40px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
         }
+
+        /* 時間：LED 數字感 */
         #time {
-            font-size: 1.1em;
-            color: #666;
-            margin-bottom: 15px;
-            font-weight: 500;
+            display: inline-block;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1rem; font-weight: 700; letter-spacing: 1px;
+            color: var(--cyan);
+            text-shadow: 0 0 8px rgba(0,210,255,0.7);
+            background: #07090c;
+            border: 1px solid #1f2a33;
+            border-radius: 8px;
+            padding: 6px 14px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
+            margin-bottom: 14px;
         }
         #welcome {
-            font-size: 2em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 40px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            font-size: 1.9em; font-weight: 900; letter-spacing: 3px;
+            color: #ffffff;
+            text-shadow: 0 2px 0 #000, 0 0 18px rgba(255,196,0,0.35);
+            margin-bottom: 4px;
         }
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .subtitle {
+            font-size: 0.78rem; letter-spacing: 4px; color: var(--hazard);
+            font-weight: 700; margin-bottom: 6px;
         }
-        .button-group button {
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
+
+        /* ══════════ 3D 立體球（修改：一次一顆，滑動時隨機方式滑入，點擊散開）══════════ */
+        .stage {
+            position: relative;
+            height: calc(var(--ball) + 56px);
+            margin: 10px -22px 0;
+            touch-action: pan-y;
+            user-select: none; -webkit-user-select: none;
+            overflow: hidden;
+        }
+        /* 底座光環 */
+        .stage::before {
+            content: '';
+            position: absolute; left: 50%; bottom: 10px;
+            width: calc(var(--ball) * 1.3); height: 26px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, var(--base, rgba(0,210,255,0.4)), rgba(0,0,0,0) 70%);
+            filter: blur(2px);
+            transition: background 0.4s;
+        }
+        .stage .ball {
+            position: absolute; left: 50%; top: 8px;
+            width: var(--ball); height: var(--ball);
+            margin-left: calc(var(--ball) / -2);
+            border: none; padding: 0; background: none;
+            border-radius: 50%;
             cursor: pointer;
-            transition: all 0.3s ease;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+            font-family: inherit;
+            visibility: hidden;                 /* 只有目前這顆顯示 */
+            -webkit-tap-highlight-color: transparent;
         }
-        .button-group button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        .stage .ball.on { visibility: visible; z-index: 2; }
+        .ball:focus-visible { outline: 3px solid var(--cyan); outline-offset: 6px; }
+
+        /* 球體本體：主色＋高光＋陰影，做出立體感 */
+        .ball .orb {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 32% 26%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 9%, rgba(255,255,255,0) 26%),
+                radial-gradient(circle at 50% 120%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%),
+                radial-gradient(circle at 38% 34%, var(--c1) 0%, var(--c2) 52%, var(--c3) 100%);
+            box-shadow:
+                inset -12px -16px 30px rgba(0,0,0,0.55),
+                inset 6px 8px 18px rgba(255,255,255,0.25),
+                0 0 0 3px rgba(255,255,255,0.08),
+                0 0 40px var(--glow);
         }
-        .button-group button:active {
-            transform: translateY(-1px);
+        /* 金屬環（赤道線） */
+        .ball .orb::before {
+            content: '';
+            position: absolute; left: 6%; right: 6%; top: 50%; height: 16%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            border-top: 2px solid rgba(255,255,255,0.35);
+            border-bottom: 2px solid rgba(0,0,0,0.25);
         }
-        #members {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .ball .ic {
+            position: absolute; z-index: 1; left: 0; right: 0; top: 20%;
+            font-size: calc(var(--ball) * 0.28); line-height: 1;
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.45));
         }
-        #devices {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        .ball .lb {
+            position: absolute; z-index: 1; left: 0; right: 0; top: 58%;
+            font-size: calc(var(--ball) * 0.12); font-weight: 900; letter-spacing: 2px;
+            color: var(--tc, #fff);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
         }
-        #supplies {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        /* 漂浮：放在內層，不影響滑入動畫 */
+        .ball .float { position: absolute; inset: 0; animation: hover 3.2s ease-in-out infinite; }
+        @keyframes hover {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-7px); }
         }
-        #meals {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+        /* 各球顏色：工業色系 */
+        #members  { --c1: #ffb070; --c2: #ff6a13; --c3: #8a2c00; --glow: rgba(255,106,19,0.6); }    /* 安全橘 */
+        #devices  { --c1: #8ff0ff; --c2: #00b4e6; --c3: #00415e; --glow: rgba(0,210,255,0.6); }     /* 電光青 */
+        #supplies { --c1: #fff08a; --c2: #ffc400; --c3: #7a5200; --glow: rgba(255,196,0,0.6);
+                    --tc: #2a1d00; }                                                                   /* 警示黃 */
+        #supplies .lb { text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+        #meals    { --c1: #b8ff8a; --c2: #3ccf3a; --c3: #0f5212; --glow: rgba(60,207,58,0.6); }     /* 訊號綠 */
+
+        /* 散開的碎片 */
+        .shard {
+            position: fixed; z-index: 1000; pointer-events: none;
+            border-radius: 50%;
+            will-change: transform, opacity;
         }
+        .flash {
+            position: fixed; inset: 0; z-index: 999; pointer-events: none;
+            background: radial-gradient(circle at var(--fx) var(--fy), rgba(255,255,255,0.85), rgba(255,255,255,0) 40%);
+            opacity: 0;
+        }
+
+        /* 待確認徽章：貼在設備球右上角 */
+        .pend-badge {
+            display: none; position: absolute; top: 2%; right: -4%; z-index: 2;
+            min-width: 30px; height: 28px; padding: 0 9px; border-radius: 14px;
+            background: linear-gradient(180deg, #ff4d4d, #c40000);
+            color: #fff; font-size: 0.8rem; font-weight: 900; line-height: 24px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 12px rgba(255,40,40,0.8), 0 3px 0 #6b0000;
+            animation: pop 0.3s ease-out;
+            white-space: nowrap;
+        }
+        @keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+
+        /* 指示點（可點選切換） */
+        .dots { display: flex; justify-content: center; gap: 4px; margin-top: 2px; }
+        .dot {
+            position: relative;
+            width: 26px; height: 26px; padding: 0; border: none; background: none; cursor: pointer;
+        }
+        .dot::before {
+            content: ''; position: absolute; left: 50%; top: 50%;
+            width: 10px; height: 10px; transform: translate(-50%, -50%);
+            border-radius: 5px;
+            background: #3a4552; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.3s;
+        }
+        .dot.on::before { width: 24px; background: var(--dc); box-shadow: 0 0 10px var(--dc); }
+        .dot.alert::after {                  /* 設備有待確認時，點旁邊亮紅點 */
+            content: ''; position: absolute; top: 2px; right: 2px;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #ff3b3b; box-shadow: 0 0 6px #ff3b3b;
+        }
+
+        /* ── 返回：保持方形框，金屬按鍵＋兩側警示斜紋（修改） ── */
         #return {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            margin-top: 10px;
+            position: relative;
+            display: block;
+            width: 100%; max-width: 150px;
+            margin: 14px auto 0;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 2px solid var(--hazard);
+            background: linear-gradient(180deg, #3a4450, #1d232a);
+            color: var(--hazard);
+            font-size: 0.9rem; font-weight: 900; letter-spacing: 4px;
+            font-family: inherit;
+            cursor: pointer;
+            overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 0 #07090c, 0 8px 16px rgba(0,0,0,0.5);
+            transition: transform 0.1s, box-shadow 0.1s, color 0.2s;
         }
-        /* ── 歸還設備確認提示框（新增） ── */
+        #return::before, #return::after {
+            content: ''; position: absolute; top: 0; bottom: 0; width: 12px;
+            background: repeating-linear-gradient(-45deg, var(--hazard) 0 5px, #111 5px 10px);
+        }
+        #return::before { left: 0; }
+        #return::after  { right: 0; }
+        #return:hover  { color: #fff; }
+        #return:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 0 #07090c; }
+
+        /* ── 連線狀態列：儀表板風格 ── */
+        .sys-status {
+            margin: 14px auto 0; max-width: 340px; padding: 5px 8px; border-radius: 8px;
+            background: #0b0e12; border: 1px solid #26303a;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+            display: flex; align-items: center; gap: 7px;
+            font-size: 0.72rem; color: var(--muted); text-align: left; line-height: 1.4;
+        }
+        .sys-status.ok  { color: #b9f5c8; }
+        .sys-status.err { border-color: #7a1f1f; color: #ff9a9a; font-weight: bold; }
+        .sys-dot { width: 7px; height: 7px; border-radius: 50%; background: #5b6672; flex-shrink: 0; }
+        .sys-status.ok  .sys-dot { background: #3cff6a; box-shadow: 0 0 8px #3cff6a; animation: blink 2s infinite; }
+        .sys-status.err .sys-dot { background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; }
+        @keyframes blink { 50% { opacity: 0.35; } }
+        .sys-text { flex: 1; }
+        .btn-recheck {
+            flex-shrink: 0; padding: 3px 7px; border-radius: 6px;
+            border: 1px solid #3a4552;
+            background: linear-gradient(180deg, #2e3741, #1a2027);
+            color: var(--cyan); font-size: 0.68rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 2px 0 #07090c;
+        }
+        .btn-recheck:active { transform: translateY(2px); box-shadow: none; }
+
+        /* ── 歸還設備確認提示框 ── */
         .check-overlay {
             display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55); z-index: 900;
+            background: rgba(5,7,10,0.75); backdrop-filter: blur(4px); z-index: 900;
             align-items: center; justify-content: center; padding: 20px;
         }
         .check-overlay.show { display: flex; }
         .check-box {
-            background: #fff; color: #333; border-radius: 18px;
-            padding: 26px 22px 20px; width: 100%; max-width: 380px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+            position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #232a32, #171c22); color: var(--text);
+            border: 1px solid var(--line); border-radius: 18px;
+            padding: 30px 22px 20px; width: 100%; max-width: 380px;
+            box-shadow: 0 6px 0 #07090c, 0 20px 50px rgba(0,0,0,0.6);
             display: flex; flex-direction: column; gap: 14px;
             text-align: center; animation: slideUp 0.3s ease-out;
         }
+        .check-box::before {
+            content: ''; position: absolute; left: 0; right: 0; top: 0; height: 8px;
+            background: repeating-linear-gradient(-45deg, var(--hazard) 0 12px, #111 12px 24px);
+        }
         .check-icon { font-size: 2.2rem; }
-        .check-text { font-size: 1.05rem; line-height: 1.8; color: #444; }
-        .check-text b { color: #5a3ea8; }
+        .check-text { font-size: 1.05rem; line-height: 1.8; color: var(--text); }
+        .check-text b { color: var(--cyan); }
         .check-dev {
-            background: #f5f0ff; border-radius: 10px; padding: 10px 14px;
-            color: #5a3ea8; font-weight: 700; font-size: 1.05rem; line-height: 1.6;
+            background: #0b0e12; border: 1px solid #26303a; border-radius: 10px; padding: 10px 14px;
+            color: var(--cyan); font-weight: 700; font-size: 1.05rem; line-height: 1.6;
         }
         .check-note {
-            background: #fff4e6; border: 1px solid #ffd8a8; border-radius: 10px;
-            padding: 8px 12px; font-size: 0.92rem; color: #d9480f; text-align: left;
+            background: rgba(255,106,19,0.12); border: 1px solid rgba(255,106,19,0.5); border-radius: 10px;
+            padding: 8px 12px; font-size: 0.92rem; color: #ffb27a; text-align: left;
         }
-        .check-ask { font-size: 1rem; font-weight: bold; color: #e8590c; }
-        .check-msg { font-size: 0.88rem; color: #e03131; min-height: 1em; }
+        .check-ask { font-size: 1rem; font-weight: bold; color: var(--hazard); }
+        .check-msg { font-size: 0.88rem; color: #ff8080; min-height: 1em; }
         .check-btns { display: flex; gap: 10px; }
         .check-btns button {
             flex: 1; padding: 13px; border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer;
+            font-size: 1rem; font-weight: bold; cursor: pointer;
+            font-family: inherit;
         }
-        .btn-check-ok   { background: #06d6a0; }
-        .btn-check-ok:hover { background: #04b888; }
-        .btn-check-skip { background: #a0a0b0; }
-        .btn-check-skip:hover { background: #888898; }
+        .btn-check-ok   { background: linear-gradient(180deg, #4be36a, #1ea83d); color: #04210b; box-shadow: 0 4px 0 #0d5a1e; }
+        .btn-check-skip { background: linear-gradient(180deg, #4a5562, #2b333c); color: #dfe6ec; box-shadow: 0 4px 0 #0d1014; }
+        .check-btns button:active { transform: translateY(3px); box-shadow: none; }
         .check-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* ── 連線狀態列、待確認徽章（新增） ── */
-        #devices { position: relative; }
-        .pend-badge {
-            display: none; position: absolute; top: -8px; right: -8px;
-            min-width: 26px; height: 26px; padding: 0 7px; border-radius: 13px;
-            background: #e03131; color: #fff; font-size: 0.8rem; line-height: 26px;
-            box-shadow: 0 2px 8px rgba(224,49,49,0.45); animation: pop 0.3s ease-out;
-        }
-        @keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
-        .sys-status {
-            margin-top: 20px; padding: 10px 12px; border-radius: 10px;
-            background: #f4f5fb; border: 1px solid #e3e5f0;
-            display: flex; align-items: center; gap: 8px;
-            font-size: 0.85rem; color: #555; text-align: left; line-height: 1.5;
-        }
-        .sys-status.err { background: #fff5f5; border-color: #ffc9c9; color: #c92a2a; font-weight: bold; }
-        .sys-dot { width: 9px; height: 9px; border-radius: 50%; background: #adb5bd; flex-shrink: 0; }
-        .sys-status.ok  .sys-dot { background: #2f9e44; box-shadow: 0 0 6px rgba(47,158,68,0.5); }
-        .sys-status.err .sys-dot { background: #e03131; }
-        .sys-text { flex: 1; }
-        .btn-recheck {
-            flex-shrink: 0; padding: 5px 10px; border-radius: 8px; border: 1px solid #c5cae9;
-            background: #fff; color: #5a3ea8; font-size: 0.78rem; font-weight: bold; cursor: pointer;
-        }
-        .btn-recheck:hover { background: #eef0ff; }
-        /* 提示框補充資訊 */
-        .check-progress { font-size: 0.8rem; color: #868e96; margin-top: -8px; }
-        .check-time { font-size: 0.85rem; color: #868e96; margin-top: -8px; }
-        .check-dev div { padding: 4px 0; border-bottom: 1px dashed #d8ccf5; }
+        .check-progress { font-size: 0.8rem; color: var(--muted); margin-top: -8px; }
+        .check-time { font-size: 0.85rem; color: var(--muted); margin-top: -8px; }
+        .check-dev div { padding: 4px 0; border-bottom: 1px dashed #2f3b46; }
         .check-dev div:last-child { border-bottom: none; }
 
         @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-            }
-            #welcome {
-                font-size: 1.6em;
-            }
-            .button-group button {
-                padding: 15px;
-                font-size: 16px;
-            }
+            .container { padding: 32px 16px 22px; }
+            .stage { margin-left: -16px; margin-right: -16px; }
+            #welcome { font-size: 1.6em; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ball .float { animation: none !important; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <span class="rivet tl"></span><span class="rivet tr"></span>
+        <span class="rivet bl"></span><span class="rivet br"></span>
+
         <div id="time"></div>
         <div id="welcome">科務大大 你好</div>
-        <div class="button-group">
-            <button id="members">會員資料</button>
-            <button id="devices">設備系統<span class="pend-badge" id="pend-badge"></span></button>
-            <button id="supplies">文具系統</button>
-            <button id="meals">訂餐系統</button>
-            <button id="return">返回</button>
+        <div class="subtitle">CONTROL CENTER</div>
+
+        <!-- 3D 立體球：一次一顆，左右滑動切換，點球散開後進入（修改） -->
+        <div class="stage" id="stage" aria-label="管理功能選單，左右滑動切換">
+            <button class="ball" id="members"  data-dc="#ff6a13" data-url="de-name.html"><span class="float"><span class="orb"></span><span class="ic">👥</span><span class="lb">會員資料</span></span></button>
+            <button class="ball" id="devices"  data-dc="#00d2ff" data-url="de-device.html"><span class="float"><span class="orb"></span><span class="ic">💻</span><span class="lb">設備系統</span><span class="pend-badge" id="pend-badge"></span></span></button>
+            <button class="ball" id="supplies" data-dc="#ffc400" data-url="de-Stationery.html"><span class="float"><span class="orb"></span><span class="ic">✏️</span><span class="lb">文具系統</span></span></button>
+            <button class="ball" id="meals"    data-dc="#3ccf3a" data-url="de-meal.html"><span class="float"><span class="orb"></span><span class="ic">🍱</span><span class="lb">訂餐系統</span></span></button>
         </div>
+        <div class="dots" id="dots"></div>
+
+        <!-- 返回：保持方形框 -->
+        <button id="return">返回</button>
+
         <div class="sys-status" id="sys-status">
             <span class="sys-dot"></span>
             <span class="sys-text" id="sys-text">連線檢查中…</span>
@@ -186,7 +373,7 @@
         </div>
     </div>
 
-    <!-- 歸還設備確認提示框（新增） -->
+    <!-- 歸還設備確認提示框 -->
     <div class="check-overlay" id="check-overlay">
         <div class="check-box">
             <div class="check-icon">📦</div>
@@ -214,23 +401,7 @@
         setInterval(updateTime, 1000);
         updateTime();
 
-        // 按鈕點擊事件
-        document.getElementById('members').addEventListener('click', function() {
-            window.location.href = 'de-name.html';
-        });
-
-        document.getElementById('devices').addEventListener('click', function() {
-            window.location.href = 'de-device.html';
-        });
-
-        document.getElementById('supplies').addEventListener('click', function() {
-            window.location.href = 'de-Stationery.html';
-        });
-
-        document.getElementById('meals').addEventListener('click', function() {
-            window.location.href = 'de-meal.html';
-        });
-
+        // 四顆球的跳頁網址寫在各自的 data-url（點球 → 散開特效 → 跳頁）
         document.getElementById('return').addEventListener('click', function() {
             if (confirm('確認要返回主頁嗎？')) {
                 window.location.href = 'index.html';
@@ -238,13 +409,180 @@
         });
 
         // ══════════════════════════════
-        //  歸還設備確認（新增）
+        //  3D 立體球（修改）
+        //  一次只出現一顆；左右滑動時，下一顆以隨機方式滑入
+        //  點球 → 球散成碎片 → 進入該頁面
+        // ══════════════════════════════
+        (function () {
+            const stage = document.getElementById('stage');
+            const balls = [...stage.querySelectorAll('.ball')];
+            const dots  = document.getElementById('dots');
+            const n = balls.length;
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let active = 0, busy = false, leaving = false;
+
+            balls.forEach((b, i) => {
+                const d = document.createElement('button');
+                d.className = 'dot';
+                d.type = 'button';
+                d.setAttribute('aria-label', b.querySelector('.lb').textContent);
+                d.style.setProperty('--dc', b.dataset.dc);
+                d.addEventListener('click', () => show(i, i > active ? 1 : -1));
+                dots.appendChild(d);
+            });
+            function syncUI() {
+                balls.forEach((b, i) => { b.classList.toggle('on', i === active); b.tabIndex = i === active ? 0 : -1; });
+                [...dots.children].forEach((d, i) => d.classList.toggle('on', i === active));
+                stage.style.setProperty('--base', getComputedStyle(balls[active]).getPropertyValue('--glow'));
+            }
+            syncUI();
+
+            // 隨機進場方式（dir：1＝往左滑、-1＝往右滑）
+            const rnd = (a, b) => a + Math.random() * (b - a);
+            const ENTRIES = [
+                dir => [{ transform: `translateX(${dir * 130}%) rotate(${dir * 200}deg) scale(.6)`, opacity: 0 }],     // 側邊滾入
+                ()  => [{ transform: 'translateY(-140%) scale(.7)', opacity: 0 },
+                        { transform: 'translateY(8%) scale(1.05, .9)', opacity: 1, offset: .7 }],                       // 從上方掉落彈跳
+                ()  => [{ transform: 'translateY(140%) scale(.5)', opacity: 0 }],                                        // 從下方升起
+                ()  => [{ transform: 'scale(0) rotate(-540deg)', opacity: 0 }],                                          // 旋轉放大
+                ()  => [{ transform: 'scale(2.4)', opacity: 0, filter: 'blur(8px)' }],                                   // 由遠拉近
+                dir => [{ transform: `translate(${dir * 120}%, -110%) scale(.4) rotate(${dir * 120}deg)`, opacity: 0 }], // 斜角飛入
+                ()  => [{ transform: 'perspective(600px) rotateY(90deg) scale(.6)', opacity: 0 }],                       // 翻轉進場
+            ];
+            let lastEntry = -1;
+
+            function show(next, dir) {
+                if (busy || leaving || next === active) return;
+                busy = true;
+                const oldBall = balls[active], newBall = balls[next];
+                active = next;
+
+                if (reduce) { syncUI(); busy = false; return; }
+
+                // 舊球往滑動方向離開
+                oldBall.animate([
+                    { transform: 'none', opacity: 1 },
+                    { transform: `translateX(${-dir * 120}%) rotate(${-dir * 90}deg) scale(.5)`, opacity: 0 }
+                ], { duration: 380, easing: 'cubic-bezier(.5,0,.75,0)' })
+                .finished.then(() => oldBall.classList.remove('on'));
+
+                // 新球用隨機方式進場（不和上一次重複）
+                let k; do { k = Math.floor(Math.random() * ENTRIES.length); } while (k === lastEntry && ENTRIES.length > 1);
+                lastEntry = k;
+                newBall.classList.add('on');
+                syncUI(); oldBall.classList.add('on');
+                newBall.animate([...ENTRIES[k](dir), { transform: 'none', opacity: 1, filter: 'none' }],
+                    { duration: 620, easing: 'cubic-bezier(.2,.8,.25,1.15)', delay: 120, fill: 'backwards' })
+                .finished.then(() => { busy = false; });
+            }
+            const go = dir => show(((active + dir) % n + n) % n, dir);
+
+            // 點球 → 散開 → 跳頁
+            function burst(ball) {
+                if (leaving) return;
+                leaving = true;
+                const url = ball.dataset.url;
+                try { sessionStorage.setItem('fadeIn', '1'); } catch (e) {}   // 告訴下一頁：用浮現方式出現（新增）
+                if (reduce) { window.location.href = url; return; }
+
+                const r = ball.getBoundingClientRect();
+                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                const cs = getComputedStyle(ball);
+                const colors = ['--c1', '--c2', '--c3'].map(v => cs.getPropertyValue(v).trim()).concat(['#ffffff']);
+
+                // 閃光
+                const flash = document.createElement('div');
+                flash.className = 'flash';
+                flash.style.setProperty('--fx', cx + 'px'); flash.style.setProperty('--fy', cy + 'px');
+                document.body.appendChild(flash);
+                flash.animate([{ opacity: 0 }, { opacity: 1, offset: .25 }, { opacity: 0 }], { duration: 500 });
+
+                // 球本體：先鼓起再消失
+                ball.animate([
+                    { transform: 'scale(1)', opacity: 1 },
+                    { transform: 'scale(1.15)', opacity: 1, offset: .35 },
+                    { transform: 'scale(1.6)', opacity: 0 }
+                ], { duration: 360, easing: 'ease-out', fill: 'forwards' });
+
+                // 碎片往四面八方飛散
+                const N = 46;
+                for (let i = 0; i < N; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'shard';
+                    const size = rnd(6, 22);
+                    const ang = rnd(0, Math.PI * 2);
+                    const start = rnd(0, r.width * 0.42);
+                    const dist = rnd(120, 340);
+                    const c = colors[Math.floor(Math.random() * colors.length)];
+                    Object.assign(p.style, {
+                        width: size + 'px', height: size + 'px',
+                        left: (cx + Math.cos(ang) * start - size / 2) + 'px',
+                        top:  (cy + Math.sin(ang) * start - size / 2) + 'px',
+                        background: `radial-gradient(circle at 35% 30%, #fff, ${c} 55%)`,
+                        boxShadow: `0 0 10px ${c}`,
+                        borderRadius: Math.random() < 0.4 ? '3px' : '50%'
+                    });
+                    document.body.appendChild(p);
+                    p.animate([
+                        { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1 },
+                        { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist + rnd(20, 90)}px) scale(${rnd(.2, .6)}) rotate(${rnd(-360, 360)}deg)`, opacity: 0 }
+                    ], { duration: rnd(550, 850), easing: 'cubic-bezier(.15,.7,.3,1)', delay: 80, fill: 'forwards' });
+                }
+                // 碎片散開後，畫面淡入深色，再交給下一頁浮現（修改）
+                const veil = document.createElement('div');
+                Object.assign(veil.style, { position: 'fixed', inset: '0', zIndex: '1001', background: '#0d1014', opacity: '0', pointerEvents: 'none' });
+                document.body.appendChild(veil);
+                veil.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: 520, fill: 'forwards' });
+                setTimeout(() => { window.location.href = url; }, 800);
+            }
+
+            // 滑動：往左滑 → 下一顆；往右滑 → 上一顆
+            let sx = 0, sy = 0, tracking = false, swiped = false;
+            stage.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; tracking = true; swiped = false; });
+            stage.addEventListener('pointerup', e => {
+                if (!tracking) return;
+                tracking = false;
+                const dx = e.clientX - sx, dy = e.clientY - sy;
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                    go(dx < 0 ? 1 : -1);
+                    swiped = true;
+                }
+            });
+            stage.addEventListener('pointercancel', () => { tracking = false; });
+
+            stage.addEventListener('click', e => {
+                const b = e.target.closest('.ball');
+                if (swiped) { swiped = false; return; }   // 剛滑動完，不算點擊
+                if (b && b === balls[active] && !busy) burst(b);
+            });
+
+            // 電腦可用鍵盤左右鍵
+            document.addEventListener('keydown', e => {
+                if (document.getElementById('check-overlay').classList.contains('show')) return;
+                if (e.key === 'ArrowRight') go(1);
+                if (e.key === 'ArrowLeft')  go(-1);
+            });
+
+            // 從下一頁按「上一頁」回來時，恢復可點
+            window.addEventListener('pageshow', ev => {
+                if (!ev.persisted) return;
+                leaving = false; busy = false;
+                balls.forEach(b => b.getAnimations().forEach(a => a.cancel()));
+                document.querySelectorAll('.shard, .flash').forEach(el => el.remove());
+                document.querySelectorAll('body > div[style*="z-index: 1001"]').forEach(el => el.remove());
+            });
+
+            window.__markDevicesDot = on => dots.children[balls.findIndex(b => b.id === 'devices')].classList.toggle('alert', on);
+        })();
+
+        // ══════════════════════════════
+        //  歸還設備確認（原本的功能不變）
         //  main 頁按「歸還」後，這裡每 5 秒檢查一次，跳出提示框
         //  確認 → Google Sheet「確認」欄寫入「已確認」
         //  略過 → 這次不再跳出，下次進入此頁會再提醒
         // ══════════════════════════════
-        const skipped = new Set();   // 本次已略過的群組
-        let checkQueue = [];         // [{ key, name, dateText, devices:[], rows:[], note }]
+        const skipped = new Set();
+        let checkQueue = [];
         let showingKey = null;
 
         function groupKey(r) { return r.name + '|' + r.returnTime; }
@@ -254,7 +592,6 @@
                 const res  = await fetch(SCRIPT_URL + '?action=getPendingChecks', { cache: 'no-store' });
                 const json = await res.json();
                 if (json.status !== 'ok' || !Array.isArray(json.data)) {
-                    // 讀不到待確認資料 → 再用 ping 查出實際版本，顯示在狀態列
                     let ver = '舊版（沒有 ping 功能）';
                     try {
                         const p = await (await fetch(SCRIPT_URL + '?action=ping', { cache: 'no-store' })).json();
@@ -267,7 +604,6 @@
                 totalPending = json.data.length;
                 setBadge(new Set(json.data.map(groupKey)).size);
 
-                // 同一人同一次歸還的多筆合併成一個提示框
                 const groups = new Map();
                 json.data.forEach(r => {
                     const key = groupKey(r);
@@ -298,8 +634,8 @@
             const b = document.getElementById('pend-badge');
             b.textContent = n + ' 待確認';
             b.style.display = n ? 'inline-block' : 'none';
+            if (window.__markDevicesDot) window.__markDevicesDot(n > 0);   // 設備球不在畫面上時，點點也提醒
         }
-        // 重新檢查：清除本次略過的紀錄，再查一次
         document.getElementById('btn-recheck').addEventListener('click', () => {
             skipped.clear();
             setSys('', '重新檢查中…');
@@ -355,7 +691,7 @@
                 });
                 const json = await res.json();
                 if (json.status === 'ok') {
-                    skipped.add(g.key);   // 避免在下次同步前又跳出
+                    skipped.add(g.key);
                     closeCheck();
                 } else {
                     document.getElementById('check-msg').textContent = '⚠ ' + (json.message || '確認失敗');
