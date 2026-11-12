@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
+  <meta name="theme-color" content="#11151a"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>義大社工科｜文具資料庫</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
@@ -251,6 +252,125 @@
       font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:background 0.2s;}
     .btn-modal-cancel:hover{background:var(--mint);color:var(--sage3);}
   </style>
+  <!-- ══════════ 工業科技風（與後台 deleloper 同步，修改）══════════ -->
+  <style>
+    :root{--st0:#0d1014;--st1:#161b21;--st2:#212831;--ln:#3a4552;--tx:#e7edf3;--mu:#98a6b4;
+      --hz:#ffc400;--cy:#00d2ff;--or:#ff6a13;--gr:#3cff6a;--rd:#ff4d4d;}
+    html{min-height:100%;background-color:var(--st0);
+      background-image:radial-gradient(circle at 15% 10%,rgba(0,210,255,.16),transparent 42%),
+        radial-gradient(circle at 85% 90%,rgba(255,106,19,.16),transparent 45%),
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+        repeating-linear-gradient(45deg,#12161b 0 6px,#0f1317 6px 12px);
+      background-size:auto,auto,28px 28px,28px 28px,auto;background-attachment:fixed;color-scheme:dark;}
+    body{background:transparent!important;background-image:none!important;color:var(--tx)!important;
+      min-height:100vh;min-height:100dvh;font-family:'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif!important;}
+    /* 金屬面板 */
+    header,.ind-panel{position:relative;overflow:hidden;
+      background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(180deg,var(--st2),var(--st1))!important;
+      border:1px solid var(--ln)!important;border-radius:16px!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.5),0 5px 0 #07090c,0 18px 36px rgba(0,0,0,.55)!important;}
+    header{padding-top:22px!important;}
+    header::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;
+      background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
+    .site-title{min-width:0;color:#fff!important;letter-spacing:1px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,196,0,.3);font-family:inherit!important;font-weight:900!important;}
+    .title-icon{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;}
+    #clock{display:inline-block;font-family:Consolas,'Courier New',monospace!important;font-weight:700;color:var(--cy)!important;
+      text-shadow:0 0 8px rgba(0,210,255,.7);background:#07090c;border:1px solid #1f2a33;border-radius:8px;
+      padding:4px 12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.8);}
+    header #clock{display:block;width:fit-content;margin:0 auto;}
+    /* 返回：方形金屬鍵＋警示斜紋，和後台一致 */
+    .btn-return{position:relative;overflow:hidden;border-radius:8px!important;border:2px solid var(--hz)!important;
+      background:linear-gradient(180deg,#3a4450,#1d232a)!important;color:var(--hz)!important;
+      padding:6px 20px!important;font-weight:900!important;letter-spacing:2px;white-space:nowrap;flex-shrink:0;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;transform:none!important;}
+    .btn-return::before,.btn-return::after{content:'';position:absolute;top:0;bottom:0;width:7px;
+      background:repeating-linear-gradient(-45deg,var(--hz) 0 4px,#111 4px 8px);}
+    .btn-return::before{left:0}.btn-return::after{right:0}
+    .btn-return:hover{color:#fff!important;}
+    .btn-return:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 #07090c!important;}
+    /* 狀態列 */
+    #status-bar{background:#0b0e12;border:1px solid #26303a;border-radius:8px;padding:5px 10px;box-shadow:inset 0 2px 5px rgba(0,0,0,.8);}
+    #status-text,#last-sync{color:var(--mu)!important;}
+    .dot.ok{background:var(--gr)!important;box-shadow:0 0 8px var(--gr)!important;}
+    .dot.err{background:var(--rd)!important;box-shadow:0 0 8px var(--rd)!important;}
+    .dot.busy{background:var(--cy)!important;box-shadow:0 0 8px var(--cy)!important;}
+    /* 區塊標題列：深色＋青色底線 */
+    .ind-head{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;
+      box-shadow:0 2px 10px rgba(0,210,255,.18);}
+    .ind-head-title{color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
+    .ind-count{background:linear-gradient(180deg,#ffd84d,var(--hz))!important;color:#2a1d00!important;font-weight:900!important;
+      box-shadow:0 2px 0 #7a5200!important;}
+    /* 列表 */
+    .ind-row{border-bottom:1px solid #2b343e!important;}
+    .ind-row:hover{background:rgba(0,210,255,.06)!important;}
+    .ind-seq{background:radial-gradient(circle at 35% 30%,#8ff0ff,#00b4e6 55%,#00415e)!important;color:#00202e!important;
+      font-weight:900!important;box-shadow:0 2px 0 #00293b,0 0 8px rgba(0,210,255,.5);}
+    .ind-name{color:#fff!important;}
+    .empty-state{color:var(--mu)!important;}
+    mark{background:rgba(255,196,0,.28)!important;color:var(--hz)!important;}
+    /* 輸入欄 */
+    .ind-input{background:#0b0e12!important;color:var(--tx)!important;border:1px solid #33404c!important;
+      box-shadow:inset 0 2px 5px rgba(0,0,0,.8)!important;}
+    .ind-input:focus{border-color:var(--cy)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(0,210,255,.2)!important;}
+    .ind-input::placeholder{color:#6b7885;}
+    /* 立體按鍵 */
+    .ind-btn{border:none!important;border-radius:10px!important;font-weight:900!important;transition:transform .1s,box-shadow .1s!important;}
+    .ind-btn:active{transform:translateY(3px)!important;}
+    .ind-cy{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #005a78,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-hz{background:linear-gradient(180deg,#ffe066,var(--hz))!important;color:#2a1d00!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 4px 0 #8a6200,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-gr{background:linear-gradient(180deg,#6cf08a,#22b545)!important;color:#04210b!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #0d5a1e,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-rd{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;}
+    .ind-gy{background:linear-gradient(180deg,#4a5562,#2b333c)!important;color:#dfe6ec!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 0 #0d1014!important;}
+    .ind-cy:active,.ind-hz:active,.ind-gr:active,.ind-rd:active,.ind-gy:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
+    .ind-sm-del{background:linear-gradient(180deg,#3a2226,#24161a)!important;color:#ff8a8a!important;border:1px solid #7a1f1f!important;
+      border-radius:6px!important;box-shadow:0 2px 0 #07090c!important;}
+    .ind-sm-del:hover{background:linear-gradient(180deg,#d42020,#8f0f0f)!important;color:#fff!important;}
+    /* 標籤 chips：深底＋發光字 */
+    .ind-chip{background:#0b0e12!important;border:1px solid #2f3b46!important;}
+    .c-cy{color:#7fe6ff!important;border-color:rgba(0,210,255,.45)!important;}
+    .c-hz{color:#ffd84d!important;border-color:rgba(255,196,0,.45)!important;}
+    .c-gr{color:#7dff9e!important;border-color:rgba(60,255,106,.4)!important;}
+    .c-or{color:#ffb27a!important;border-color:rgba(255,106,19,.5)!important;background:rgba(255,106,19,.1)!important;}
+    .c-bl{color:#a5d8ff!important;border-color:rgba(120,190,255,.5)!important;background:rgba(0,120,255,.12)!important;}
+    .c-mu{color:#c3ccd5!important;}
+    .c-pk{color:#ff9ec4!important;border-color:rgba(255,80,150,.5)!important;background:rgba(255,80,150,.1)!important;}
+    .chip-label,.chip-lbl{opacity:.7;}
+    @media (max-width:400px){.site-title{font-size:.9rem!important;gap:7px!important;letter-spacing:0;} .btn-return{padding:6px 14px!important;letter-spacing:1px;}}
+  </style>
+  <style>
+    .deco{opacity:.12!important;filter:drop-shadow(0 0 6px rgba(0,210,255,.6));}
+    .search-label,.date-filter-title,.inv-title{color:var(--hz)!important;font-family:inherit!important;font-weight:900!important;}
+    .date-label,.inv-label{color:var(--mu)!important;}
+    .date-sep{color:var(--mu)!important;}
+    .date-filter-hint{color:var(--hz)!important;}
+    .search-clear{color:var(--mu)!important;}
+    .item-row.selected{background:linear-gradient(90deg,rgba(0,210,255,.18),rgba(0,210,255,.04))!important;border-left:3px solid var(--cy)!important;}
+    .inv-selected-tag{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;box-shadow:0 3px 0 #005a78;}
+    .inv-time-display{background:#07090c!important;border:1px solid #1f2a33!important;color:var(--cy)!important;font-family:Consolas,monospace!important;}
+    .inv-qty-hint{color:var(--mu)!important;}
+    .inv-qty-hint.err{color:var(--rd)!important;}
+    .inv-msg.ok,.modal-msg.ok{background:rgba(60,255,106,.1)!important;color:#7dff9e!important;border-color:rgba(60,255,106,.4)!important;}
+    .inv-msg.err,.modal-msg.err{background:rgba(255,77,77,.12)!important;color:#ff9a9a!important;border-color:#7a1f1f!important;}
+    .inv-record-item-name{background:#0b0e12!important;color:#fff!important;border-left:3px solid var(--hz)!important;}
+    .inv-slot{background:#0b0e12!important;border:1px solid #2f3b46!important;}
+    .inv-slot.has-data{background:linear-gradient(180deg,#14262a,#0e1a1d)!important;border-color:rgba(0,210,255,.4)!important;}
+    .inv-slot.current{border-color:var(--hz)!important;box-shadow:0 0 0 2px rgba(255,196,0,.3),0 0 12px rgba(255,196,0,.25)!important;}
+    .slot-label{color:var(--mu)!important;}.inv-slot.has-data .slot-label{color:var(--cy)!important;}.inv-slot.current .slot-label{color:var(--hz)!important;}
+    .slot-qty{color:#fff!important;}.slot-qty.empty,.slot-time{color:var(--mu)!important;}
+    .slot-badge{background:var(--hz)!important;color:#2a1d00!important;}
+    .overlay{background:rgba(5,7,10,.75)!important;}
+    .modal{background:linear-gradient(180deg,#232a32,#171c22)!important;border:1px solid var(--ln)!important;
+      box-shadow:0 -10px 40px rgba(0,0,0,.6)!important;position:relative;}
+    .modal::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;border-radius:24px 24px 0 0;
+      background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
+    .modal h2{color:#fff!important;font-family:inherit!important;}
+    .modal .subtitle,.field label{color:var(--mu)!important;}
+    .drag-handle{background:#4a5562!important;}
+    .modal-icon.add-i,.modal-icon.del-i{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);}
+    .modal-icon.del-i{border-color:var(--rd);}
+  </style>
   <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
   <style>
     html.fade-in { background: #0d1014; }
@@ -294,23 +414,23 @@
 </div>
 
 <div class="action-bar">
-  <button class="btn-action btn-add-item" onclick="openModal('add')">＋ 新增文具</button>
-  <button class="btn-action btn-del-item" onclick="openModal('del')">－ 刪除文具</button>
+  <button class="btn-action btn-add-item ind-btn ind-gr" onclick="openModal('add')">＋ 新增文具</button>
+  <button class="btn-action btn-del-item ind-btn ind-rd" onclick="openModal('del')">－ 刪除文具</button>
 </div>
 
-<div class="search-card">
+<div class="search-card ind-panel">
   <div class="search-label">🔍 搜尋文具</div>
   <div class="search-wrap">
     <span class="search-icon-pos">🔍</span>
-    <input type="text" class="search-input" id="search-input" placeholder="輸入關鍵字篩選文具…" autocomplete="off"/>
+    <input type="text" class="search-input ind-input" id="search-input" placeholder="輸入關鍵字篩選文具…" autocomplete="off"/>
     <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
   </div>
 </div>
 
-<div class="list-card">
-  <div class="list-header">
-    <div class="list-header-title">📦 文具列表 <span style="font-size:0.75rem;font-weight:400;color:var(--muted)">（點選文具進行盤點）</span></div>
-    <span id="list-count" style="display:none"></span>
+<div class="list-card ind-panel">
+  <div class="list-header ind-head">
+    <div class="list-header-title ind-head-title">📦 文具列表 <span style="font-size:0.75rem;font-weight:400;color:var(--muted)">（點選文具進行盤點）</span></div>
+    <span class="ind-count" id="list-count" style="display:none"></span>
   </div>
   <div class="item-list" id="item-list">
     <div class="empty-state"><span class="empty-icon">🌱</span><p>載入中，請稍候…</p></div>
@@ -318,7 +438,7 @@
 </div>
 
 <div class="inventory-zone" id="inventory-zone">
-  <div class="inv-input-card">
+  <div class="inv-input-card ind-panel">
     <div class="inv-title">📊 盤點輸入</div>
     <div class="inv-selected-tag" id="inv-selected-name">—</div>
     <div class="inv-row">
@@ -327,14 +447,14 @@
     </div>
     <div class="inv-row">
       <span class="inv-label">🔢 數量</span>
-      <input type="text" class="inv-qty-input" id="inv-qty" placeholder="請輸入數量" maxlength="6" inputmode="numeric"/>
+      <input type="text" class="inv-qty-input ind-input" id="inv-qty" placeholder="請輸入數量" maxlength="6" inputmode="numeric"/>
     </div>
     <div class="inv-qty-hint" id="inv-qty-hint">僅限輸入正整數</div>
     <div class="inv-msg" id="inv-msg"></div>
-    <button class="btn-inventory" id="btn-inventory" onclick="submitInventory()">📋 確認盤點</button>
+    <button class="btn-inventory ind-btn ind-cy" id="btn-inventory" onclick="submitInventory()">📋 確認盤點</button>
   </div>
-  <div class="inv-record-card" id="inv-record-card" style="display:none">
-    <div class="inv-record-header">📈 盤點記錄</div>
+  <div class="inv-record-card ind-panel" id="inv-record-card" style="display:none">
+    <div class="inv-record-header ind-head ind-head-title">📈 盤點記錄</div>
     <div class="inv-record-body">
       <div class="inv-record-item-name" id="record-item-name">—</div>
       <div class="inv-slots" id="inv-slots"></div>
@@ -343,31 +463,31 @@
 </div>
 
 <!-- 日期篩選卡 -->
-<div class="date-filter-card">
+<div class="date-filter-card ind-panel">
   <div class="date-filter-title">📅 依日期查詢登記記錄</div>
   <div class="date-filter-row">
     <div class="date-field">
       <label class="date-label">開始日期</label>
-      <input type="date" class="date-input" id="date-from"/>
+      <input type="date" class="date-input ind-input" id="date-from"/>
     </div>
     <span class="date-sep">～</span>
     <div class="date-field">
       <label class="date-label">結束日期</label>
-      <input type="date" class="date-input" id="date-to"/>
+      <input type="date" class="date-input ind-input" id="date-to"/>
     </div>
   </div>
   <div class="date-filter-actions">
-    <button class="btn-date-search" onclick="applyDateFilter()">🔍 查詢</button>
-    <button class="btn-date-reset"  onclick="resetDateFilter()">✕ 清除</button>
+    <button class="btn-date-search ind-btn ind-cy" onclick="applyDateFilter()">🔍 查詢</button>
+    <button class="btn-date-reset ind-btn ind-gy"  onclick="resetDateFilter()">✕ 清除</button>
   </div>
   <div class="date-filter-hint" id="date-filter-hint"></div>
 </div>
 
 <!-- 文具登記記錄 -->
-<div class="order-records-card">
-  <div class="order-records-header">
-    <div class="order-records-title">📝 文具登記記錄</div>
-    <span id="order-count" style="display:none"></span>
+<div class="order-records-card ind-panel">
+  <div class="order-records-header ind-head">
+    <div class="order-records-title ind-head-title">📝 文具登記記錄</div>
+    <span class="ind-count" id="order-count" style="display:none"></span>
   </div>
   <div class="order-records-body" id="order-records-body">
     <div class="empty-state"><span class="empty-icon">📭</span><p>載入中，請稍候…</p></div>
@@ -383,12 +503,12 @@
     </div>
     <div class="field">
       <label>文具名稱 <span style="color:var(--danger)">*</span></label>
-      <input type="text" class="modal-input" id="add-name" placeholder="例如：原子筆、便利貼、筆記本" maxlength="30" autocomplete="off"/>
+      <input type="text" class="modal-input ind-input" id="add-name" placeholder="例如：原子筆、便利貼、筆記本" maxlength="30" autocomplete="off"/>
     </div>
     <div class="modal-msg" id="add-msg"></div>
     <div class="modal-actions">
-      <button class="btn-modal-submit green" onclick="submitAdd()">✅ 確認新增</button>
-      <button class="btn-modal-cancel" onclick="closeModal('add-overlay')">取消返回</button>
+      <button class="btn-modal-submit green ind-btn ind-gr" onclick="submitAdd()">✅ 確認新增</button>
+      <button class="btn-modal-cancel ind-btn ind-gy" onclick="closeModal('add-overlay')">取消返回</button>
     </div>
   </div>
 </div>
@@ -402,12 +522,12 @@
     </div>
     <div class="field">
       <label>文具名稱 <span style="color:var(--danger)">*</span></label>
-      <input type="text" class="modal-input" id="del-name" placeholder="請輸入要刪除的文具名稱" maxlength="30" autocomplete="off"/>
+      <input type="text" class="modal-input ind-input" id="del-name" placeholder="請輸入要刪除的文具名稱" maxlength="30" autocomplete="off"/>
     </div>
     <div class="modal-msg" id="del-msg"></div>
     <div class="modal-actions">
-      <button class="btn-modal-submit red" onclick="submitDel()">🗑 確認刪除</button>
-      <button class="btn-modal-cancel" onclick="closeModal('del-overlay')">取消返回</button>
+      <button class="btn-modal-submit red ind-btn ind-rd" onclick="submitDel()">🗑 確認刪除</button>
+      <button class="btn-modal-cancel ind-btn ind-gy" onclick="closeModal('del-overlay')">取消返回</button>
     </div>
   </div>
 </div>
@@ -438,9 +558,9 @@
     if(!items||!items.length){list.innerHTML=`<div class="empty-state"><span class="empty-icon">${kw?'😅':'📭'}</span><p>${kw?`找不到「${esc(kw)}」相關文具`:'目前資料庫沒有文具，請新增'}</p></div>`;count.style.display='none';return;}
     count.style.display='inline-block';count.textContent=`共 ${items.length} 項`;
     items.forEach((item,i)=>{
-      const div=document.createElement('div');div.className='item-row'+(item===selectedItem?' selected':'');div.style.animationDelay=(i*0.035)+'s';
+      const div=document.createElement('div');div.className='item-row ind-row'+(item===selectedItem?' selected':'');div.style.animationDelay=(i*0.035)+'s';
       let dn=esc(item);if(kw){const rx=new RegExp(`(${kw.split('').map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\')).join('|')})`, 'g');dn=dn.replace(rx,'<mark>$1</mark>');}
-      div.innerHTML=`<span class="item-seq">${i+1}</span><span class="item-name">${dn}</span>`;
+      div.innerHTML=`<span class="item-seq ind-seq">${i+1}</span><span class="item-name ind-name">${dn}</span>`;
       div.addEventListener('click',()=>selectItem(item));list.appendChild(div);
     });
   }
@@ -573,13 +693,13 @@
     if(!rows||!rows.length){body.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><p>目前尚無文具登記記錄</p></div>`;count.style.display='none';return;}
     count.style.display='inline-block';count.textContent=`共 ${rows.length} 筆`;
     [...rows].reverse().forEach((r,i)=>{
-      const div=document.createElement('div');div.className='order-row';div.style.animationDelay=(i*0.04)+'s';
-      const notesChip=r.notes?`<span class="order-chip chip-notes"><span class="chip-lbl">備註</span>${esc(r.notes)}</span>`:'';
-      div.innerHTML=`<div class="order-row-top"><span class="order-seq">${rows.length-i}</span><span class="order-name">${esc(r.name)}</span></div>
+      const div=document.createElement('div');div.className='order-row ind-row';div.style.animationDelay=(i*0.04)+'s';
+      const notesChip=r.notes?`<span class="order-chip chip-notes ind-chip c-mu"><span class="chip-lbl">備註</span>${esc(r.notes)}</span>`:'';
+      div.innerHTML=`<div class="order-row-top"><span class="order-seq ind-seq">${rows.length-i}</span><span class="order-name ind-name">${esc(r.name)}</span></div>
         <div class="order-chips">
-          <span class="order-chip chip-time"><span class="chip-lbl">時間</span>${formatDateShort(r.time)}</span>
-          <span class="order-chip chip-item"><span class="chip-lbl">文具</span>${esc(r.item)}</span>
-          <span class="order-chip chip-qty"><span class="chip-lbl">數量</span>${esc(r.qty)}</span>
+          <span class="order-chip chip-time ind-chip c-cy"><span class="chip-lbl">時間</span>${formatDateShort(r.time)}</span>
+          <span class="order-chip chip-item ind-chip c-gr"><span class="chip-lbl">文具</span>${esc(r.item)}</span>
+          <span class="order-chip chip-qty ind-chip c-hz"><span class="chip-lbl">數量</span>${esc(r.qty)}</span>
           ${notesChip}
         </div>`;
       body.appendChild(div);
