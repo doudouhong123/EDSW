@@ -482,6 +482,7 @@
                 if (leaving) return;
                 leaving = true;
                 const url = ball.dataset.url;
+                try { sessionStorage.setItem('fadeIn', '1'); } catch (e) {}   // 告訴下一頁：用浮現方式出現（新增）
                 if (reduce) { window.location.href = url; return; }
 
                 const r = ball.getBoundingClientRect();
@@ -527,7 +528,12 @@
                         { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist + rnd(20, 90)}px) scale(${rnd(.2, .6)}) rotate(${rnd(-360, 360)}deg)`, opacity: 0 }
                     ], { duration: rnd(550, 850), easing: 'cubic-bezier(.15,.7,.3,1)', delay: 80, fill: 'forwards' });
                 }
-                setTimeout(() => { window.location.href = url; }, 720);
+                // 碎片散開後，畫面淡入深色，再交給下一頁浮現（修改）
+                const veil = document.createElement('div');
+                Object.assign(veil.style, { position: 'fixed', inset: '0', zIndex: '1001', background: '#0d1014', opacity: '0', pointerEvents: 'none' });
+                document.body.appendChild(veil);
+                veil.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: 520, fill: 'forwards' });
+                setTimeout(() => { window.location.href = url; }, 800);
             }
 
             // 滑動：往左滑 → 下一顆；往右滑 → 上一顆
@@ -563,6 +569,7 @@
                 leaving = false; busy = false;
                 balls.forEach(b => b.getAnimations().forEach(a => a.cancel()));
                 document.querySelectorAll('.shard, .flash').forEach(el => el.remove());
+                document.querySelectorAll('body > div[style*="z-index: 1001"]').forEach(el => el.remove());
             });
 
             window.__markDevicesDot = on => dots.children[balls.findIndex(b => b.id === 'devices')].classList.toggle('alert', on);
