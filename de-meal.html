@@ -197,6 +197,29 @@
     .mv-btn{min-width:44px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;font-size:0.85rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;text-decoration:none;text-align:center;}
     .mv-btn:hover{background:rgba(255,255,255,0.25);}
   </style>
+  <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
+  <style>
+    html.fade-in { background: #0d1014; }
+    html.fade-in body { animation: pageFloatIn 0.8s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes pageFloatIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); filter: blur(8px); }
+      to   { opacity: 1; transform: none; filter: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { html.fade-in body { animation: none; } }
+  </style>
+  <script>
+    try {
+      if (sessionStorage.getItem('fadeIn')) {
+        sessionStorage.removeItem('fadeIn');
+        document.documentElement.classList.add('fade-in');
+        addEventListener('animationend', function done(e) {
+          if (e.animationName !== 'pageFloatIn') return;
+          document.documentElement.classList.remove('fade-in');
+          removeEventListener('animationend', done);
+        });
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
 
