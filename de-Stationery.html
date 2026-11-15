@@ -387,6 +387,21 @@
       font-size:.85rem!important;padding:8px!important;height:38px;text-align:left;}
     .date-input::-webkit-date-and-time-value{text-align:left;}
     .date-sep{padding-bottom:9px!important;}
+    /* ── 盤點記錄：數量可點選修改（新增）── */
+    .slot-edit{display:flex;align-items:center;justify-content:space-between;gap:4px;width:100%;
+      background:#07090c;border:1px dashed rgba(255,196,0,.55);border-radius:8px;padding:5px 7px;
+      font:inherit;font-size:1.1rem;font-weight:900;color:#fff!important;cursor:pointer;line-height:1.1;
+      touch-action:manipulation;transition:border-color .2s,background .2s;}
+    .slot-edit:hover,.slot-edit:active{border-color:var(--hz);background:rgba(255,196,0,.1);}
+    .slot-pen{font-size:.75rem;color:var(--hz);font-weight:700;}
+    .slot-editor{display:flex;flex-direction:column;gap:5px;}
+    .slot-input{width:100%;min-width:0;padding:6px 7px;border-radius:8px;font-size:1rem;font-weight:900;
+      background:#0b0e12;color:#fff;border:1px solid var(--cy);box-shadow:0 0 0 3px rgba(0,210,255,.2);outline:none;}
+    .slot-edit-btns{display:flex;gap:5px;}
+    .slot-edit-btns button{flex:1;padding:5px 0;border:none;border-radius:7px;font-weight:900;cursor:pointer;font-size:.85rem;}
+    .slot-save{background:linear-gradient(180deg,#6cf08a,#22b545);color:#04210b;box-shadow:0 2px 0 #0d5a1e;}
+    .slot-cancel{background:linear-gradient(180deg,#4a5562,#2b333c);color:#dfe6ec;box-shadow:0 2px 0 #0d1014;}
+    .slot-edit-btns button:active{transform:translateY(2px);box-shadow:none;}
     /* ── 日期框改顯示「年 / 月 / 日」中文格式（修改）── */
     .date-wrap{position:relative;width:100%;}
     .date-show{display:flex;align-items:center;justify-content:space-between;gap:4px;height:38px;padding:0 10px;
@@ -613,6 +628,7 @@
   }
 
   async function loadRecord(name){
+    editingSlot=0;
     try{const res=await fetch(`${GAS_URL}?action=getInventory&name=${encodeURIComponent(name)}`,{cache:'no-store'});const json=await res.json();currentRecord=json.data||{t1:'',q1:'',t2:'',q2:'',t3:'',q3:''};}
     catch{currentRecord={t1:'',q1:'',t2:'',q2:'',t3:'',q3:''};}renderRecord();
   }
@@ -623,8 +639,42 @@
     const nextSlot=getNextSlot(r);slots.innerHTML='';
     [1,2,3].forEach(n=>{const t=r[`t${n}`],q=r[`q${n}`],hasData=!!t,isCurrent=(n===nextSlot);
       const div=document.createElement('div');div.className='inv-slot'+(hasData?' has-data':'')+(isCurrent?' current':'');
-      div.innerHTML=`<div class="slot-label">記錄 ${n}</div><div class="slot-qty ${hasData?'':'empty'}">${hasData?esc(q):'—'}</div><div class="slot-time">${hasData?formatTime(t):'尚未記錄'}</div>${isCurrent?'<div class="slot-badge">▶</div>':''}`;
+      div.innerHTML=`<div class="slot-label">記錄 ${n}</div>${hasData?`<button type="button" class="slot-qty slot-edit" onclick="editSlot(${n})" title="點一下修改數量">${esc(q)}<span class="slot-pen">✎</span></button>`:'<div class="slot-qty empty">—</div>'}<div class="slot-time">${hasData?formatTime(t):'尚未記錄'}</div>${isCurrent?'<div class="slot-badge">▶</div>':''}`;
       slots.appendChild(div);});
+  }
+
+  /* （新增）點盤點記錄裡的數量 → 直接修改；時間保留原本的，不影響下一次寫入的位置 */
+  let editingSlot=0;
+  function editSlot(n){
+    if(editingSlot)return;
+    editingSlot=n;
+    const slot=document.querySelectorAll('#inv-slots .inv-slot')[n-1];
+    const btn=slot.querySelector('.slot-edit');
+    const box=document.createElement('div');box.className='slot-editor';
+    box.innerHTML=`<input type="text" class="slot-input" inputmode="numeric" maxlength="6" value="${esc(currentRecord['q'+n])}"/>
+      <div class="slot-edit-btns"><button type="button" class="slot-save">✔</button><button type="button" class="slot-cancel">✕</button></div>`;
+    btn.replaceWith(box);
+    const inp=box.querySelector('.slot-input');
+    inp.addEventListener('input',()=>{inp.value=inp.value.replace(/[^0-9]/g,'').slice(0,6);});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')saveSlot(n,inp);if(e.key==='Escape'){editingSlot=0;renderRecord();}});
+    box.querySelector('.slot-save').onclick=()=>saveSlot(n,inp);
+    box.querySelector('.slot-cancel').onclick=()=>{editingSlot=0;renderRecord();};
+    inp.focus();inp.select();
+  }
+  async function saveSlot(n,inp){
+    const qty=inp.value.trim();
+    if(!qty||parseInt(qty)<=0){showInvMsg('⚠ 數量必須是大於 0 的整數','err');inp.focus();return;}
+    if(qty===String(currentRecord['q'+n])){editingSlot=0;renderRecord();return;}
+    const raw=currentRecord['t'+n];
+    const d=new Date(String(raw).replace(/\//g,'-'));
+    const time=isNaN(d)?String(raw):d.toLocaleString('zh-TW',{hour12:false});   // 時間維持原本那次盤點的時間
+    inp.disabled=true;showInvMsg('修改中…','ok');
+    try{
+      const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateInventory',name:selectedItem,slot:n,time,qty})});
+      const json=await res.json();
+      if(json.status==='ok'){currentRecord['q'+n]=qty;editingSlot=0;renderRecord();showInvMsg(`✅ 記錄 ${n} 已改為 ${qty}`,'ok');}
+      else{inp.disabled=false;showInvMsg('⚠ '+(json.message||'修改失敗'),'err');}
+    }catch{inp.disabled=false;showInvMsg('⚠ 連線失敗','err');}
   }
 
   function getNextSlot(r){
