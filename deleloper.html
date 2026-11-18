@@ -94,6 +94,10 @@
             background: rgb(var(--ovc)); opacity: calc(var(--ova) * 0.38);
             mix-blend-mode: multiply;
         }
+        /* 夜晚：背板稍微不透明一點，小字加深，維持好讀 */
+        html.night .container { background-color: rgba(250,246,238,0.28); }
+        html.night { --muted: #6f665b; }
+
         /* 寫實光影畫布＋牆面顆粒 */
         #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
         .grain {
@@ -133,7 +137,11 @@
             border-radius: 6px;
             background:
                 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
-                linear-gradient(170deg, #fdfbf7 0%, var(--paper) 45%, var(--paper-2) 100%);
+                linear-gradient(170deg, rgba(253,251,247,0.62) 0%, rgba(251,248,242,0.56) 45%, rgba(244,238,228,0.52) 100%);
+            /* 背板半透明（修改）：像一片霧面描圖紙，透出後面的光影 */
+            transition: background-color .6s;
+            -webkit-backdrop-filter: blur(5px) saturate(1.08);
+            backdrop-filter: blur(5px) saturate(1.08);
             box-shadow:
                 0 1px 0 rgba(255,255,255,0.9) inset,
                 0 0 0 1px rgba(120,100,70,0.08),
@@ -505,6 +513,7 @@
                 r.setProperty('--wy', v[17].toFixed(1) + 'vh');
                 r.setProperty('--wsk', v[18].toFixed(1) + 'deg');
                 r.setProperty('--wrot', v[19].toFixed(1) + 'deg');
+                document.documentElement.classList.toggle('night', v[12] > 0.45);
                 const meta = document.querySelector('meta[name="theme-color"]');
                 if (meta) meta.content = v[12] > 0.6 ? '#4b5270' : (v[12] > 0.3 ? '#c9a9a8' : '#efe6d8');
             }
