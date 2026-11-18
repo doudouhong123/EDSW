@@ -95,7 +95,7 @@
             mix-blend-mode: multiply;
         }
         /* 夜晚：背板稍微不透明一點，小字加深，維持好讀 */
-        html.night .container { background-color: rgba(250,246,238,0.28); }
+        html.night .container { background-color: rgba(250,246,238,0.32); }
         html.night { --muted: #6f665b; }
 
         /* 寫實光影畫布＋牆面顆粒 */
@@ -137,11 +137,11 @@
             border-radius: 6px;
             background:
                 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
-                linear-gradient(170deg, rgba(253,251,247,0.62) 0%, rgba(251,248,242,0.56) 45%, rgba(244,238,228,0.52) 100%);
+                linear-gradient(170deg, rgba(253,251,247,0.34) 0%, rgba(251,248,242,0.28) 45%, rgba(244,238,228,0.24) 100%);
             /* 背板半透明（修改）：像一片霧面描圖紙，透出後面的光影 */
             transition: background-color .6s;
-            -webkit-backdrop-filter: blur(5px) saturate(1.08);
-            backdrop-filter: blur(5px) saturate(1.08);
+            -webkit-backdrop-filter: blur(2.5px) saturate(1.1);
+            backdrop-filter: blur(2.5px) saturate(1.1);
             box-shadow:
                 0 1px 0 rgba(255,255,255,0.9) inset,
                 0 0 0 1px rgba(120,100,70,0.08),
@@ -636,7 +636,7 @@
             // 光斑位置：手機直式畫面比較窄，光斑放大一些才看得到
             function geo() {
                 const portrait = H > W * 1.2;
-                const kw = portrait ? 1.9 : 1, kh = portrait ? 0.75 : 1;
+                const kw = portrait ? 1.9 : 1, kh = portrait ? 1.05 : 1;
                 const w = P[9] * W * kw, h = P[10] * H * kh;
                 const x = portrait ? (P[7] - 0.22) * W * 1.35 : P[7] * W;
                 const y = P[8] * H * (portrait ? 0.8 : 1);
