@@ -315,6 +315,14 @@
         .circle-menu .c-back .c-ic { font-size: 1.5rem; }
         .circle-menu .c-back .c-lb { font-size: 0.9rem; }
 
+        /* ── 訂餐專用帳號：只顯示「訂餐」（新增） ── */
+        .ring.meal-only { aspect-ratio: auto; height: calc(var(--d) + 16px); }
+        .ring.meal-only .circle.c-order { left: calc(50% - var(--d)/2); top: 8px; }
+        .ring.meal-only #equipment,
+        .ring.meal-only #stationery,
+        .ring.meal-only #quick-scan { display: none; }
+        .meal-only-hide { display: none !important; }
+
         #toast {
             position: fixed; top: 22px; left: 50%;
             transform: translateX(-50%) translateY(-20px);
@@ -424,6 +432,13 @@
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
+    // ── 訂餐專用帳號（新增）：由 index 登入 2040 時設定 ──
+    const MEAL_ONLY = localStorage.getItem('mealOnly') === '1' && localStorage.getItem('account') === '2040';
+    if (MEAL_ONLY) {
+        document.getElementById('ring').classList.add('meal-only');
+        document.querySelector('.ring-hint').classList.add('meal-only-hide');
+    }
+
     // ── 自訂提示框 ──
     let _msgCallback = null;
     function showMsg(text, icon, callback) {
@@ -448,6 +463,11 @@
     const account = localStorage.getItem('account');
     let currentUserName = '';
     if (!account) { showMsg('請先登入', '🔒', () => { window.location.href = 'index.html'; }); }
+    else if (MEAL_ONLY) {   // 訂餐專用帳號：顯示單位名稱（新增）
+        currentUserName = '社區醫學科';
+        document.getElementById('name').textContent = '歡迎，' + currentUserName;
+        document.getElementById('name').classList.remove('loading');
+    }
     else {
         fetch(`${SCRIPT_URL}?account=${account}`)
             .then(r => r.json())
@@ -559,6 +579,7 @@
     // ══════════════════════════════
     (function () {
         const ring  = document.getElementById('ring');
+        if (MEAL_ONLY) return;   // 訂餐專用帳號只有一個選項，不需旋轉（新增）
         const order = ['order', 'equipment', 'stationery', 'quick-scan']; // 初始：上、右、下、左
         let rot = 0;
         function layout() {
@@ -599,7 +620,7 @@
     document.getElementById('equipment').addEventListener('click', () => window.location.href = 'device.html');
     document.getElementById('stationery').addEventListener('click', () => window.location.href = 'Stationery.html');
     document.getElementById('order').addEventListener('click', () => window.location.href = 'meal.html');
-    document.getElementById('back').addEventListener('click', () => { localStorage.removeItem('account'); window.location.href = 'index.html'; });
+    document.getElementById('back').addEventListener('click', () => { localStorage.removeItem('account'); localStorage.removeItem('mealOnly'); window.location.href = 'index.html'; });
     document.getElementById('quick-scan').addEventListener('click', openQR);
 
     // ══════════════════════════════
