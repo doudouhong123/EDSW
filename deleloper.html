@@ -3,380 +3,393 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#11151a">
+    <meta name="theme-color" content="#efe6d8">
     <title>後台管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* ══════════ 工業科技風（修改）══════════
-           底色：鋼鐵灰 / 碳黑；強調：警示黃、安全橘、電光青、訊號綠 */
+        /* ══════════ 窗邊葉影（整體重新設計）══════════
+           概念：午後陽光照進辦公室，牆上有樹葉的影子；
+           面板像一張厚紙卡，功能球是霧面陶瓷，不用發光特效。
+           光源統一在左上，所有影子都往右下落。 */
         :root {
-            --steel-0: #0d1014;
-            --steel-1: #161b21;
-            --steel-2: #212831;
-            --line:    #3a4552;
-            --text:    #e7edf3;
-            --muted:   #98a6b4;
-            --hazard:  #ffc400;
-            --cyan:    #00d2ff;
-            --ball:    clamp(170px, 52vw, 210px);   /* 立體球直徑 */
+            --wall:    #efe6d8;
+            --paper:   #fbf8f2;
+            --paper-2: #f4eee4;
+            --ink:     #2f2a24;
+            --ink-2:   #5b5348;
+            --muted:   #8f8579;
+            --hair:    #e3d9ca;
+            --sage:    #6f8a68;
+            --ball:    clamp(160px, 48vw, 196px);   /* 陶瓷球直徑 */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* 背景填滿：碳纖維斜紋＋細網格＋邊角光暈 */
+        /* ── 牆面：暖白灰泥＋細顆粒 ── */
         html {
             min-height: 100%;
-            background-color: var(--steel-0);
+            background-color: var(--wall);
             background-image:
-                radial-gradient(circle at 15% 10%, rgba(0,210,255,0.16), transparent 42%),
-                radial-gradient(circle at 85% 90%, rgba(255,106,19,0.16), transparent 45%),
-                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
-                repeating-linear-gradient(45deg, #12161b 0 6px, #0f1317 6px 12px);
-            background-size: auto, auto, 28px 28px, 28px 28px, auto;
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+                linear-gradient(160deg, #f3ebdf 0%, #ebe1d1 55%, #e2d6c3 100%);
             background-attachment: fixed;
         }
         body {
-            font-family: 'Segoe UI', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             min-height: 100vh; min-height: 100dvh;
-            padding: 24px 14px;
+            padding: 28px 16px;
             display: flex; justify-content: center; align-items: center;
-            color: var(--text);
+            color: var(--ink);
             background: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ── 金屬面板 ── */
-        .container {
-            position: relative;
-            width: 100%; max-width: 480px;
-            padding: 34px 22px 24px;
-            border-radius: 22px;
+        /* ── 陽光與葉影 ── */
+        .sunlight {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background:
-                linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0) 40%),
-                linear-gradient(180deg, var(--steel-2), var(--steel-1));
-            border: 1px solid var(--line);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.12),
-                inset 0 -2px 0 rgba(0,0,0,0.5),
-                0 6px 0 #07090c,
-                0 24px 50px rgba(0,0,0,0.6);
-            text-align: center;
-            overflow: hidden;
-            animation: slideUp 0.7s ease-out;
+                radial-gradient(ellipse 75% 55% at 18% 12%, rgba(255,220,165,0.55), rgba(255,220,165,0) 70%),
+                linear-gradient(118deg, rgba(255,238,205,0.35) 0%, rgba(255,238,205,0) 50%),
+                linear-gradient(0deg, rgba(120,95,65,0.10), rgba(120,95,65,0) 35%);
         }
-        /* 上緣警示斜紋帶 */
-        .container::before {
-            content: '';
-            position: absolute; left: 0; right: 0; top: 0; height: 10px;
-            background: repeating-linear-gradient(-45deg, var(--hazard) 0 14px, #111 14px 28px);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-        }
-        /* 四角鉚釘 */
-        .rivet {
-            position: absolute; width: 10px; height: 10px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, #d9e1e8, #6b7785 55%, #2b333c);
-            box-shadow: 0 1px 1px rgba(0,0,0,0.7);
-        }
-        .rivet.tl { top: 20px; left: 14px; }  .rivet.tr { top: 20px; right: 14px; }
-        .rivet.bl { bottom: 14px; left: 14px; } .rivet.br { bottom: 14px; right: 14px; }
-        @keyframes slideUp {
-            from { transform: translateY(40px); opacity: 0; }
-            to   { transform: translateY(0); opacity: 1; }
-        }
+        .leaves { position: fixed; pointer-events: none; mix-blend-mode: multiply; will-change: transform; }
+        .leaves path { fill: #4a4532; }
+        .leaves.l-back  { z-index: 0; top: -12vh; right: -18vw; width: min(130vw, 980px);
+                          opacity: .15; filter: blur(11px); transform-origin: 95% 0%;
+                          animation: swayA 12s ease-in-out infinite alternate; }
+        .leaves.l-low   { z-index: 0; bottom: -14vh; left: -16vw; width: min(85vw, 620px);
+                          opacity: .17; filter: blur(5px); transform-origin: 50% 50%;
+                          transform: rotate(180deg);
+                          animation: swayC 10s ease-in-out infinite alternate; }
+        /* 最前面一層葉影也落在卡片上，像真的光影 */
+        .leaves.l-front { z-index: 3; top: -8vh; right: -10vw; width: min(105vw, 780px);
+                          opacity: .13; filter: blur(4px); transform-origin: 95% 0%;
+                          animation: swayB 7.5s ease-in-out infinite alternate; }
+        @keyframes swayA { from { transform: rotate(-1.2deg); } to { transform: rotate(1.6deg) translate(-10px,6px); } }
+        @keyframes swayB { from { transform: rotate(1deg); }    to { transform: rotate(-2deg) translate(8px,-4px); } }
+        @keyframes swayC { from { transform: rotate(180deg); }  to { transform: rotate(182deg) translate(6px,4px); } }
 
-        /* 時間：LED 數字感 */
+        /* ── 紙卡面板 ── */
+        .container {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 440px;
+            padding: 30px 26px 22px;
+            border-radius: 6px;
+            background:
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+                linear-gradient(170deg, #fdfbf7 0%, var(--paper) 45%, var(--paper-2) 100%);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.9) inset,
+                0 0 0 1px rgba(120,100,70,0.08),
+                2px 3px 4px rgba(70,50,30,0.10),
+                12px 22px 34px rgba(70,50,30,0.16),
+                30px 54px 80px rgba(70,50,30,0.14);
+            text-align: center;
+            animation: rise 0.8s cubic-bezier(.2,.7,.2,1);
+        }
+        @keyframes rise { from { transform: translateY(18px); opacity: 0; } to { transform: none; opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+        .rivet { display: none; }
+
+        /* 頁首：日期、問候、細線 */
         #time {
-            display: inline-block;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 1rem; font-weight: 700; letter-spacing: 1px;
-            color: var(--cyan);
-            text-shadow: 0 0 8px rgba(0,210,255,0.7);
-            background: #07090c;
-            border: 1px solid #1f2a33;
-            border-radius: 8px;
-            padding: 6px 14px;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
+            font-size: 0.82rem; font-weight: 500; letter-spacing: 0.08em;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
             margin-bottom: 14px;
         }
         #welcome {
-            font-size: 1.9em; font-weight: 900; letter-spacing: 3px;
-            color: #ffffff;
-            text-shadow: 0 2px 0 #000, 0 0 18px rgba(255,196,0,0.35);
-            margin-bottom: 4px;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.75rem; font-weight: 700; letter-spacing: 0.12em;
+            color: var(--ink);
+            margin-bottom: 6px;
         }
         .subtitle {
-            font-size: 0.78rem; letter-spacing: 4px; color: var(--hazard);
-            font-weight: 700; margin-bottom: 6px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-size: 0.72rem; letter-spacing: 0.32em; color: var(--muted); font-weight: 500;
+            margin-bottom: 4px;
         }
+        .subtitle::before, .subtitle::after { content: ''; width: 34px; height: 1px; background: var(--hair); }
 
-        /* ══════════ 3D 立體球（修改：一次一顆，滑動時隨機方式滑入，點擊散開）══════════ */
-        .stage {
-            position: relative;
-            height: calc(var(--ball) + 56px);
-            margin: 10px -22px 0;
-            touch-action: pan-y;
-            user-select: none; -webkit-user-select: none;
-            overflow: hidden;
+        /* ══════════ 功能選單：牆上的吊牌 ══════════
+           一條木頭掛條＋黃銅掛勾，四塊上漆木牌用細繩掛著，隨風輕晃 */
+        .stage.hooks {
+            position: relative; height: 262px;
+            margin: 24px -4px 0; padding-top: 0;
+            display: flex; justify-content: space-evenly;
         }
-        /* 底座光環 */
-        .stage::before {
-            content: '';
-            position: absolute; left: 50%; bottom: 10px;
-            width: calc(var(--ball) * 1.3); height: 26px;
-            transform: translateX(-50%);
-            border-radius: 50%;
-            background: radial-gradient(ellipse at center, var(--base, rgba(0,210,255,0.4)), rgba(0,0,0,0) 70%);
-            filter: blur(2px);
-            transition: background 0.4s;
+        .rail {
+            position: absolute; left: 0; right: 0; top: 2px; height: 18px; border-radius: 3px;
+            background:
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='40'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .25  0 0 0 0 .16  0 0 0 0 .08  0 0 0 .28 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+                linear-gradient(180deg, #c9a37a 0%, #a97f55 55%, #8a6440 100%);
+            background-size: 300px 18px, auto;
+            box-shadow: inset 0 1px 0 rgba(255,235,205,0.55), inset 0 -2px 0 rgba(60,35,15,0.25), 4px 7px 9px rgba(70,50,30,0.25);
         }
-        .stage .ball {
-            position: absolute; left: 50%; top: 8px;
-            width: var(--ball); height: var(--ball);
-            margin-left: calc(var(--ball) / -2);
-            border: none; padding: 0; background: none;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #fff;
-            font-family: inherit;
-            visibility: hidden;                 /* 只有目前這顆顯示 */
+        .slot {
+            position: relative; z-index: 1;
+            width: 22%; max-width: 92px; height: 100%;
+            border: none; background: none; padding: 0;
+            cursor: pointer; font-family: inherit;
             -webkit-tap-highlight-color: transparent;
         }
-        .stage .ball.on { visibility: visible; z-index: 2; }
-        .ball:focus-visible { outline: 3px solid var(--cyan); outline-offset: 6px; }
-
-        /* 球體本體：主色＋高光＋陰影，做出立體感 */
-        .ball .orb {
-            position: absolute; inset: 0;
-            border-radius: 50%;
+        .slot:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; border-radius: 6px; }
+        /* 黃銅掛勾 */
+        .peg {
+            position: absolute; z-index: 3; top: 5px; left: 50%;
+            width: 12px; height: 12px; margin-left: -6px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #f6e3ad, #c2964a 55%, #6e5020);
+            box-shadow: 1px 2px 2px rgba(40,25,10,0.35);
+        }
+        /* 會晃動的部分：繩子＋木牌，以掛勾為支點 */
+        .swing {
+            position: absolute; top: 11px; left: 0; right: 0; height: 236px;
+            transform-origin: 50% 0;
+            animation: idle 5.5s ease-in-out infinite alternate;
+            animation-delay: var(--delay);
+            filter: drop-shadow(5px 9px 7px rgba(70,50,30,0.28));
+            transition: transform .45s cubic-bezier(.3,.7,.2,1), opacity .4s ease;
+        }
+        @keyframes idle  { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+        @keyframes swing { 0% { transform: rotate(0); } 25% { transform: rotate(6deg); } 55% { transform: rotate(-4deg); } 80% { transform: rotate(2deg); } 100% { transform: rotate(0); } }
+        .slot:hover .swing { animation: swing 1.4s ease-out; }
+        /* 繩子：從掛勾斜拉到牌子的孔 */
+        .cord {
+            position: absolute; top: 0; left: 50%; width: 1.6px; height: 34px; margin-left: -0.8px;
+            background: linear-gradient(180deg, #7a6248, #5e4934);
+            border-radius: 1px;
+        }
+        /* 上漆木牌 */
+        .plate {
+            position: absolute; top: 28px; left: 0; right: 0; height: 196px;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 40px; gap: 16px;
+            clip-path: polygon(22% 0, 78% 0, 100% 11%, 100% 100%, 0 100%, 0 11%);
+            border-radius: 0 0 6px 6px;
             background:
-                radial-gradient(circle at 32% 26%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 9%, rgba(255,255,255,0) 26%),
-                radial-gradient(circle at 50% 120%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%),
-                radial-gradient(circle at 38% 34%, var(--c1) 0%, var(--c2) 52%, var(--c3) 100%);
-            box-shadow:
-                inset -12px -16px 30px rgba(0,0,0,0.55),
-                inset 6px 8px 18px rgba(255,255,255,0.25),
-                0 0 0 3px rgba(255,255,255,0.08),
-                0 0 40px var(--glow);
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='240'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.5 0.012' numOctaves='3' seed='9'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+                radial-gradient(ellipse at 30% 15%, rgba(255,255,255,0.22), rgba(255,255,255,0) 60%),
+                linear-gradient(170deg, var(--c1) 0%, var(--c2) 100%);
+            background-size: 100% 100%, auto, auto;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+            color: #fff8ec;
         }
-        /* 金屬環（赤道線） */
-        .ball .orb::before {
-            content: '';
-            position: absolute; left: 6%; right: 6%; top: 50%; height: 16%;
-            transform: translateY(-50%);
+        /* 牌子邊緣的木頭厚度感 */
+        .plate::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            clip-path: inherit;
+            box-shadow: inset -3px -4px 0 rgba(40,25,10,0.16), inset 2px 2px 0 rgba(255,255,255,0.14);
+        }
+        /* 黃銅孔眼 */
+        .hole {
+            position: absolute; top: 9px; left: 50%; width: 12px; height: 12px; margin-left: -6px;
             border-radius: 50%;
-            border-top: 2px solid rgba(255,255,255,0.35);
-            border-bottom: 2px solid rgba(0,0,0,0.25);
+            background: radial-gradient(circle, #4a3a2a 0 3px, #d9b56a 3.5px 5px, #8a6a30 5.5px);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.3);
         }
-        .ball .ic {
-            position: absolute; z-index: 1; left: 0; right: 0; top: 20%;
-            font-size: calc(var(--ball) * 0.28); line-height: 1;
-            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.45));
+        .plate .ic svg {
+            width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.7;
+            stroke-linecap: round; stroke-linejoin: round;
+            filter: drop-shadow(0 -1px 0 rgba(40,25,10,0.3));
         }
-        .ball .lb {
-            position: absolute; z-index: 1; left: 0; right: 0; top: 58%;
-            font-size: calc(var(--ball) * 0.12); font-weight: 900; letter-spacing: 2px;
-            color: var(--tc, #fff);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        .plate .lb {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.12rem; font-weight: 700; line-height: 1.55; letter-spacing: 0.18em; padding-left: 0.18em;
+            /* 雕刻字：上暗下亮 */
+            text-shadow: 0 -1px 0 rgba(40,25,10,0.35), 0 1px 0 rgba(255,255,255,0.18);
         }
-        /* 漂浮：放在內層，不影響滑入動畫 */
-        .ball .float { position: absolute; inset: 0; animation: hover 3.2s ease-in-out infinite; }
-        @keyframes hover {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-7px); }
+        /* 取下牌子：往上提起後淡出 */
+        .slot.opening .swing { animation: none; transform: translateY(-30px) rotate(-3deg); opacity: 0; }
+        /* 待確認：貼在牌子右上角的紅色圓貼紙 */
+        .stage.hooks .pend-badge {
+            display: none; position: absolute; top: 40px; right: -8px; z-index: 2;
+            min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px;
+            background: #b04a32; color: #fff8ef;
+            font-size: 0.72rem; font-weight: 700; line-height: 26px; white-space: nowrap;
+            box-shadow: 1px 2px 3px rgba(60,30,15,0.3);
+            transform: rotate(8deg);
         }
+        .hook-hint { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.14em; margin-top: 2px; }
+        .dots { display: none !important; }
+        @media (max-width: 380px) { .plate .lb { font-size: 1rem; } }
 
-        /* 各球顏色：工業色系 */
-        #members  { --c1: #ffb070; --c2: #ff6a13; --c3: #8a2c00; --glow: rgba(255,106,19,0.6); }    /* 安全橘 */
-        #devices  { --c1: #8ff0ff; --c2: #00b4e6; --c3: #00415e; --glow: rgba(0,210,255,0.6); }     /* 電光青 */
-        #supplies { --c1: #fff08a; --c2: #ffc400; --c3: #7a5200; --glow: rgba(255,196,0,0.6);
-                    --tc: #2a1d00; }                                                                   /* 警示黃 */
-        #supplies .lb { text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
-        #meals    { --c1: #b8ff8a; --c2: #3ccf3a; --c3: #0f5212; --glow: rgba(60,207,58,0.6); }     /* 訊號綠 */
-
-        /* 散開的碎片 */
-        .shard {
-            position: fixed; z-index: 1000; pointer-events: none;
-            border-radius: 50%;
-            will-change: transform, opacity;
-        }
-        .flash {
-            position: fixed; inset: 0; z-index: 999; pointer-events: none;
-            background: radial-gradient(circle at var(--fx) var(--fy), rgba(255,255,255,0.85), rgba(255,255,255,0) 40%);
-            opacity: 0;
-        }
-
-        /* 待確認徽章：貼在設備球右上角 */
-        .pend-badge {
-            display: none; position: absolute; top: 2%; right: -4%; z-index: 2;
-            min-width: 30px; height: 28px; padding: 0 9px; border-radius: 14px;
-            background: linear-gradient(180deg, #ff4d4d, #c40000);
-            color: #fff; font-size: 0.8rem; font-weight: 900; line-height: 24px;
-            border: 2px solid #fff;
-            box-shadow: 0 0 12px rgba(255,40,40,0.8), 0 3px 0 #6b0000;
-            animation: pop 0.3s ease-out;
-            white-space: nowrap;
-        }
-        @keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
-
-        /* 指示點（可點選切換） */
-        .dots { display: flex; justify-content: center; gap: 4px; margin-top: 2px; }
-        .dot {
-            position: relative;
-            width: 26px; height: 26px; padding: 0; border: none; background: none; cursor: pointer;
-        }
+        /* 指示點 */
+        .dots { display: flex; justify-content: center; gap: 2px; margin-top: 0; }
+        .dot { position: relative; width: 24px; height: 24px; padding: 0; border: none; background: none; cursor: pointer; }
         .dot::before {
             content: ''; position: absolute; left: 50%; top: 50%;
-            width: 10px; height: 10px; transform: translate(-50%, -50%);
-            border-radius: 5px;
-            background: #3a4552; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
-            transition: all 0.3s;
+            width: 6px; height: 6px; transform: translate(-50%, -50%);
+            border-radius: 3px; background: #d6cbbb;
+            transition: all 0.35s ease;
         }
-        .dot.on::before { width: 24px; background: var(--dc); box-shadow: 0 0 10px var(--dc); }
-        .dot.alert::after {                  /* 設備有待確認時，點旁邊亮紅點 */
-            content: ''; position: absolute; top: 2px; right: 2px;
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #ff3b3b; box-shadow: 0 0 6px #ff3b3b;
+        .dot.on::before { width: 20px; background: var(--dc); }
+        .dot.alert::after {
+            content: ''; position: absolute; top: 4px; right: 3px;
+            width: 6px; height: 6px; border-radius: 50%; background: #a8432c;
         }
 
-        /* ── 返回：保持方形框，金屬按鍵＋兩側警示斜紋（修改） ── */
+        /* 返回：掛在釘子上的小木牌（和上方吊牌同一套） */
         #return {
             position: relative;
-            display: block;
-            width: 100%; max-width: 150px;
-            margin: 14px auto 0;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 2px solid var(--hazard);
-            background: linear-gradient(180deg, #3a4450, #1d232a);
-            color: var(--hazard);
-            font-size: 0.9rem; font-weight: 900; letter-spacing: 4px;
-            font-family: inherit;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            width: 136px; height: 44px;
+            margin: 50px auto 0;
+            border: none; border-radius: 5px;
+            background:
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.015 0.45' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .26 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+                radial-gradient(ellipse at 30% 20%, rgba(255,250,235,0.35), rgba(255,250,235,0) 60%),
+                linear-gradient(175deg, #e2c49c 0%, #cfa978 60%, #b98f5d 100%);
+            background-size: 200px 44px, auto, auto;
+            box-shadow:
+                inset 0 1px 0 rgba(255,245,225,0.6),
+                inset -2px -3px 0 rgba(80,50,20,0.18),
+                5px 9px 10px rgba(70,50,30,0.25);
+            color: #5a3d22;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1rem; font-weight: 700; letter-spacing: 0.3em; padding-left: 0.3em;
+            text-shadow: 0 1px 0 rgba(255,240,215,0.55), 0 -1px 0 rgba(70,40,15,0.2);   /* 雕刻字 */
             cursor: pointer;
-            overflow: hidden;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 0 #07090c, 0 8px 16px rgba(0,0,0,0.5);
-            transition: transform 0.1s, box-shadow 0.1s, color 0.2s;
+            transform-origin: 50% -28px;          /* 以上方釘子為支點 */
+            animation: signIdle 6s ease-in-out infinite alternate;
+            -webkit-tap-highlight-color: transparent;
         }
-        #return::before, #return::after {
-            content: ''; position: absolute; top: 0; bottom: 0; width: 12px;
-            background: repeating-linear-gradient(-45deg, var(--hazard) 0 5px, #111 5px 10px);
+        /* 兩條細繩拉成 V 字，掛在一根黃銅釘上 */
+        #return::before {
+            content: ''; position: absolute; left: 50%; top: -34px;
+            width: 110px; height: 36px; margin-left: -55px;
+            background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='36'><path d='M14 36 L55 6 L96 36' fill='none' stroke='%236a5340' stroke-width='1.6'/><circle cx='14' cy='35' r='2.4' fill='%23b9924f'/><circle cx='96' cy='35' r='2.4' fill='%23b9924f'/></svg>") no-repeat;
+            pointer-events: none;
         }
-        #return::before { left: 0; }
-        #return::after  { right: 0; }
-        #return:hover  { color: #fff; }
-        #return:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 0 #07090c; }
+        #return::after {
+            content: ''; position: absolute; left: 50%; top: -34px;
+            width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #f6e3ad, #c2964a 55%, #6e5020);
+            box-shadow: 1px 2px 2px rgba(40,25,10,0.35);
+        }
+        #return .arr { letter-spacing: 0; font-family: 'Noto Sans TC', sans-serif; font-weight: 700; }
+        @keyframes signIdle  { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
+        @keyframes signSwing { 0% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 55% { transform: rotate(4deg); } 80% { transform: rotate(-2deg); } 100% { transform: rotate(0); } }
+        #return:hover  { animation: signSwing 1.3s ease-out; }
+        #return:active { box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), inset -2px -3px 0 rgba(80,50,20,0.18), 2px 4px 6px rgba(70,50,30,0.22); }
+        #return:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 4px; }
+        @media (prefers-reduced-motion: reduce) { #return { animation: none !important; } }
 
-        /* ── 連線狀態列：儀表板風格 ── */
+        /* 連線狀態：頁尾一行小字 */
         .sys-status {
-            margin: 14px auto 0; max-width: 340px; padding: 5px 8px; border-radius: 8px;
-            background: #0b0e12; border: 1px solid #26303a;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
-            display: flex; align-items: center; gap: 7px;
-            font-size: 0.72rem; color: var(--muted); text-align: left; line-height: 1.4;
+            margin: 18px auto 0; padding-top: 12px;
+            border-top: 1px solid var(--hair);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 0.74rem; color: var(--muted); line-height: 1.5; text-align: left;
         }
-        .sys-status.ok  { color: #b9f5c8; }
-        .sys-status.err { border-color: #7a1f1f; color: #ff9a9a; font-weight: bold; }
-        .sys-dot { width: 7px; height: 7px; border-radius: 50%; background: #5b6672; flex-shrink: 0; }
-        .sys-status.ok  .sys-dot { background: #3cff6a; box-shadow: 0 0 8px #3cff6a; animation: blink 2s infinite; }
-        .sys-status.err .sys-dot { background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; }
-        @keyframes blink { 50% { opacity: 0.35; } }
-        .sys-text { flex: 1; }
+        .sys-status.ok  { color: var(--ink-2); }
+        .sys-status.err { color: #a8432c; font-weight: 500; }
+        .sys-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9bfb1; flex-shrink: 0; }
+        .sys-status.ok  .sys-dot { background: var(--sage); animation: breathe 3s ease-in-out infinite; }
+        .sys-status.err .sys-dot { background: #a8432c; }
+        @keyframes breathe { 50% { opacity: 0.35; } }
+        .sys-text { flex: 0 1 auto; }
         .btn-recheck {
-            flex-shrink: 0; padding: 3px 7px; border-radius: 6px;
-            border: 1px solid #3a4552;
-            background: linear-gradient(180deg, #2e3741, #1a2027);
-            color: var(--cyan); font-size: 0.68rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 2px 0 #07090c;
+            flex-shrink: 0; padding: 0; border: none; background: none;
+            color: var(--sage); font-size: 0.74rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
         }
-        .btn-recheck:active { transform: translateY(2px); box-shadow: none; }
 
-        /* ── 歸還設備確認提示框 ── */
+        /* ── 歸還設備確認：紙卡對話框 ── */
         .check-overlay {
             display: none; position: fixed; inset: 0;
-            background: rgba(5,7,10,0.75); backdrop-filter: blur(4px); z-index: 900;
+            background: rgba(60,45,30,0.32); backdrop-filter: blur(3px); z-index: 900;
             align-items: center; justify-content: center; padding: 20px;
         }
         .check-overlay.show { display: flex; }
         .check-box {
-            position: relative; overflow: hidden;
-            background: linear-gradient(180deg, #232a32, #171c22); color: var(--text);
-            border: 1px solid var(--line); border-radius: 18px;
-            padding: 30px 22px 20px; width: 100%; max-width: 380px;
-            box-shadow: 0 6px 0 #07090c, 0 20px 50px rgba(0,0,0,0.6);
-            display: flex; flex-direction: column; gap: 14px;
+            position: relative;
+            background: linear-gradient(170deg, #fdfbf7, var(--paper-2)); color: var(--ink);
+            border-radius: 6px;
+            padding: 26px 22px 20px; width: 100%; max-width: 380px;
+            box-shadow: 0 0 0 1px rgba(120,100,70,0.08), 14px 24px 50px rgba(50,35,20,0.28);
+            display: flex; flex-direction: column; gap: 12px;
             text-align: center; animation: slideUp 0.3s ease-out;
         }
-        .check-box::before {
-            content: ''; position: absolute; left: 0; right: 0; top: 0; height: 8px;
-            background: repeating-linear-gradient(-45deg, var(--hazard) 0 12px, #111 12px 24px);
-        }
-        .check-icon { font-size: 2.2rem; }
-        .check-text { font-size: 1.05rem; line-height: 1.8; color: var(--text); }
-        .check-text b { color: var(--cyan); }
+        .check-icon { display: flex; justify-content: center; color: var(--sage); }
+        .check-icon svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+        .check-text { font-family: 'Noto Serif TC', serif; font-size: 1.08rem; line-height: 1.8; }
+        .check-text b { color: #8a4a30; }
         .check-dev {
-            background: #0b0e12; border: 1px solid #26303a; border-radius: 10px; padding: 10px 14px;
-            color: var(--cyan); font-weight: 700; font-size: 1.05rem; line-height: 1.6;
+            background: #fff; border: 1px solid var(--hair); border-radius: 4px; padding: 8px 14px;
+            color: var(--ink); font-weight: 500; font-size: 1rem; line-height: 1.6;
         }
         .check-note {
-            background: rgba(255,106,19,0.12); border: 1px solid rgba(255,106,19,0.5); border-radius: 10px;
-            padding: 8px 12px; font-size: 0.92rem; color: #ffb27a; text-align: left;
+            background: #f7ece4; border-left: 3px solid #bb6f4e; border-radius: 2px;
+            padding: 8px 12px; font-size: 0.92rem; color: #7a4530; text-align: left;
         }
-        .check-ask { font-size: 1rem; font-weight: bold; color: var(--hazard); }
-        .check-msg { font-size: 0.88rem; color: #ff8080; min-height: 1em; }
+        .check-ask { font-size: 0.95rem; font-weight: 500; color: var(--ink-2); }
+        .check-msg { font-size: 0.86rem; color: #a8432c; min-height: 1em; }
         .check-btns { display: flex; gap: 10px; }
         .check-btns button {
-            flex: 1; padding: 13px; border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: bold; cursor: pointer;
-            font-family: inherit;
+            flex: 1; padding: 12px; border-radius: 999px;
+            font-size: 0.98rem; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: 0.1em;
         }
-        .btn-check-ok   { background: linear-gradient(180deg, #4be36a, #1ea83d); color: #04210b; box-shadow: 0 4px 0 #0d5a1e; }
-        .btn-check-skip { background: linear-gradient(180deg, #4a5562, #2b333c); color: #dfe6ec; box-shadow: 0 4px 0 #0d1014; }
-        .check-btns button:active { transform: translateY(3px); box-shadow: none; }
-        .check-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .check-progress { font-size: 0.8rem; color: var(--muted); margin-top: -8px; }
-        .check-time { font-size: 0.85rem; color: var(--muted); margin-top: -8px; }
-        .check-dev div { padding: 4px 0; border-bottom: 1px dashed #2f3b46; }
+        .btn-check-ok   { background: var(--sage); color: #fffaf2; border: 1px solid var(--sage); box-shadow: 3px 5px 10px rgba(80,108,70,0.25); }
+        .btn-check-ok:hover { background: #627c5b; }
+        .btn-check-skip { background: transparent; color: var(--ink-2); border: 1px solid #d3c7b6; }
+        .btn-check-skip:hover { background: #fff; }
+        .check-btns button:active { transform: translateY(1px); }
+        .check-btns button:disabled { opacity: 0.55; cursor: not-allowed; }
+        .check-progress { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.08em; }
+        .check-time { font-size: 0.84rem; color: var(--muted); margin-top: -6px; }
+        .check-dev div { padding: 4px 0; border-bottom: 1px dashed var(--hair); }
         .check-dev div:last-child { border-bottom: none; }
 
         @media (max-width: 480px) {
-            .container { padding: 32px 16px 22px; }
-            .stage { margin-left: -16px; margin-right: -16px; }
-            #welcome { font-size: 1.6em; }
+            .container { padding: 28px 18px 20px; }
+            .stage { margin-left: -18px; margin-right: -18px; }
+            #welcome { font-size: 1.55rem; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .ball .float { animation: none !important; }
+            .leaves, .swing { animation: none !important; }
         }
     </style>
 </head>
 <body>
+    <!-- 陽光與葉影 -->
+    <div class="sunlight" aria-hidden="true"></div>
+    <svg class="leaves l-back"  viewBox="0 0 900 900" aria-hidden="true"></svg>
+    <svg class="leaves l-low"   viewBox="0 0 900 900" aria-hidden="true"></svg>
+    <svg class="leaves l-front" viewBox="0 0 900 900" aria-hidden="true"></svg>
+
     <div class="container">
         <span class="rivet tl"></span><span class="rivet tr"></span>
         <span class="rivet bl"></span><span class="rivet br"></span>
 
         <div id="time"></div>
         <div id="welcome">科務大大 你好</div>
-        <div class="subtitle">CONTROL CENTER</div>
+        <div class="subtitle">行政管理後台</div>
 
-        <!-- 3D 立體球：一次一顆，左右滑動切換，點球散開後進入（修改） -->
-        <div class="stage" id="stage" aria-label="管理功能選單，左右滑動切換">
-            <button class="ball" id="members"  data-dc="#ff6a13" data-url="de-name.html"><span class="float"><span class="orb"></span><span class="ic">👥</span><span class="lb">會員資料</span></span></button>
-            <button class="ball" id="devices"  data-dc="#00d2ff" data-url="de-device.html"><span class="float"><span class="orb"></span><span class="ic">💻</span><span class="lb">設備系統</span><span class="pend-badge" id="pend-badge"></span></span></button>
-            <button class="ball" id="supplies" data-dc="#ffc400" data-url="de-Stationery.html"><span class="float"><span class="orb"></span><span class="ic">✏️</span><span class="lb">文具系統</span></span></button>
-            <button class="ball" id="meals"    data-dc="#3ccf3a" data-url="de-meal.html"><span class="float"><span class="orb"></span><span class="ic">🍱</span><span class="lb">訂餐系統</span></span></button>
+        <!-- 功能選單：牆上的吊牌（點一下把牌子取下，進入頁面） -->
+        <div class="stage hooks" id="stage">
+            <span class="rail" aria-hidden="true"></span>
+            <button class="slot" id="members" data-url="de-name.html" aria-label="會員資料" style="--c1:#c78464;--c2:#a35d3f;--delay:0s"><span class="peg"></span><span class="swing"><span class="cord"></span><span class="plate"><span class="hole"></span><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.5"/><path d="M15.5 14.2c2.4-.2 4.3 1.3 5 4.3"/></svg></span><span class="lb">會員<br>資料</span></span></span></button>
+            <button class="slot" id="devices" data-url="de-device.html" aria-label="設備系統" style="--c1:#7892ad;--c2:#536f8b;--delay:-1.3s"><span class="peg"></span><span class="swing"><span class="cord"></span><span class="plate"><span class="hole"></span><span class="ic"><svg viewBox="0 0 24 24"><rect x="4.5" y="5" width="15" height="10" rx="1.2"/><path d="M2.5 18.5h19"/><path d="M10 18.5l.6-1.4h2.8l.6 1.4"/></svg></span><span class="lb">設備<br>系統</span></span><span class="pend-badge" id="pend-badge"></span></span></button>
+            <button class="slot" id="supplies" data-url="de-Stationery.html" aria-label="文具系統" style="--c1:#cfab62;--c2:#a8833a;--delay:-2.6s"><span class="peg"></span><span class="swing"><span class="cord"></span><span class="plate"><span class="hole"></span><span class="ic"><svg viewBox="0 0 24 24"><path d="M15.5 4.5l4 4L9 19l-5 1 1-5z"/><path d="M13.5 6.5l4 4"/></svg></span><span class="lb">文具<br>系統</span></span></span></button>
+            <button class="slot" id="meals" data-url="de-meal.html" aria-label="訂餐系統" style="--c1:#88a77a;--c2:#617f55;--delay:-0.7s"><span class="peg"></span><span class="swing"><span class="cord"></span><span class="plate"><span class="hole"></span><span class="ic"><svg viewBox="0 0 24 24"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M8 20h8"/><path d="M9 8c0-1.5 1-1.8 1-3.3M12.5 8c0-1.5 1-1.8 1-3.3"/></svg></span><span class="lb">訂餐<br>系統</span></span></span></button>
         </div>
+        <div class="hook-hint">點選吊牌即可進入</div>
         <div class="dots" id="dots"></div>
 
         <!-- 返回：保持方形框 -->
-        <button id="return">返回</button>
+        <button id="return"><span class="arr">←</span>返回</button>
 
         <div class="sys-status" id="sys-status">
             <span class="sys-dot"></span>
             <span class="sys-text" id="sys-text">連線檢查中…</span>
-            <button class="btn-recheck" id="btn-recheck" title="重新檢查，包含先前略過的">🔄 重新檢查</button>
+            <button class="btn-recheck" id="btn-recheck" title="重新檢查，包含先前略過的">重新檢查</button>
         </div>
     </div>
 
     <!-- 歸還設備確認提示框 -->
     <div class="check-overlay" id="check-overlay">
         <div class="check-box">
-            <div class="check-icon">📦</div>
+            <div class="check-icon"><svg viewBox="0 0 24 24"><path d="M3.5 7.5L12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9"/></svg></div>
             <div class="check-progress" id="check-progress"></div>
             <div class="check-text" id="check-text"></div>
             <div class="check-time" id="check-time"></div>
@@ -385,13 +398,41 @@
             <div class="check-ask">請確認設備是否完整、有無異常？</div>
             <div class="check-msg" id="check-msg"></div>
             <div class="check-btns">
-                <button class="btn-check-ok" id="btn-check-ok">✅ 確認</button>
+                <button class="btn-check-ok" id="btn-check-ok">確認</button>
                 <button class="btn-check-skip" id="btn-check-skip">略過</button>
             </div>
         </div>
     </div>
 
     <script>
+        // ══ 葉影：用程式畫出樹枝與葉子 ══
+        (function () {
+            let seed = 7;
+            const rand = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+            const LEAF = 'M0 0 C 10 -11, 30 -12, 44 0 C 30 12, 10 11, 0 0 Z';
+            function branch(x0, y0, x1, y1, cx, cy, count, size) {
+                let out = `<path d="M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}" style="fill:none;stroke:#4a4532;stroke-width:${size * 0.09}"/>`;
+                for (let i = 1; i <= count; i++) {
+                    const t = i / (count + 1);
+                    const x = (1-t)*(1-t)*x0 + 2*(1-t)*t*cx + t*t*x1;
+                    const y = (1-t)*(1-t)*y0 + 2*(1-t)*t*cy + t*t*y1;
+                    const dx = 2*(1-t)*(cx-x0) + 2*t*(x1-cx), dy = 2*(1-t)*(cy-y0) + 2*t*(y1-cy);
+                    const base = Math.atan2(dy, dx) * 180 / Math.PI;
+                    const ang = base + (i % 2 ? 1 : -1) * (35 + rand() * 30);
+                    const s = size * (0.7 + rand() * 0.6) * (1 - t * 0.35);
+                    out += `<path d="${LEAF}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${(s/44).toFixed(2)})"/>`;
+                }
+                return out;
+            }
+            const svg =
+                branch(900, 0,   180, 520, 520, 120, 26, 70) +
+                branch(900, 90,  380, 760, 700, 380, 20, 62) +
+                branch(760, 0,   300, 230, 560, 40,  16, 56) +
+                branch(640, 300, 520, 620, 600, 460, 8,  46) +
+                branch(430, 300, 250, 420, 330, 330, 7,  44);
+            document.querySelectorAll('svg.leaves').forEach(el => { el.innerHTML = svg; });
+        })();
+
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
         // ── 訂餐專用後台帳號（新增）：index 以 2040 登入後台時設定 ──
@@ -406,7 +447,10 @@
 
         function updateTime() {
             const now = new Date();
-            document.getElementById('time').innerText = now.toLocaleString('zh-TW');
+            const wk = '日一二三四五六'[now.getDay()];
+            const hm = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('time').innerText =
+                `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日　星期${wk}　${hm}`;
         }
         setInterval(updateTime, 1000);
         updateTime();
@@ -420,170 +464,45 @@
         });
 
         // ══════════════════════════════
-        //  3D 立體球（修改）
-        //  一次只出現一顆；左右滑動時，下一顆以隨機方式滑入
-        //  點球 → 球散成碎片 → 進入該頁面
+        //  功能選單：牆上的吊牌（點一下取下牌子，進入頁面）
         // ══════════════════════════════
         (function () {
-            const stage = document.getElementById('stage');
-            const balls = [...stage.querySelectorAll('.ball')];
-            const dots  = document.getElementById('dots');
-            const n = balls.length;
             const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            let active = 0, busy = false, leaving = false;
-
-            balls.forEach((b, i) => {
-                const d = document.createElement('button');
-                d.className = 'dot';
-                d.type = 'button';
-                d.setAttribute('aria-label', b.querySelector('.lb').textContent);
-                d.style.setProperty('--dc', b.dataset.dc);
-                d.addEventListener('click', () => show(i, i > active ? 1 : -1));
-                dots.appendChild(d);
-            });
-            function syncUI() {
-                balls.forEach((b, i) => { b.classList.toggle('on', i === active); b.tabIndex = i === active ? 0 : -1; });
-                [...dots.children].forEach((d, i) => d.classList.toggle('on', i === active));
-                stage.style.setProperty('--base', getComputedStyle(balls[active]).getPropertyValue('--glow'));
-            }
-            syncUI();
-
-            // 隨機進場方式（dir：1＝往左滑、-1＝往右滑）
-            const rnd = (a, b) => a + Math.random() * (b - a);
-            const ENTRIES = [
-                dir => [{ transform: `translateX(${dir * 130}%) rotate(${dir * 200}deg) scale(.6)`, opacity: 0 }],     // 側邊滾入
-                ()  => [{ transform: 'translateY(-140%) scale(.7)', opacity: 0 },
-                        { transform: 'translateY(8%) scale(1.05, .9)', opacity: 1, offset: .7 }],                       // 從上方掉落彈跳
-                ()  => [{ transform: 'translateY(140%) scale(.5)', opacity: 0 }],                                        // 從下方升起
-                ()  => [{ transform: 'scale(0) rotate(-540deg)', opacity: 0 }],                                          // 旋轉放大
-                ()  => [{ transform: 'scale(2.4)', opacity: 0, filter: 'blur(8px)' }],                                   // 由遠拉近
-                dir => [{ transform: `translate(${dir * 120}%, -110%) scale(.4) rotate(${dir * 120}deg)`, opacity: 0 }], // 斜角飛入
-                ()  => [{ transform: 'perspective(600px) rotateY(90deg) scale(.6)', opacity: 0 }],                       // 翻轉進場
-            ];
-            let lastEntry = -1;
-
-            function show(next, dir) {
-                if (busy || leaving || next === active) return;
-                busy = true;
-                const oldBall = balls[active], newBall = balls[next];
-                active = next;
-
-                if (reduce) { syncUI(); busy = false; return; }
-
-                // 舊球往滑動方向離開
-                oldBall.animate([
-                    { transform: 'none', opacity: 1 },
-                    { transform: `translateX(${-dir * 120}%) rotate(${-dir * 90}deg) scale(.5)`, opacity: 0 }
-                ], { duration: 380, easing: 'cubic-bezier(.5,0,.75,0)' })
-                .finished.then(() => oldBall.classList.remove('on'));
-
-                // 新球用隨機方式進場（不和上一次重複）
-                let k; do { k = Math.floor(Math.random() * ENTRIES.length); } while (k === lastEntry && ENTRIES.length > 1);
-                lastEntry = k;
-                newBall.classList.add('on');
-                syncUI(); oldBall.classList.add('on');
-                newBall.animate([...ENTRIES[k](dir), { transform: 'none', opacity: 1, filter: 'none' }],
-                    { duration: 620, easing: 'cubic-bezier(.2,.8,.25,1.15)', delay: 120, fill: 'backwards' })
-                .finished.then(() => { busy = false; });
-            }
-            const go = dir => show(((active + dir) % n + n) % n, dir);
-
-            // 點球 → 散開 → 跳頁
-            function burst(ball) {
+            let leaving = false;
+            function enter(el) {
                 if (leaving) return;
                 leaving = true;
-                const url = ball.dataset.url;
-                try { sessionStorage.setItem('fadeIn', '1'); } catch (e) {}   // 告訴下一頁：用浮現方式出現（新增）
+                const url = el.dataset.url;
+                try { sessionStorage.setItem('fadeIn', '1'); } catch (e) {}
                 if (reduce) { window.location.href = url; return; }
-
-                const r = ball.getBoundingClientRect();
-                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-                const cs = getComputedStyle(ball);
-                const colors = ['--c1', '--c2', '--c3'].map(v => cs.getPropertyValue(v).trim()).concat(['#ffffff']);
-
-                // 閃光
-                const flash = document.createElement('div');
-                flash.className = 'flash';
-                flash.style.setProperty('--fx', cx + 'px'); flash.style.setProperty('--fy', cy + 'px');
-                document.body.appendChild(flash);
-                flash.animate([{ opacity: 0 }, { opacity: 1, offset: .25 }, { opacity: 0 }], { duration: 500 });
-
-                // 球本體：先鼓起再消失
-                ball.animate([
-                    { transform: 'scale(1)', opacity: 1 },
-                    { transform: 'scale(1.15)', opacity: 1, offset: .35 },
-                    { transform: 'scale(1.6)', opacity: 0 }
-                ], { duration: 360, easing: 'ease-out', fill: 'forwards' });
-
-                // 碎片往四面八方飛散
-                const N = 46;
-                for (let i = 0; i < N; i++) {
-                    const p = document.createElement('div');
-                    p.className = 'shard';
-                    const size = rnd(6, 22);
-                    const ang = rnd(0, Math.PI * 2);
-                    const start = rnd(0, r.width * 0.42);
-                    const dist = rnd(120, 340);
-                    const c = colors[Math.floor(Math.random() * colors.length)];
-                    Object.assign(p.style, {
-                        width: size + 'px', height: size + 'px',
-                        left: (cx + Math.cos(ang) * start - size / 2) + 'px',
-                        top:  (cy + Math.sin(ang) * start - size / 2) + 'px',
-                        background: `radial-gradient(circle at 35% 30%, #fff, ${c} 55%)`,
-                        boxShadow: `0 0 10px ${c}`,
-                        borderRadius: Math.random() < 0.4 ? '3px' : '50%'
-                    });
-                    document.body.appendChild(p);
-                    p.animate([
-                        { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1 },
-                        { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist + rnd(20, 90)}px) scale(${rnd(.2, .6)}) rotate(${rnd(-360, 360)}deg)`, opacity: 0 }
-                    ], { duration: rnd(550, 850), easing: 'cubic-bezier(.15,.7,.3,1)', delay: 80, fill: 'forwards' });
-                }
-                // 碎片散開後，畫面淡入深色，再交給下一頁浮現（修改）
+                el.classList.add('opening');
                 const veil = document.createElement('div');
-                Object.assign(veil.style, { position: 'fixed', inset: '0', zIndex: '1001', background: '#0d1014', opacity: '0', pointerEvents: 'none' });
+                veil.className = 'page-veil';
+                Object.assign(veil.style, { position: 'fixed', inset: '0', zIndex: '1001', background: '#efe6d8', opacity: '0', pointerEvents: 'none' });
                 document.body.appendChild(veil);
-                veil.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: 520, fill: 'forwards' });
-                setTimeout(() => { window.location.href = url; }, 800);
+                veil.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, delay: 360, fill: 'forwards' });
+                setTimeout(() => { window.location.href = url; }, 680);
             }
-
-            // 滑動：往左滑 → 下一顆；往右滑 → 上一顆
-            let sx = 0, sy = 0, tracking = false, swiped = false;
-            stage.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; tracking = true; swiped = false; });
-            stage.addEventListener('pointerup', e => {
-                if (!tracking) return;
-                tracking = false;
-                const dx = e.clientX - sx, dy = e.clientY - sy;
-                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-                    go(dx < 0 ? 1 : -1);
-                    swiped = true;
-                }
-            });
-            stage.addEventListener('pointercancel', () => { tracking = false; });
-
-            stage.addEventListener('click', e => {
-                const b = e.target.closest('.ball');
-                if (swiped) { swiped = false; return; }   // 剛滑動完，不算點擊
-                if (b && b === balls[active] && !busy) burst(b);
-            });
-
-            // 電腦可用鍵盤左右鍵
-            document.addEventListener('keydown', e => {
-                if (document.getElementById('check-overlay').classList.contains('show')) return;
-                if (e.key === 'ArrowRight') go(1);
-                if (e.key === 'ArrowLeft')  go(-1);
-            });
+            document.querySelectorAll('.slot').forEach(s => s.addEventListener('click', () => enter(s)));
+            // 手機沒有滑鼠移入：手指碰到時也讓牌子晃一下
+            document.querySelectorAll('.slot').forEach(s => s.addEventListener('touchstart', () => {
+                const w = s.querySelector('.swing');
+                w.style.animation = 'none'; void w.offsetWidth; w.style.animation = 'swing 1.2s ease-out';
+            }, { passive: true }));
+            const ret = document.getElementById('return');
+            ret.addEventListener('touchstart', () => {
+                ret.style.animation = 'none'; void ret.offsetWidth; ret.style.animation = 'signSwing 1.2s ease-out';
+            }, { passive: true });
+            if (document.querySelectorAll('.slot').length === 1) document.querySelector('.hook-hint').textContent = '點選吊牌即可進入訂餐系統';
 
             // 從下一頁按「上一頁」回來時，恢復可點
             window.addEventListener('pageshow', ev => {
                 if (!ev.persisted) return;
-                leaving = false; busy = false;
-                balls.forEach(b => b.getAnimations().forEach(a => a.cancel()));
-                document.querySelectorAll('.shard, .flash').forEach(el => el.remove());
-                document.querySelectorAll('body > div[style*="z-index: 1001"]').forEach(el => el.remove());
+                leaving = false;
+                document.querySelectorAll('.opening').forEach(el => el.classList.remove('opening'));
+                document.querySelectorAll('.page-veil').forEach(el => el.remove());
             });
-
-            if (!MEAL_ONLY_ADMIN) window.__markDevicesDot = on => dots.children[balls.findIndex(b => b.id === 'devices')].classList.toggle('alert', on);
+            window.__markDevicesDot = () => {};   // 木牌上已直接貼待確認貼紙
         })();
 
         // ══════════════════════════════
@@ -643,7 +562,7 @@
         }
         function setBadge(n) {
             const b = document.getElementById('pend-badge');
-            b.textContent = n + ' 待確認';
+            b.textContent = n;
             b.style.display = n ? 'inline-block' : 'none';
             if (window.__markDevicesDot) window.__markDevicesDot(n > 0);   // 設備球不在畫面上時，點點也提醒
         }
@@ -683,7 +602,7 @@
         function setCheckBusy(busy) {
             document.getElementById('btn-check-ok').disabled   = busy;
             document.getElementById('btn-check-skip').disabled = busy;
-            document.getElementById('btn-check-ok').textContent = busy ? '處理中…' : '✅ 確認';
+            document.getElementById('btn-check-ok').textContent = busy ? '處理中…' : '確認';
         }
 
         function closeCheck() {
