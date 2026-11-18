@@ -394,6 +394,16 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
+        // ── 訂餐專用後台帳號（新增）：index 以 2040 登入後台時設定 ──
+        //    只保留「訂餐系統」與「返回」，其他球、歸還確認、連線狀態都不顯示
+        const MEAL_ONLY_ADMIN = localStorage.getItem('adminMealOnly') === '1';
+        if (MEAL_ONLY_ADMIN) {
+            ['members', 'devices', 'supplies'].forEach(id => document.getElementById(id).remove());
+            document.getElementById('dots').style.display = 'none';
+            document.getElementById('sys-status').style.display = 'none';
+            document.getElementById('welcome').textContent = '社區醫學科 你好';
+        }
+
         function updateTime() {
             const now = new Date();
             document.getElementById('time').innerText = now.toLocaleString('zh-TW');
@@ -404,6 +414,7 @@
         // 四顆球的跳頁網址寫在各自的 data-url（點球 → 散開特效 → 跳頁）
         document.getElementById('return').addEventListener('click', function() {
             if (confirm('確認要返回主頁嗎？')) {
+                localStorage.removeItem('adminMealOnly');   // 清除訂餐專用模式（新增）
                 window.location.href = 'index.html';
             }
         });
@@ -572,7 +583,7 @@
                 document.querySelectorAll('body > div[style*="z-index: 1001"]').forEach(el => el.remove());
             });
 
-            window.__markDevicesDot = on => dots.children[balls.findIndex(b => b.id === 'devices')].classList.toggle('alert', on);
+            if (!MEAL_ONLY_ADMIN) window.__markDevicesDot = on => dots.children[balls.findIndex(b => b.id === 'devices')].classList.toggle('alert', on);
         })();
 
         // ══════════════════════════════
@@ -703,8 +714,10 @@
             }
         }
 
-        pollChecks();
-        setInterval(pollChecks, 5000);
+        if (!MEAL_ONLY_ADMIN) {   // 訂餐專用後台不檢查歸還設備（修改）
+            pollChecks();
+            setInterval(pollChecks, 5000);
+        }
     </script>
 </body>
 </html>
