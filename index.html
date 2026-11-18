@@ -460,6 +460,14 @@
                 return;
             }
 
+            // ── 訂餐專用後台帳號（新增）：只能使用訂餐系統 ──
+            if (adminAccount === '2040' && adminPassword === '100208') {
+                localStorage.setItem('adminMealOnly', '1');
+                document.getElementById('adminModal').style.display = 'none';
+                window.location.href = 'deleloper.html';
+                return;
+            }
+
             if (adminAccount !== '2046') {
                 alert('帳號密碼錯誤');
                 document.getElementById('adminAccount').value = '';
@@ -475,6 +483,7 @@
                 return;
             }
 
+            localStorage.removeItem('adminMealOnly');   // 完整後台（新增）
             document.getElementById('adminModal').style.display = 'none';
             window.location.href = 'deleloper.html';
         });
