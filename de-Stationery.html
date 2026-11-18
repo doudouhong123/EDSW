@@ -184,7 +184,7 @@
     .search-clear.show { display: block; }
 
     /* ── 文具目錄：索引卡 ── */
-    .catalog { display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 12px; margin-top: 14px; }
+    .catalog { }
     .icard {
       position: relative; height: 112px; border: none; cursor: pointer; text-align: left; padding: 0;
       font-family: inherit; color: #2a2f38;
@@ -219,6 +219,24 @@
     .icard .flip-hint { color: #9aa2ae; }
     mark { background: rgba(244,211,94,0.6); color: inherit; border-radius: 2px; padding: 0 1px; }
     .catalog .empty-line, .slips .empty-line { grid-column: 1 / -1; text-align: center; padding: 24px 0; color: #7d8aa0; font-family: 'LXGW WenKai TC', sans-serif; letter-spacing: 0.08em; }
+
+    /* ── 分頁：每頁 10 筆，左右滑動換頁（新增）── */
+    .pager {
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      margin: 0 -8px;
+    }
+    .pager::-webkit-scrollbar { display: none; }
+    .pager > .page { flex: 0 0 100%; scroll-snap-align: start; padding: 14px 8px 12px; box-sizing: border-box; min-width: 0; }
+    .page.catalog { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 12px; align-content: start; margin-top: 0; }
+    .page.slips   { display: flex; flex-direction: column; gap: 10px; margin-top: 0; }
+    .pager-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 2px; min-height: 26px; }
+    .pager-nav .pg-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #d3c7b6; background: rgba(255,255,255,0.6); color: var(--ink-2); cursor: pointer; font-size: 0.85rem; }
+    .pager-nav .pg-btn:disabled { opacity: .35; cursor: default; }
+    .pager-nav .pg-dots { display: flex; gap: 5px; }
+    .pager-nav .pg-dots i { width: 6px; height: 6px; border-radius: 3px; background: #d6cbbb; transition: all .3s; cursor: pointer; }
+    .pager-nav .pg-dots i.on { width: 18px; background: #8a7a64; }
+    .pager-nav .pg-text { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
 
     /* ── 翻面盤點（3D 翻轉）── */
     .flip-overlay {
@@ -394,7 +412,7 @@
     .btn-modal-cancel { background: transparent; border: 1px solid #d3c7b6; color: var(--ink-2); }
 
     @media (prefers-reduced-motion: reduce) { .flip-card { transition: none; } .icard, .slip { animation: none; } }
-    @media (max-width: 380px) { .catalog { grid-template-columns: repeat(2, 1fr); } .icard .nm { font-size: 1rem; } }
+    @media (max-width: 380px) { .icard .nm { font-size: 1rem; } }
     /* 從後台進入時以「浮現」方式出現 */
     html.fade-in { background: #efe6d8; }
     html.fade-in body { animation: pageFloatIn 0.8s cubic-bezier(.2,.8,.2,1) both; }
@@ -443,22 +461,8 @@
     <button class="wbtn terra" onclick="openModal('del')">－ 刪除文具</button>
   </div>
 
-  <!-- 文具目錄 -->
-  <div class="section">
-    <div class="sec-head">
-      <span class="sec-title">文具目錄</span>
-      <span class="pill" id="list-count" style="display:none"></span>
-    </div>
-    <div class="tape">
-      <input type="text" class="search-input" id="search-input" placeholder="輸入關鍵字找文具…" autocomplete="off"/>
-      <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="清除搜尋">✕</button>
-    </div>
-    <div class="catalog" id="item-list"><div class="empty-line">載入中，請稍候…</div></div>
-    <div class="sec-note" style="text-align:center;margin-top:10px;">點一下卡片，翻到背面盤點</div>
-  </div>
-
   <!-- 領用單存根 -->
-  <div class="section" style="padding-bottom: 22px;">
+  <div class="section">
     <div class="sec-head">
       <span class="sec-title">領用單存根</span>
       <span class="pill" id="order-count" style="display:none"></span>
@@ -473,7 +477,23 @@
       <button class="wbtn oak" onclick="resetDateFilter()">清除</button>
     </div>
     <div class="date-filter-hint" id="date-filter-hint"></div>
-    <div class="slips" id="order-records-body"><div class="empty-line">載入中，請稍候…</div></div>
+    <div class="pager" id="order-records-body"><div class="page"><div class="empty-line">載入中，請稍候…</div></div></div>
+    <div class="pager-nav" id="order-nav"></div>
+  </div>
+
+  <!-- 文具目錄 -->
+  <div class="section" style="padding-bottom: 22px;">
+    <div class="sec-head">
+      <span class="sec-title">文具目錄</span>
+      <span class="pill" id="list-count" style="display:none"></span>
+    </div>
+    <div class="tape">
+      <input type="text" class="search-input" id="search-input" placeholder="輸入關鍵字找文具…" autocomplete="off"/>
+      <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="清除搜尋">✕</button>
+    </div>
+    <div class="pager" id="item-list"><div class="page"><div class="empty-line">載入中，請稍候…</div></div></div>
+    <div class="pager-nav" id="item-nav"></div>
+    <div class="sec-note" style="text-align:center;margin-top:6px;">點一下卡片，翻到背面盤點・左右滑動換頁</div>
   </div>
 </div>
 
@@ -827,6 +847,32 @@
   function fuzzyMatch(item, kw) { if (!kw) return true; const il = item.toLowerCase(), kl = kw.toLowerCase(); if (il.includes(kl)) return true; let idx = 0; for (const ch of kl) { const f = il.indexOf(ch, idx); if (f === -1) return false; idx = f + 1; } return true; }
   function relevanceScore(item, kw) { const il = item.toLowerCase(), kl = kw.toLowerCase(); if (il === kl) return 100; if (il.startsWith(kl)) return 90; if (il.includes(kl)) return 80; return 60; }
 
+  /* ══════════ 分頁：每頁 10 筆，左右滑動換頁（新增）══════════ */
+  const PER_PAGE = 10;
+  function chunk(arr, n) { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; }
+  function pageIndex(pager) { return pager.clientWidth ? Math.round(pager.scrollLeft / pager.clientWidth) : 0; }
+  function goPage(pager, i, smooth) { pager.scrollTo({ left: i * pager.clientWidth, behavior: smooth ? 'smooth' : 'auto' }); }
+  function buildNav(pager, nav, total) {
+    nav.innerHTML = '';
+    if (total <= 1) return;
+    nav.innerHTML = `<button class="pg-btn" type="button" aria-label="上一頁">‹</button><span class="pg-dots">${'<i></i>'.repeat(Math.min(total, 12))}</span><span class="pg-text"></span><button class="pg-btn" type="button" aria-label="下一頁">›</button>`;
+    const [prev, next] = nav.querySelectorAll('.pg-btn');
+    prev.onclick = () => goPage(pager, Math.max(0, pageIndex(pager) - 1), true);
+    next.onclick = () => goPage(pager, Math.min(total - 1, pageIndex(pager) + 1), true);
+    nav.querySelectorAll('.pg-dots i').forEach((d, i) => d.onclick = () => goPage(pager, i, true));
+    syncNav(pager, nav, total);
+  }
+  function syncNav(pager, nav, total) {
+    if (total <= 1) return;
+    const i = pageIndex(pager);
+    nav.querySelectorAll('.pg-dots i').forEach((d, k) => d.classList.toggle('on', k === Math.min(i, 11)));
+    const t = nav.querySelector('.pg-text'); if (t) t.textContent = `第 ${i + 1} / ${total} 頁`;
+    const [prev, next] = nav.querySelectorAll('.pg-btn'); if (prev) { prev.disabled = i <= 0; next.disabled = i >= total - 1; }
+  }
+  function watchPager(pager, nav, getTotal) {
+    let t; pager.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(() => syncNav(pager, nav, getTotal()), 60); }, { passive: true });
+  }
+
   /* ══════════ 文具目錄：索引卡 ══════════ */
   const TABS = ['#c78464', '#7892ad', '#cfab62', '#88a77a', '#9a6884'];
   let lastListSig = '';
@@ -834,20 +880,26 @@
     const card = e.target.closest('.icard');
     if (card && card.dataset.name !== undefined) selectItem(card.dataset.name);
   });
+  let itemPages = 1, lastKw = null;
   function renderList(items, kw) {
-    const list = document.getElementById('item-list'), count = document.getElementById('list-count');
+    const list = document.getElementById('item-list'), count = document.getElementById('list-count'), nav = document.getElementById('item-nav');
     const sig = JSON.stringify(items) + '|' + kw;
     if (sig === lastListSig) return;                // 資料沒變就不重畫
     const firstPaint = !lastListSig;
     lastListSig = sig;
+    const keepPage = (kw === lastKw) ? pageIndex(list) : 0;   // 同步更新時停在原本那頁；換關鍵字回到第 1 頁
+    lastKw = kw;
     list.classList.toggle('no-intro', !firstPaint);
     list.innerHTML = '';
     if (!items || !items.length) {
-      list.innerHTML = `<div class="empty-line">${kw ? `找不到「${esc(kw)}」相關文具` : '目前資料庫沒有文具，請新增'}</div>`;
-      count.style.display = 'none'; return;
+      list.innerHTML = `<div class="page"><div class="empty-line">${kw ? `找不到「${esc(kw)}」相關文具` : '目前資料庫沒有文具，請新增'}</div></div>`;
+      count.style.display = 'none'; itemPages = 1; buildNav(list, nav, 1); return;
     }
     count.style.display = 'inline-block'; count.textContent = `共 ${items.length} 項`;
-    items.forEach((item, i) => {
+    const pages = chunk(items, PER_PAGE); itemPages = pages.length;
+    pages.forEach((pageItems, p) => {
+      const page = document.createElement('div'); page.className = 'page catalog'; list.appendChild(page);
+      pageItems.forEach((item, k) => { const i = p * PER_PAGE + k;
       const idx = allItems.indexOf(item);
       const rr = (n) => { const x = Math.sin((idx + 2) * n) * 10000; return x - Math.floor(x); };
       let dn = esc(item);
@@ -856,13 +908,18 @@
       card.type = 'button';
       card.className = 'icard' + (item === selectedItem ? ' selected' : '');
       card.dataset.name = item;
-      card.style.cssText = `--tc:${TABS[idx % TABS.length]};--tilt:${(rr(3.1) * 2 - 1).toFixed(2)}deg;--tx:${(10 + rr(7.7) * 60).toFixed(0)}px;--in:${(i * 0.03).toFixed(2)}s`;
+      card.style.cssText = `--tc:${TABS[idx % TABS.length]};--tilt:${(rr(3.1) * 2 - 1).toFixed(2)}deg;--tx:${(10 + rr(7.7) * 60).toFixed(0)}px;--in:${(k * 0.03).toFixed(2)}s`;
       const q = qtyCache[item];
       card.innerHTML = `<span class="tab"></span><span class="no">No.${idx + 1}</span><span class="nm">${dn}</span>
         <span class="stock">${q !== undefined ? `<span>庫存<b>${esc(q)}</b></span>` : '<span class="flip-hint">點一下盤點</span>'}<span>↻</span></span>`;
-      list.appendChild(card);
+      page.appendChild(card);
+      });
     });
+    buildNav(list, nav, itemPages);
+    goPage(list, Math.min(keepPage, itemPages - 1), false);
+    syncNav(list, nav, itemPages);
   }
+  watchPager(document.getElementById('item-list'), document.getElementById('item-nav'), () => itemPages);
   function refreshCardStock(name) {   // 只更新那一張卡的庫存字，不重畫整個目錄
     const card = [...document.querySelectorAll('#item-list .icard')].find(c => c.dataset.name === name);
     if (!card) return;
@@ -1040,7 +1097,7 @@
     updateDateShow(inp);
   });
 
-  function applyDateFilter() {
+  function applyDateFilter(fromUser = true) {   // 自動同步時 fromUser=false，不跳回第 1 頁
     const fromVal = document.getElementById('date-from').value, toVal = document.getElementById('date-to').value;
     const hint = document.getElementById('date-filter-hint');
     if (!fromVal && !toVal) { hint.textContent = '⚠ 請至少選擇一個日期'; hint.style.color = '#a8432c'; return; }
@@ -1050,48 +1107,59 @@
     const label = [(fromVal || '最早'), '～', (toVal || '最新')].join(' ');
     hint.style.color = '';
     hint.textContent = filtered.length > 0 ? `${label}，共 ${filtered.length} 筆` : `${label} 沒有領用紀錄`;
-    renderOrderRecords(filtered);
+    if (!fromUser) { renderOrderRecords(filtered); return; }
+    lastSlipSig = ''; renderOrderRecords(filtered); goPage(document.getElementById('order-records-body'), 0, false); syncNav(document.getElementById('order-records-body'), document.getElementById('order-nav'), slipPages);
   }
   function resetDateFilter() {
     document.getElementById('date-from').value = ''; document.getElementById('date-to').value = '';
     document.querySelectorAll('.date-input').forEach(updateDateShow);
     document.getElementById('date-filter-hint').textContent = '';
-    isFiltering = false; renderOrderRecords(allOrderRecords);
+    isFiltering = false; lastSlipSig = ''; renderOrderRecords(allOrderRecords); goPage(document.getElementById('order-records-body'), 0, false); syncNav(document.getElementById('order-records-body'), document.getElementById('order-nav'), slipPages);
   }
 
   /* ══════════ 領用單存根 ══════════ */
   async function fetchOrderRecords() {
     try {
       const res = await fetch(`${GAS_URL}?action=getOrderRecords`, { cache: 'no-store' }); const json = await res.json();
-      if (json.status === 'ok') { allOrderRecords = json.data || []; if (!isFiltering) renderOrderRecords(allOrderRecords); else applyDateFilter(); }
+      if (json.status === 'ok') { allOrderRecords = json.data || []; if (!isFiltering) renderOrderRecords(allOrderRecords); else applyDateFilter(false); }
     } catch {}
   }
-  let lastSlipSig = '';
+  let lastSlipSig = '', slipPages = 1;
   function renderOrderRecords(rows) {
-    const body = document.getElementById('order-records-body'), count = document.getElementById('order-count');
+    const body = document.getElementById('order-records-body'), count = document.getElementById('order-count'), nav = document.getElementById('order-nav');
     rows = rows || [];
     const sig = JSON.stringify(rows);
     if (sig === lastSlipSig) return;
     const firstPaint = !lastSlipSig; lastSlipSig = sig;
+    const keepPage = pageIndex(body);
     body.classList.toggle('no-intro', !firstPaint);
     body.innerHTML = '';
-    if (!rows.length) { body.innerHTML = `<div class="empty-line">目前尚無文具領用紀錄</div>`; count.style.display = 'none'; return; }
+    if (!rows.length) { body.innerHTML = `<div class="page"><div class="empty-line">目前尚無文具領用紀錄</div></div>`; count.style.display = 'none'; slipPages = 1; buildNav(body, nav, 1); return; }
     count.style.display = 'inline-block'; count.textContent = `共 ${rows.length} 筆`;
-    [...rows].reverse().forEach((r, i) => {
-      const n = rows.length - i;
-      const x = Math.sin(n * 9.1) * 10000, tilt = ((x - Math.floor(x)) * 1.2 - 0.6).toFixed(2);
-      const div = document.createElement('div');
-      div.className = 'slip';
-      div.style.cssText = `--tilt:${tilt}deg;--in:${Math.min(i * 0.03, 0.6).toFixed(2)}s`;
-      div.innerHTML = `<span class="sno">No.${n}</span>
-        <div class="row"><i>領用人</i><span class="who">${esc(r.name)}</span></div>
-        <div class="row"><i>文具</i><span class="what">${esc(r.item)}</span></div>
-        <div class="row"><i>數量</i><span class="qty">${esc(r.qty)}</span></div>
-        <div class="row"><i>時間</i><span class="when">${formatDateShort(r.time)}</span></div>
-        ${r.notes ? `<div class="row"><i>備註</i><span class="memo">${esc(r.notes)}</span></div>` : ''}`;
-      body.appendChild(div);
+    // 最新的在第 1 頁最上面，越往右滑越舊
+    const newestFirst = rows.map((r, i) => ({ r, n: i + 1 })).reverse();
+    const pages = chunk(newestFirst, PER_PAGE); slipPages = pages.length;
+    pages.forEach(pageRows => {
+      const page = document.createElement('div'); page.className = 'page slips'; body.appendChild(page);
+      pageRows.forEach(({ r, n }, k) => {
+        const x = Math.sin(n * 9.1) * 10000, tilt = ((x - Math.floor(x)) * 1.2 - 0.6).toFixed(2);
+        const div = document.createElement('div');
+        div.className = 'slip';
+        div.style.cssText = `--tilt:${tilt}deg;--in:${(k * 0.03).toFixed(2)}s`;
+        div.innerHTML = `<span class="sno">No.${n}</span>
+          <div class="row"><i>領用人</i><span class="who">${esc(r.name)}</span></div>
+          <div class="row"><i>文具</i><span class="what">${esc(r.item)}</span></div>
+          <div class="row"><i>數量</i><span class="qty">${esc(r.qty)}</span></div>
+          <div class="row"><i>時間</i><span class="when">${formatDateShort(r.time)}</span></div>
+          ${r.notes ? `<div class="row"><i>備註</i><span class="memo">${esc(r.notes)}</span></div>` : ''}`;
+        page.appendChild(div);
+      });
     });
+    buildNav(body, nav, slipPages);
+    goPage(body, Math.min(keepPage, slipPages - 1), false);
+    syncNav(body, nav, slipPages);
   }
+  watchPager(document.getElementById('order-records-body'), document.getElementById('order-nav'), () => slipPages);
   fetchOrderRecords(); setInterval(fetchOrderRecords, POLL_MS);
 </script>
 </body>
