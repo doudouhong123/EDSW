@@ -2,651 +2,358 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="theme-color" content="#11151a"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#efe6d8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>義大社工科｜會員管理</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
+    /* ══════════ 會員管理：窗邊葉影＋木吊牌（與後台吊牌版同一套）══════════ */
     :root {
-      --sand:    #fdf6ec;
-      --cream:   #fef9f3;
-      --warm1:   #f5a469;
-      --warm2:   #e8845a;
-      --warm3:   #d4634a;
-      --sage:    #7aab8a;
-      --sage2:   #5d9170;
-      --sky:     #7fb3d3;
-      --blush:   #f2c4b0;
-      --ink:     #3d2b1f;
-      --ink2:    #6b4c3b;
-      --muted:   #a08070;
-      --border:  #e8d5c4;
-      --white:   #ffffff;
-      --shadow:  rgba(100,60,30,0.10);
-      --radius:  16px;
-      --radius-sm: 10px;
+      --ink: #2f2a24; --ink-2: #5b5348; --muted: #8f8579; --hair: #e3d9ca;
+      --sage: #6f8a68; --terra: #b0603f;
+      --engrave: #4a2d14;
+      --sx: 14px; --sy: 24px; --ovc: 255,255,255; --ova: 0; --lamp: 0;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    html { min-height: 100%; background: #e6ddd0; }
     body {
-      background: var(--sand);
-      background-image:
-        radial-gradient(circle at 15% 20%, rgba(245,164,105,0.12) 0%, transparent 50%),
-        radial-gradient(circle at 85% 80%, rgba(122,171,138,0.10) 0%, transparent 50%);
+      font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
       color: var(--ink);
-      font-family: 'Noto Sans TC', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 14px 48px;
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 22px 14px 48px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .deco {
-      position: fixed;
-      pointer-events: none;
-      opacity: 0.12;
-      animation: floatY 6s ease-in-out infinite;
-      z-index: 0;
+    /* ── 寫實光影（牆面、窗光、葉影）── */
+    #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+    .grain {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      mix-blend-mode: multiply;
     }
-    .deco:nth-child(1) { top: 8%;  left: 3%;  font-size: 1.6rem; animation-delay: 0s;   }
-    .deco:nth-child(2) { top: 22%; right: 4%; font-size: 1.1rem; animation-delay: 1.5s; }
-    .deco:nth-child(3) { top: 55%; left: 2%;  font-size: 0.9rem; animation-delay: 3s;   }
-    .deco:nth-child(4) { top: 72%; right: 3%; font-size: 1.4rem; animation-delay: 2s;   }
-    .deco:nth-child(5) { top: 40%; right: 2%; font-size: 1rem;   animation-delay: 4s;   }
-
-    @keyframes floatY {
-      0%,100% { transform: translateY(0) rotate(0deg); }
-      50%      { transform: translateY(-12px) rotate(8deg); }
+    .ambient-top {   /* 卡片：只稍微變暗，保持好讀 */
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: rgb(var(--ovc)); opacity: calc(var(--ova) * 0.38);
+        mix-blend-mode: multiply;
     }
+    /* 夜晚：背板稍微不透明一點，小字加深，維持好讀 */
+    html.night .container { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    header {
-      width: 100%;
-      max-width: 480px;
-      background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 14px 20px;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 20px var(--shadow);
-      position: relative;
-      z-index: 1;
-      animation: slideDown 0.5s ease both;
+    /* 寫實光影畫布＋牆面顆粒 */
+    #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+    .grain {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        mix-blend-mode: multiply;
     }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* 夜間桌燈：卡片附近一圈暖光，晚上也看得清楚 */
+    .lamp {
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255,186,110,0.45), rgba(255,186,110,0) 70%);
+        mix-blend-mode: soft-light; opacity: var(--lamp);
     }
+    html.night .panel { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .site-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--warm2);
-    }
-
-    .site-title .icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--warm1), var(--warm3));
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      box-shadow: 0 2px 8px rgba(232,132,90,0.35);
-      flex-shrink: 0;
-    }
-
-    .btn-return {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer;
-      border: 1.5px solid var(--border);
-      background: var(--sand);
-      color: var(--muted);
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .btn-return:hover {
-      background: var(--blush);
-      border-color: var(--warm1);
-      color: var(--warm3);
-      transform: translateX(-2px);
-    }
-    .btn-return:active { transform: scale(0.96); }
-
-    #clock {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--muted);
-      text-align: center;
-      letter-spacing: 0.03em;
-    }
-
-    #status-bar {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 12px;
-      min-height: 22px;
-      z-index: 1;
-      animation: slideDown 0.5s 0.1s ease both;
-    }
-
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--muted);
-      flex-shrink: 0;
-      transition: background 0.4s;
-    }
-    .dot.ok   { background: var(--sage); box-shadow: 0 0 6px rgba(122,171,138,0.5); }
-    .dot.err  { background: var(--warm3); }
-    .dot.busy { background: var(--sky); animation: pulse 1.2s infinite; }
-
-    @keyframes pulse {
-      0%,100% { opacity:1; box-shadow: 0 0 0 rgba(127,179,211,0); }
-      50%      { opacity:0.4; box-shadow: 0 0 8px rgba(127,179,211,0.6); }
-    }
-
-    #status-text { font-size: 0.78rem; color: var(--muted); }
-    #last-sync { margin-left: auto; font-size: 0.74rem; color: var(--muted); }
-
-    #count-badge {
-      background: linear-gradient(135deg, var(--warm1), var(--warm2));
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 10px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(232,132,90,0.3);
-    }
-
-    /* 待審核提示徽章（可點擊重新開啟審核視窗） */
-    #pending-badge {
-      background: linear-gradient(135deg, var(--sky), #5d97bd);
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 10px;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Noto Sans TC', sans-serif;
-      box-shadow: 0 2px 6px rgba(93,151,189,0.3);
-    }
-
-    .table-card {
-      width: 100%;
-      max-width: 480px;
-      background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 6px 28px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s 0.15s ease both;
-    }
-
-    .table-header {
-      background: linear-gradient(135deg, #fef0e4 0%, #fde8d4 100%);
-      padding: 13px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1.5px solid var(--border);
-    }
-
-    .table-header-title {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--warm2);
-    }
-
-    .member-list { display: flex; flex-direction: column; }
-
-    .member-card {
-      padding: 14px 18px;
-      border-bottom: 1px solid #f3e8de;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: background 0.2s;
-      animation: rowIn 0.35s ease both;
-    }
-    .member-card:last-child { border-bottom: none; }
-    .member-card:hover { background: #fff8f3; }
-
-    @keyframes rowIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-row-top { display: flex; align-items: center; gap: 10px; }
-
-    .num-bubble {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px; height: 24px;
-      background: linear-gradient(135deg, var(--blush), var(--warm1));
-      border-radius: 50%;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .member-name { font-size: 1rem; font-weight: 700; color: var(--ink); }
-
-    .card-row-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding-left: 34px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    /* ── 半透明紙卡 ── */
+    .panel {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 560px;
       border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      white-space: nowrap;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(170deg, rgba(253,251,247,0.40) 0%, rgba(251,248,242,0.34) 45%, rgba(244,238,228,0.30) 100%);
+      -webkit-backdrop-filter: blur(2.5px) saturate(1.1);
+      backdrop-filter: blur(2.5px) saturate(1.1);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 1px rgba(120,100,70,0.08),
+        2px 3px 4px rgba(70,50,30,0.10),
+        calc(var(--sx) * 0.9) calc(var(--sy) * 1) 30px rgba(70,50,30,0.22),
+        calc(var(--sx) * 2.2) calc(var(--sy) * 2.4) 70px rgba(70,50,30,0.20);
+      animation: rise .7s cubic-bezier(.2,.7,.2,1) both;
     }
-    .chip-label { font-size: 0.68rem; opacity: 0.7; font-weight: 600; letter-spacing: 0.04em; }
-    .chip-account { background: #edf6f0; color: var(--sage2); border: 1px solid #c5dece; }
-    .chip-pwd {
-      background: #fff4ee; color: var(--ink2); border: 1px solid var(--border);
-      font-family: 'Zen Maru Gothic', monospace; letter-spacing: 0.08em;
+    @keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    /* 頁首 */
+    header { padding: 22px 22px 14px; text-align: center; position: relative; }
+    .site-title {
+      font-family: 'Noto Serif TC', serif; font-size: 1.55rem; font-weight: 700;
+      letter-spacing: 0.14em; padding-left: 0.14em; color: var(--ink);
     }
-    .chip-date { background: #f0f5ff; color: var(--sky); border: 1px solid #c5d9ee; }
-
-    .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
-    .empty-icon { font-size: 2.2rem; display: block; margin-bottom: 10px; }
-    .empty-state p { font-size: 0.9rem; }
-
-    .bottom-bar {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 20px;
-      z-index: 1;
-      animation: slideDown 0.5s 0.25s ease both;
+    .site-sub {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 0.72rem; letter-spacing: 0.3em; color: var(--muted); margin-top: 6px;
     }
+    .site-sub::before, .site-sub::after { content: ''; width: 30px; height: 1px; background: var(--hair); }
+    #clock {
+      font-size: 0.78rem; color: var(--muted); letter-spacing: 0.08em;
+      font-variant-numeric: tabular-nums; margin-bottom: 10px;
+    }
+    /* 返回：小原木牌 */
+    .btn-return {
+      position: absolute; top: 16px; left: 16px;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px 0 12px;
+      border: none; border-radius: 4px; cursor: pointer;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.015 0.45' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .26 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #e2c49c 0%, #cfa978 60%, #b98f5d 100%);
+      background-size: 200px 34px, auto;
+      box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), inset -2px -2px 0 rgba(80,50,20,0.18), 3px 5px 7px rgba(70,50,30,0.25);
+      color: var(--engrave); font-family: 'Noto Serif TC', serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.18em;
+      text-shadow: 0 1px 0 rgba(255,240,215,0.55), 0 -1px 0 rgba(70,40,15,0.2);
+    }
+    .btn-return:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), 1px 2px 3px rgba(70,50,30,0.25); }
 
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px;
-      border-radius: 40px;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
+    /* 狀態列：一行小字 */
+    #status-bar {
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px;
+      font-size: 0.74rem; color: var(--muted);
+      padding: 0 18px 4px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #c9bfb1; flex-shrink: 0; }
+    .dot.ok   { background: var(--sage); }
+    .dot.err  { background: #a8432c; }
+    .dot.busy { background: #c39b4c; animation: breathe 1.2s infinite; }
+    @keyframes breathe { 50% { opacity: .35; } }
+    #status-text { color: var(--ink-2); }
+    #last-sync { color: var(--muted); }
+    #count-badge {
+      padding: 1px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.55); border: 1px solid #d3c7b6;
+      color: var(--ink-2); font-weight: 700;
+    }
+    #pending-badge {
+      padding: 2px 10px; border-radius: 999px; border: none; cursor: pointer;
+      background: #b04a32; color: #fff8ef; font-family: inherit; font-size: 0.74rem; font-weight: 700;
+      box-shadow: 1px 2px 4px rgba(60,30,15,0.3); transform: rotate(-3deg);
+    }
+    #pending-diag { display: none; margin: 6px 18px 0; padding: 8px 12px; border-left: 3px solid #a8432c;
+      background: rgba(247,236,228,0.85); color: #7a3a26; font-size: 0.8rem; border-radius: 2px; }
+
+    .list-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin: 14px 18px 0; padding-top: 12px; border-top: 1px solid var(--hair);
+    }
+    .list-title { font-family: 'Noto Serif TC', serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.16em; }
+    .list-note  { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.06em; }
+
+    /* ══════════ 會員名牌：繪馬（許願木牌）══════════
+       淺色松木＋細橫紋、上緣是很淺的屋頂斜角；紅色緞繩打結掛在木架上，
+       右側直排紅字「祈　社工科」，左下淡淡的紅色線條圖案，姓名像用筆寫上去 */
+    .member-list { padding: 6px 10px 4px; }
+    .tag-row {
       position: relative;
-      overflow: hidden;
+      display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 10px;
+      padding: 0 4px; margin-bottom: 10px;
+      height: 196px;
     }
-    .btn::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: rgba(255,255,255,0.15);
-      opacity: 0;
-      transition: opacity 0.2s;
+    /* 木架橫桿：圓木棍 */
+    .tag-row .rail {
+      position: absolute; left: -4px; right: -4px; top: 4px; height: 12px; border-radius: 6px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='24'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.01 0.6' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .25  0 0 0 0 .16  0 0 0 0 .08  0 0 0 .25 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(180deg, #d9b689 0%, #b98d5d 45%, #8d6440 100%);
+      background-size: 300px 12px, auto;
+      box-shadow: inset 0 2px 1px rgba(255,240,215,0.55), 3px 6px 7px rgba(70,50,30,0.25);
     }
-    .btn:hover::after { opacity: 1; }
-    .btn:active { transform: scale(0.97); }
+    .tag-row .rail::before, .tag-row .rail::after {
+      content: ''; position: absolute; top: -3px; width: 10px; height: 18px; border-radius: 3px;
+      background: linear-gradient(90deg, #7d5636, #a67c52 50%, #6e4a2c);
+    }
+    .tag-row .rail::before { left: -2px; } .tag-row .rail::after { right: -2px; }
 
+    .mtag {
+      position: relative;
+      top: var(--dy, 0px);
+      animation: tagIn .55s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: var(--in);
+    }
+    @keyframes tagIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+    .mtag .swing {
+      position: absolute; top: 9px; left: 0; right: 0; height: 180px;
+      transform-origin: 50% 0;
+      rotate: var(--tilt, 0deg);
+      animation: idle 5.5s ease-in-out infinite alternate; animation-delay: var(--delay);
+      filter: drop-shadow(calc(var(--sx) * 0.35) calc(var(--sy) * 0.3 + 2px) 5px rgba(60,40,22,0.28));
+    }
+    @keyframes idle  { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
+    @keyframes swing { 0% { transform: rotate(0); } 25% { transform: rotate(6deg); } 55% { transform: rotate(-4deg); } 80% { transform: rotate(2deg); } 100% { transform: rotate(0); } }
+    .mtag:hover .swing { animation: swing 1.4s ease-out; }
+
+    /* 紅色緞繩：兩股繩從橫桿垂下，在孔上方打結，多出來的繩尾垂在一旁 */
+    .mtag .loop  { position: absolute; z-index: 3; top: 0; left: 50%; width: 24px; height: 46px; margin-left: -12px; overflow: visible; }
+    .mtag .tails { position: absolute; z-index: 0; top: 40px; left: 50%; width: 110px; height: 150px; overflow: visible; pointer-events: none; }
+    .mtag .loop path, .mtag .tails path { fill: none; stroke: #d6282b; stroke-width: 2.2; stroke-linecap: round; }
+    .mtag .tails path { stroke-width: 2; }
+
+    /* 繪馬本體 */
+    .mtag .plate {
+      position: absolute; z-index: 1; top: 38px; left: 0; right: 0; height: 128px;
+      clip-path: polygon(0 10%, 50% 0, 100% 10%, 100% 100%, 0 100%);
+      background:
+        /* 細細的橫向木紋 */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='140'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.004 0.22' numOctaves='3' seed='12'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .4  0 0 0 0 .2  0 0 0 .55 -.18'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+        repeating-linear-gradient(180deg, rgba(190,160,110,0) 0 5px, rgba(190,160,110,0.16) 5px 6px, rgba(190,160,110,0) 6px 9px),
+        radial-gradient(ellipse at 30% 25%, rgba(255,255,248,0.6), rgba(255,255,248,0) 65%),
+        linear-gradient(175deg, var(--w1) 0%, var(--w2) 100%);
+      background-size: 100% 100%, auto, auto, auto;
+    }
+    .mtag .plate::after {   /* 木板切邊的厚度感 */
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      box-shadow: inset -2px -3px 0 rgba(150,115,60,0.20), inset 2px 2px 0 rgba(255,255,255,0.55);
+    }
+    .mtag .hole {
+      position: absolute; z-index: 2; top: 9px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%;
+      background: radial-gradient(circle, #5a4430 0 2.4px, #b49870 2.8px 4px);
+    }
+    /* 左下：淡紅色線條圖（兩個人在愛心裡，原創簡筆） */
+    .mtag .motif {
+      position: absolute; z-index: 0; left: 6px; bottom: 7px; width: 46%; height: 64%;
+      fill: none; stroke: #d6282b; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round;
+      opacity: .32;
+    }
+    /* 右側：紅字直排「祈　社工科」 */
+    .mtag .pray {
+      position: absolute; z-index: 1; right: 7px; top: 24%;
+      writing-mode: vertical-rl; text-orientation: upright;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; color: #cf2b2b;
+      font-size: 0.78rem; letter-spacing: 0.18em; line-height: 1;
+    }
+    .mtag .pray .p1 { margin-bottom: 0.7em; font-size: 0.86rem; }
+    /* 中間：用筆寫上的姓名與資料 */
+    .mtag .info {
+      position: absolute; z-index: 1; left: 8px; right: 26px; top: 20px; bottom: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+      color: #2b2118; text-align: center;
+    }
+    .mtag .nm {
+      font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+      font-size: 1.36rem; font-weight: 700; letter-spacing: 0.1em; padding-left: 0.1em; line-height: 1.2;
+      max-width: 100%; overflow-wrap: anywhere; margin-bottom: 4px;
+    }
+    .mtag .ln {
+      display: flex; align-items: baseline; justify-content: center; gap: 5px;
+      width: 100%; font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif;
+      font-size: 0.76rem; line-height: 1.42;
+    }
+    .mtag .ln i { font-style: normal; font-size: 0.64rem; opacity: .55; flex-shrink: 0; }
+    .mtag .ln b { font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
+    .mtag .ln.pw b { letter-spacing: 0.12em; }
+
+    @media (max-width: 380px) { .mtag .nm { font-size: 1.18rem; } .mtag .ln { font-size: 0.7rem; } .mtag .pray { font-size: 0.7rem; } }
+    .empty-state { padding: 34px 0 30px; text-align: center; }
+    .empty-plaque {
+      display: inline-block; padding: 14px 24px; border-radius: 4px;
+      background: linear-gradient(175deg, #e2c49c, #c9a171);
+      color: var(--engrave); font-family: 'Noto Serif TC', serif; font-weight: 700; letter-spacing: 0.16em;
+      text-shadow: 0 1px 0 rgba(255,240,215,0.55), 0 -1px 0 rgba(70,40,15,0.2);
+      box-shadow: 3px 5px 8px rgba(70,50,30,0.22);
+    }
+
+    /* ── 底部：上漆木板按鍵 ── */
+    .bottom-bar { display: flex; justify-content: center; gap: 12px; padding: 4px 18px 20px; }
+    .btn {
+      flex: 0 0 auto; width: 132px; height: 38px; border: none; border-radius: 4px; cursor: pointer;
+      font-family: 'Noto Serif TC', serif; font-size: 0.86rem; font-weight: 700; letter-spacing: 0.14em;
+      color: #fff8ec; text-shadow: 0 -1px 0 rgba(40,25,10,0.35), 0 1px 0 rgba(255,255,255,0.15);
+      background-size: 100% 100%, auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset -2px -3px 0 rgba(40,25,10,0.18), 4px 7px 10px rgba(70,50,30,0.25);
+      transition: transform .1s;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 2px 3px 5px rgba(70,50,30,0.25); }
     .btn-add {
-      background: linear-gradient(135deg, var(--sage), var(--sage2));
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(93,145,112,0.35);
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+        linear-gradient(175deg, #88a77a, #617f55);
     }
-    .btn-add:hover { box-shadow: 0 6px 22px rgba(93,145,112,0.45); transform: translateY(-2px); }
-
     .btn-del {
-      background: linear-gradient(135deg, #f07060, var(--warm3));
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(212,99,74,0.3);
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='5'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+        linear-gradient(175deg, #c78464, #a35d3f);
     }
-    .btn-del:hover { box-shadow: 0 6px 22px rgba(212,99,74,0.4); transform: translateY(-2px); }
 
+    /* ── 對話框：紙卡 ── */
     .overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(61,43,31,0.45);
-      backdrop-filter: blur(6px);
-      z-index: 200;
-      justify-content: center;
-      align-items: flex-end;
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(60,45,30,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+      justify-content: center; align-items: flex-end;
     }
-    .overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+    .overlay.active { display: flex; animation: fadeIn .25s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
     .modal {
-      background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: 24px 24px 0 0;
-      padding: 28px 24px 36px;
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 -10px 40px rgba(100,60,30,0.15);
-      animation: slideUp 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+      width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+      background: linear-gradient(170deg, #fdfbf7, #f4eee4);
+      border-radius: 10px 10px 0 0;
+      padding: 22px 22px 30px;
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 -10px 40px rgba(50,35,20,0.25);
+      animation: slideUp .35s cubic-bezier(.3,1.2,.5,1) both;
     }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-    .drag-handle {
-      width: 40px; height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 0 auto -4px;
-    }
-
-    .modal-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-    .modal-icon.add    { background: linear-gradient(135deg, #e8f5ec, #c5e0ce); }
-    .modal-icon.del    { background: linear-gradient(135deg, #fde8e4, #f5c5bb); }
-    .modal-icon.review { background: linear-gradient(135deg, #e6f0f8, #c5d9ee); }
-
+    .drag-handle { width: 40px; height: 4px; background: #d6cbbb; border-radius: 2px; margin: 0 auto -2px; }
     .modal-head { display: flex; align-items: center; gap: 12px; }
-
-    .modal h2 {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1.3;
+    .modal-icon {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff8ec;
+      box-shadow: inset -3px -4px 8px rgba(40,25,10,0.18), 3px 4px 8px rgba(70,50,30,0.18);
     }
+    .modal-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .modal-icon.add { background: #7a9a6c; } .modal-icon.del { background: #b0603f; } .modal-icon.review { background: #6683a0; }
+    .modal h2 { font-family: 'Noto Serif TC', serif; font-size: 1.15rem; letter-spacing: 0.1em; }
     .modal .subtitle { font-size: 0.76rem; color: var(--muted); margin-top: 3px; }
-
     .field { display: flex; flex-direction: column; gap: 6px; }
-
-    label { font-size: 0.8rem; font-weight: 600; color: var(--ink2); }
-
-    input[type="text"],
-    input[type="password"] {
-      background: var(--sand);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--ink);
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 0.95rem;
-      padding: 11px 14px;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    label { font-size: 0.82rem; font-weight: 700; color: var(--ink-2); }
+    label .req { color: var(--terra); }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 11px 14px; border-radius: 4px; outline: none;
+      background: #fff; border: 1px solid #d8ccbb; color: var(--ink);
+      font-family: inherit; font-size: 0.95rem;
+      box-shadow: inset 0 2px 3px rgba(70,50,30,0.06);
+      transition: border-color .2s, box-shadow .2s;
     }
-    input:focus {
-      border-color: var(--warm1);
-      box-shadow: 0 0 0 3px rgba(245,164,105,0.18);
-      background: var(--white);
-    }
-    input.error    { border-color: var(--warm3); box-shadow: 0 0 0 3px rgba(212,99,74,0.15); }
-    input.ok-field { border-color: var(--sage);  box-shadow: 0 0 0 3px rgba(122,171,138,0.18); }
-
+    input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(111,138,104,0.18); }
+    input.error    { border-color: #a8432c; box-shadow: 0 0 0 3px rgba(168,67,44,0.15); }
+    input.ok-field { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(111,138,104,0.18); }
     .field-hint { font-size: 0.74rem; color: var(--muted); }
-    .field-hint.err { color: var(--warm3); font-weight: 600; }
-    .field-hint.ok  { color: var(--sage2); }
-
-    .modal-msg { font-size: 0.82rem; padding: 8px 12px; border-radius: 8px; display: none; }
+    .field-hint.err { color: #a8432c; font-weight: 700; }
+    .field-hint.ok  { color: #4f6b48; }
+    .modal-msg { display: none; font-size: 0.82rem; padding: 8px 12px; border-radius: 2px; }
     .modal-msg.show { display: block; }
-    .modal-msg.err  { background: #fde8e4; color: var(--warm3); border: 1px solid #f5c5bb; }
-    .modal-msg.info { background: #edf6f0; color: var(--sage2); border: 1px solid #c5dece; }
-
-    .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-
-    .btn-submit {
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
-      font-weight: 700;
-      font-size: 1rem;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
+    .modal-msg.err  { background: #f7ece4; color: #7a3a26; border-left: 3px solid #a8432c; }
+    .modal-msg.info { background: #edf2e9; color: #4f6b48; border-left: 3px solid var(--sage); }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+    .btn-submit, .btn-cancel {
+      width: 100%; padding: 13px; border-radius: 999px; cursor: pointer;
+      font-family: inherit; font-size: 0.98rem; font-weight: 700; letter-spacing: 0.12em;
     }
-    .btn-submit:active { transform: scale(0.97); }
-    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
-    .btn-submit.green {
-      background: linear-gradient(135deg, var(--sage), var(--sage2));
-      color: #fff;
-      box-shadow: 0 3px 12px rgba(93,145,112,0.3);
-    }
-    .btn-submit.red {
-      background: linear-gradient(135deg, #f07060, var(--warm3));
-      color: #fff;
-      box-shadow: 0 3px 12px rgba(212,99,74,0.3);
-    }
-    .btn-cancel {
-      width: 100%;
-      padding: 13px;
-      border-radius: 14px;
-      background: var(--sand);
-      color: var(--muted);
-      border: 1.5px solid var(--border);
-      font-weight: 600;
-      font-size: 0.95rem;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-cancel:hover { background: var(--cream); }
-    .btn-cancel:disabled { opacity: 0.55; cursor: not-allowed; }
-
-    /* ── 審核視窗內容 ── */
-    .review-counter {
-      align-self: flex-start;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #5d97bd;
-      background: #e6f0f8;
-      border: 1px solid #c5d9ee;
-      border-radius: 20px;
-      padding: 2px 10px;
-    }
-
-    .review-question {
-      font-size: 1rem;
-      color: var(--ink);
-      line-height: 1.6;
-    }
-    .review-question strong {
-      font-size: 1.25rem;
-      color: var(--warm3);
-      margin: 0 2px;
-    }
-
-    .review-detail {
-      background: var(--sand);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.85rem;
-    }
+    .btn-submit { border: none; color: #fff8ec; }
+    .btn-submit.green { background: var(--sage); box-shadow: 3px 5px 10px rgba(80,108,70,0.25); }
+    .btn-submit.red   { background: var(--terra); box-shadow: 3px 5px 10px rgba(140,70,40,0.25); }
+    .btn-cancel { background: transparent; border: 1px solid #d3c7b6; color: var(--ink-2); }
+    .btn-submit:active, .btn-cancel:active { transform: translateY(1px); }
+    .btn-submit:disabled, .btn-cancel:disabled { opacity: .55; cursor: not-allowed; }
+    .review-counter { align-self: flex-start; font-size: 0.72rem; font-weight: 700; color: #48627c;
+      background: #e6edf3; border-radius: 999px; padding: 2px 10px; }
+    .review-question { font-size: 1rem; line-height: 1.7; }
+    .review-question strong { font-family: 'Noto Serif TC', serif; font-size: 1.25rem; color: #8a4a30; margin: 0 2px; }
+    .review-detail { background: #fff; border: 1px solid var(--hair); border-radius: 4px; padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; }
     .review-detail div { display: flex; gap: 10px; }
     .review-detail span:first-child { color: var(--muted); min-width: 56px; }
-    .review-detail span:last-child  { color: var(--ink); font-weight: 600; word-break: break-all; }
-  </style>
-  <!-- ══════════ 工業科技風（與後台 deleloper 同步，修改）══════════ -->
-  <style>
-    :root{--st0:#0d1014;--st1:#161b21;--st2:#212831;--ln:#3a4552;--tx:#e7edf3;--mu:#98a6b4;
-      --hz:#ffc400;--cy:#00d2ff;--or:#ff6a13;--gr:#3cff6a;--rd:#ff4d4d;}
-    html{min-height:100%;background-color:var(--st0);
-      background-image:radial-gradient(circle at 15% 10%,rgba(0,210,255,.16),transparent 42%),
-        radial-gradient(circle at 85% 90%,rgba(255,106,19,.16),transparent 45%),
-        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
-        repeating-linear-gradient(45deg,#12161b 0 6px,#0f1317 6px 12px);
-      background-size:auto,auto,28px 28px,28px 28px,auto;background-attachment:fixed;color-scheme:dark;}
-    body{background:transparent!important;background-image:none!important;color:var(--tx)!important;
-      min-height:100vh;min-height:100dvh;font-family:'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif!important;}
-    /* 金屬面板 */
-    header,.ind-panel{position:relative;overflow:hidden;
-      background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(180deg,var(--st2),var(--st1))!important;
-      border:1px solid var(--ln)!important;border-radius:16px!important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.5),0 5px 0 #07090c,0 18px 36px rgba(0,0,0,.55)!important;}
-    header{padding-top:22px!important;}
-    header::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;
-      background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
-    .site-title{min-width:0;color:#fff!important;letter-spacing:1px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,196,0,.3);font-family:inherit!important;font-weight:900!important;}
-    .title-icon{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;}
-    #clock{display:inline-block;font-family:Consolas,'Courier New',monospace!important;font-weight:700;color:var(--cy)!important;
-      text-shadow:0 0 8px rgba(0,210,255,.7);background:#07090c;border:1px solid #1f2a33;border-radius:8px;
-      padding:4px 12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.8);}
-    header #clock{display:block;width:fit-content;margin:0 auto;}
-    /* 返回：方形金屬鍵＋警示斜紋，和後台一致 */
-    .btn-return{position:relative;overflow:hidden;border-radius:8px!important;border:2px solid var(--hz)!important;
-      background:linear-gradient(180deg,#3a4450,#1d232a)!important;color:var(--hz)!important;
-      padding:6px 20px!important;font-weight:900!important;letter-spacing:2px;white-space:nowrap;flex-shrink:0;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;transform:none!important;}
-    .btn-return::before,.btn-return::after{content:'';position:absolute;top:0;bottom:0;width:7px;
-      background:repeating-linear-gradient(-45deg,var(--hz) 0 4px,#111 4px 8px);}
-    .btn-return::before{left:0}.btn-return::after{right:0}
-    .btn-return:hover{color:#fff!important;}
-    .btn-return:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 #07090c!important;}
-    /* 狀態列 */
-    #status-bar{background:#0b0e12;border:1px solid #26303a;border-radius:8px;padding:5px 10px;box-shadow:inset 0 2px 5px rgba(0,0,0,.8);}
-    #status-text,#last-sync{color:var(--mu)!important;}
-    .dot.ok{background:var(--gr)!important;box-shadow:0 0 8px var(--gr)!important;}
-    .dot.err{background:var(--rd)!important;box-shadow:0 0 8px var(--rd)!important;}
-    .dot.busy{background:var(--cy)!important;box-shadow:0 0 8px var(--cy)!important;}
-    /* 區塊標題列：深色＋青色底線 */
-    .ind-head{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;
-      box-shadow:0 2px 10px rgba(0,210,255,.18);}
-    .ind-head-title{color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
-    .ind-count{background:linear-gradient(180deg,#ffd84d,var(--hz))!important;color:#2a1d00!important;font-weight:900!important;
-      box-shadow:0 2px 0 #7a5200!important;}
-    /* 列表 */
-    .ind-row{border-bottom:1px solid #2b343e!important;}
-    .ind-row:hover{background:rgba(0,210,255,.06)!important;}
-    .ind-seq{background:radial-gradient(circle at 35% 30%,#8ff0ff,#00b4e6 55%,#00415e)!important;color:#00202e!important;
-      font-weight:900!important;box-shadow:0 2px 0 #00293b,0 0 8px rgba(0,210,255,.5);}
-    .ind-name{color:#fff!important;}
-    .empty-state{color:var(--mu)!important;}
-    mark{background:rgba(255,196,0,.28)!important;color:var(--hz)!important;}
-    /* 輸入欄 */
-    .ind-input{background:#0b0e12!important;color:var(--tx)!important;border:1px solid #33404c!important;
-      box-shadow:inset 0 2px 5px rgba(0,0,0,.8)!important;}
-    .ind-input:focus{border-color:var(--cy)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(0,210,255,.2)!important;}
-    .ind-input::placeholder{color:#6b7885;}
-    /* 立體按鍵 */
-    .ind-btn{border:none!important;border-radius:10px!important;font-weight:900!important;transition:transform .1s,box-shadow .1s!important;}
-    .ind-btn:active{transform:translateY(3px)!important;}
-    .ind-cy{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #005a78,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-hz{background:linear-gradient(180deg,#ffe066,var(--hz))!important;color:#2a1d00!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 4px 0 #8a6200,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-gr{background:linear-gradient(180deg,#6cf08a,#22b545)!important;color:#04210b!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #0d5a1e,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-rd{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-gy{background:linear-gradient(180deg,#4a5562,#2b333c)!important;color:#dfe6ec!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 0 #0d1014!important;}
-    .ind-cy:active,.ind-hz:active,.ind-gr:active,.ind-rd:active,.ind-gy:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
-    .ind-sm-del{background:linear-gradient(180deg,#3a2226,#24161a)!important;color:#ff8a8a!important;border:1px solid #7a1f1f!important;
-      border-radius:6px!important;box-shadow:0 2px 0 #07090c!important;}
-    .ind-sm-del:hover{background:linear-gradient(180deg,#d42020,#8f0f0f)!important;color:#fff!important;}
-    /* 標籤 chips：深底＋發光字 */
-    .ind-chip{background:#0b0e12!important;border:1px solid #2f3b46!important;}
-    .c-cy{color:#7fe6ff!important;border-color:rgba(0,210,255,.45)!important;}
-    .c-hz{color:#ffd84d!important;border-color:rgba(255,196,0,.45)!important;}
-    .c-gr{color:#7dff9e!important;border-color:rgba(60,255,106,.4)!important;}
-    .c-or{color:#ffb27a!important;border-color:rgba(255,106,19,.5)!important;background:rgba(255,106,19,.1)!important;}
-    .c-bl{color:#a5d8ff!important;border-color:rgba(120,190,255,.5)!important;background:rgba(0,120,255,.12)!important;}
-    .c-mu{color:#c3ccd5!important;}
-    .c-pk{color:#ff9ec4!important;border-color:rgba(255,80,150,.5)!important;background:rgba(255,80,150,.1)!important;}
-    .chip-label,.chip-lbl{opacity:.7;}
-    @media (max-width:400px){.site-title{font-size:.9rem!important;gap:7px!important;letter-spacing:0;} .btn-return{padding:6px 14px!important;letter-spacing:1px;}}
+    .review-detail span:last-child  { font-weight: 700; word-break: break-all; }
 
-    /* ── 會員管理頁 ── */
-    :root{--sand:#0b0e12;--cream:#161b21;--white:#1b2128;--ink:#e7edf3;--ink2:#c3ccd5;--muted:#98a6b4;--border:#33404c;}
-    .deco{opacity:.12!important;filter:drop-shadow(0 0 6px rgba(0,210,255,.6));}
-    .site-title .icon{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;}
-    #count-badge{background:linear-gradient(180deg,#ffd84d,var(--hz))!important;color:#2a1d00!important;font-weight:900!important;box-shadow:0 2px 0 #7a5200!important;}
-    #pending-badge{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;font-weight:900!important;box-shadow:0 2px 0 #005a78,0 0 10px rgba(0,210,255,.6)!important;animation:blink 1.6s infinite;}
-    @keyframes blink{50%{opacity:.6}}
-    #pending-diag{background:rgba(255,77,77,.12)!important;color:#ff9a9a!important;border-color:#7a1f1f!important;}
-    .table-card{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(180deg,var(--st2),var(--st1))!important;border:1px solid var(--ln)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.5),0 5px 0 #07090c,0 18px 36px rgba(0,0,0,.55)!important;border-radius:16px!important;}
-    .table-header{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
-    .table-header-title{color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;}
-    .table-header span{color:var(--mu)!important;text-shadow:none;font-weight:400;letter-spacing:0;}
-    .member-card{border-bottom:1px solid #2b343e!important;}
-    .member-card:hover{background:rgba(0,210,255,.06)!important;}
-    .num-bubble{background:radial-gradient(circle at 35% 30%,#8ff0ff,#00b4e6 55%,#00415e)!important;color:#00202e!important;font-weight:900!important;box-shadow:0 2px 0 #00293b,0 0 8px rgba(0,210,255,.5)!important;}
-    .member-name{color:#fff!important;}
-    .chip-account{background:#0b0e12!important;color:#7dff9e!important;border:1px solid rgba(60,255,106,.4)!important;}
-    .chip-pwd{background:#0b0e12!important;color:#ffd84d!important;border:1px solid rgba(255,196,0,.45)!important;font-family:Consolas,monospace!important;}
-    .chip-date{background:#0b0e12!important;color:#7fe6ff!important;border:1px solid rgba(0,210,255,.45)!important;}
-    .btn{border-radius:12px!important;}
-    .btn-add{background:linear-gradient(180deg,#6cf08a,#22b545)!important;color:#04210b!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #0d5a1e,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;} .btn-del{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;}
-    .btn:hover{transform:none!important;} .btn:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
-    .overlay{background:rgba(5,7,10,.75)!important;}
-    .modal{background:linear-gradient(180deg,#232a32,#171c22)!important;border:1px solid var(--ln)!important;box-shadow:0 -10px 40px rgba(0,0,0,.6)!important;position:relative;}
-    .modal::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;border-radius:24px 24px 0 0;background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
-    .modal h2{color:#fff!important;font-family:inherit!important;}
-    .drag-handle{background:#4a5562!important;}
-    .modal-icon.add,.modal-icon.del,.modal-icon.review{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);}
-    .modal-icon.del{border-color:var(--rd);} .modal-icon.review{border-color:var(--cy);}
-    input[type="text"],input[type="password"]{background:#0b0e12!important;color:var(--tx)!important;border:1px solid #33404c!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8)!important;}
-    input:focus{border-color:var(--cy)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(0,210,255,.2)!important;}
-    input.error{border-color:var(--rd)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(255,77,77,.25)!important;}
-    input.ok-field{border-color:var(--gr)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(60,255,106,.2)!important;}
-    .field-hint.err{color:#ff8a8a!important;} .field-hint.ok{color:#7dff9e!important;}
-    .modal-msg.err{background:rgba(255,77,77,.12)!important;color:#ff9a9a!important;border-color:#7a1f1f!important;}
-    .modal-msg.info{background:rgba(60,255,106,.1)!important;color:#7dff9e!important;border-color:rgba(60,255,106,.4)!important;}
-    .btn-submit{border-radius:12px!important;}
-    .btn-submit.green{background:linear-gradient(180deg,#6cf08a,#22b545)!important;color:#04210b!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #0d5a1e,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;} .btn-submit.red{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;}
-    .btn-cancel{background:linear-gradient(180deg,#4a5562,#2b333c)!important;color:#dfe6ec!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #0d1014,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;border-radius:12px!important;}
-    .btn-submit:active,.btn-cancel:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
-    .review-counter{background:#0b0e12!important;color:var(--cy)!important;border-color:rgba(0,210,255,.45)!important;}
-    .review-question strong{color:var(--hz)!important;text-shadow:0 0 10px rgba(255,196,0,.4);}
-    .review-detail{background:#0b0e12!important;border:1px solid #2f3b46!important;}
-  </style>
-  <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
-  <style>
-    html.fade-in { background: #0d1014; }
+    @media (max-width: 380px) { .mtag .nm { font-size: 1.08rem; } .mtag .ln { font-size: 0.72rem; } .site-title { font-size: 1.35rem; } }
+    @media (prefers-reduced-motion: reduce) { .mtag .swing, .mtag { animation: none !important; } }
+
+    /* 從後台進入時以「浮現」方式出現 */
+    html.fade-in { background: #efe6d8; }
     html.fade-in body { animation: pageFloatIn 0.8s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes pageFloatIn {
-      from { opacity: 0; transform: translateY(28px) scale(0.97); filter: blur(8px); }
+      from { opacity: 0; transform: translateY(24px) scale(0.98); filter: blur(6px); }
       to   { opacity: 1; transform: none; filter: none; }
     }
     @media (prefers-reduced-motion: reduce) { html.fade-in body { animation: none; } }
@@ -666,76 +373,60 @@
   </script>
 </head>
 <body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="ambient-top" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
 
-<div class="deco">🌸</div>
-<div class="deco">🌿</div>
-<div class="deco">✿</div>
-<div class="deco">🍃</div>
-<div class="deco">🌼</div>
-
-<header>
-  <div class="header-top">
-    <div class="site-title">
-      <div class="icon">👥</div>
-      義大社工科｜會員管理
-    </div>
+<div class="panel">
+  <header>
     <button class="btn-return" onclick="window.location.href='deleloper.html'">← 返回</button>
+    <div id="clock">載入中…</div>
+    <h1 class="site-title">會員管理</h1>
+    <div class="site-sub">義大社工科</div>
+  </header>
+
+  <div id="status-bar">
+    <div class="dot" id="dot"></div>
+    <span id="status-text">連線中…</span>
+    <span id="count-badge" style="display:none"></span>
+    <button id="pending-badge" style="display:none" onclick="reopenReview()"></button>
+    <span id="last-sync"></span>
   </div>
-  <div id="clock">載入中…</div>
-</header>
+  <div id="pending-diag"></div>
 
-<div id="status-bar">
-  <div class="dot" id="dot"></div>
-  <span id="status-text">連線中…</span>
-  <span id="count-badge" style="display:none"></span>
-  <button id="pending-badge" style="display:none" onclick="reopenReview()"></button>
-  <span id="last-sync"></span>
-</div>
-
-<!-- 待審核讀取狀況（有問題時才會出現） -->
-<div id="pending-diag" style="display:none;width:100%;max-width:480px;margin:-4px 0 12px;padding:8px 12px;border-radius:10px;background:#fde8e4;color:#d4634a;border:1px solid #f5c5bb;font-size:0.8rem;font-weight:600;z-index:1;"></div>
-
-<div class="table-card">
-  <div class="table-header">
-    <div class="table-header-title">🗂 會員名單</div>
-    <span style="font-size:0.75rem;color:var(--muted)">每 5 秒自動同步 · v2</span>
+  <div class="list-head">
+    <span class="list-title">會員名牌</span>
+    <span class="list-note">每 5 秒自動同步</span>
   </div>
   <div class="member-list" id="member-list">
-    <div class="empty-state">
-      <span class="empty-icon">🌱</span>
-      <p>載入中，請稍候…</p>
-    </div>
+    <div class="empty-state"><span class="empty-plaque">載入中，請稍候…</span></div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-add" onclick="openAdd()">＋ 新增會員</button>
+    <button class="btn btn-del" onclick="openDel()">－ 刪除會員</button>
   </div>
 </div>
 
-<div class="bottom-bar">
-  <button class="btn btn-add" onclick="openAdd()">＋ 新增會員</button>
-  <button class="btn btn-del" onclick="openDel()">－ 刪除會員</button>
-</div>
-
-<!-- ─── 註冊審核 Modal ─── -->
+<!-- ─── 註冊審核 ─── -->
 <div class="overlay" id="review-overlay">
   <div class="modal">
     <div class="drag-handle"></div>
     <div class="modal-head">
-      <div class="modal-icon review">📝</div>
+      <div class="modal-icon review"><svg viewBox="0 0 24 24"><path d="M14 3.5H7a1.5 1.5 0 0 0-1.5 1.5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5M9 12.5h6M9 16h4"/></svg></div>
       <div>
         <h2>新註冊申請</h2>
         <p class="subtitle">來自註冊頁面送出的資料</p>
       </div>
     </div>
-
     <span class="review-counter" id="review-counter"></span>
-
     <p class="review-question">是否新增姓名 <strong id="review-name"></strong>？</p>
-
     <div class="review-detail">
       <div><span>帳號</span><span id="review-account"></span></div>
       <div><span>申請時間</span><span id="review-time"></span></div>
     </div>
-
     <div class="modal-msg" id="review-msg"></div>
-
     <div class="modal-actions">
       <button class="btn-submit green" id="rv-approve" onclick="reviewAction('approve')">新增</button>
       <button class="btn-submit red"   id="rv-reject"  onclick="reviewAction('reject')">取消</button>
@@ -744,39 +435,32 @@
   </div>
 </div>
 
-<!-- ─── 新增 Modal ─── -->
+<!-- ─── 新增 ─── -->
 <div class="overlay" id="add-overlay">
   <div class="modal">
     <div class="drag-handle"></div>
     <div class="modal-head">
-      <div class="modal-icon add">🌱</div>
+      <div class="modal-icon add"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.4"/><path d="M3.5 19.5c.7-3.4 3.2-5.3 6.5-5.3 1.4 0 2.6.3 3.6 1"/><path d="M18 14v6M15 17h6"/></svg></div>
       <div>
         <h2>新增會員</h2>
         <p class="subtitle">請填寫以下資料以完成新增</p>
       </div>
     </div>
-
     <div class="field">
-      <label>姓名 <span style="color:var(--warm3)">*</span></label>
-      <input type="text" id="add-name" placeholder="請輸入中文姓名" maxlength="10"
-             oninput="validateName(this)" autocomplete="off"/>
+      <label>姓名 <span class="req">*</span></label>
+      <input type="text" id="add-name" placeholder="請輸入中文姓名" maxlength="10" oninput="validateName(this)" autocomplete="off"/>
       <span class="field-hint" id="hint-name">僅限中文字，不可含英文或數字</span>
     </div>
-
     <div class="field">
-      <label>帳號 <span style="color:var(--warm3)">*</span></label>
+      <label>帳號 <span class="req">*</span></label>
       <input type="text" id="add-account" placeholder="請輸入帳號" maxlength="20" autocomplete="off"/>
     </div>
-
     <div class="field">
-      <label>密碼 <span style="color:var(--warm3)">*</span></label>
-      <input type="text" id="add-password" placeholder="請輸入 6 位數字" maxlength="6"
-             oninput="validatePwd(this)" autocomplete="off" inputmode="numeric"/>
+      <label>密碼 <span class="req">*</span></label>
+      <input type="text" id="add-password" placeholder="請輸入 6 位數字" maxlength="6" oninput="validatePwd(this)" autocomplete="off" inputmode="numeric"/>
       <span class="field-hint" id="hint-pwd">須為 6 位數字（例：123456）</span>
     </div>
-
     <div class="modal-msg" id="add-msg"></div>
-
     <div class="modal-actions">
       <button class="btn-submit green" onclick="submitAdd()">確認新增</button>
       <button class="btn-cancel" onclick="closeModal('add-overlay')">取消返回</button>
@@ -784,25 +468,22 @@
   </div>
 </div>
 
-<!-- ─── 刪除 Modal ─── -->
+<!-- ─── 刪除 ─── -->
 <div class="overlay" id="del-overlay">
   <div class="modal">
     <div class="drag-handle"></div>
     <div class="modal-head">
-      <div class="modal-icon del">🗑</div>
+      <div class="modal-icon del"><svg viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5"/><path d="M10 11v5M14 11v5"/></svg></div>
       <div>
         <h2>刪除會員</h2>
         <p class="subtitle">輸入帳號後將永久刪除該筆資料</p>
       </div>
     </div>
-
     <div class="field">
-      <label>帳號 <span style="color:var(--warm3)">*</span></label>
+      <label>帳號 <span class="req">*</span></label>
       <input type="text" id="del-account" placeholder="請輸入要刪除的帳號" autocomplete="off"/>
     </div>
-
     <div class="modal-msg" id="del-msg"></div>
-
     <div class="modal-actions">
       <button class="btn-submit red" onclick="submitDel()">確認刪除</button>
       <button class="btn-cancel" onclick="closeModal('del-overlay')">取消返回</button>
@@ -811,6 +492,270 @@
 </div>
 
 <script>
+        // ══ 光線隨時間變化（新增）══
+  //  早上太陽在左邊（東）低低的、偏金黃；中午在正上方、白亮；
+  //  下午移到右邊；傍晚右側低角度橘紅；入夜後房間變暗、改成月光＋桌燈。
+  //  測試用：網址後面加 ?hour=18.5 可以直接看某個時間的樣子
+  (function () {
+      //  時間   太陽X  太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影
+      //  時間   太陽X 太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影  窗光  窗X(vw) 窗Y(vh) 傾斜  旋轉
+      const K = [
+          [0,     72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],   // 深夜：月光
+          [4.6,   72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],
+          [5.6,    0, 66,  255,160,130,  .80,   48, 12, 214,160,200,  .45,  .35, .80, .55, 52,  6,  -42,  6],   // 破曉：粉紫
+          [7,      2, 42,  255,206,130,  .95,   40, 18, 255,226,190,  .18,  0,   1.5, .75, 46,  4,  -34,  4],   // 早晨：金黃
+          [10,    24, 12,  255,226,170,  .85,   22, 30, 255,248,236,  .04,  0,   1.6, .65, 34, 14,  -18,  2],
+          [12.5,  50,  0,  255,246,226,  .70,    0, 38, 255,255,255,  0,    0,   1.4, .55, 22, 34,    0,  0],   // 正午：白亮、影子短
+          [15,    78, 12,  255,220,150,  .85,  -22, 30, 255,244,226,  .06,  0,   1.6, .65,  8, 14,   18, -2],
+          [17,    98, 40,  255,160, 80,  1,    -42, 18, 255,190,140,  .30,  0,   1.7, .80, -4,  4,   34, -4],   // 傍晚：橘
+          [18.2, 100, 66,  255,110, 90,  .85,  -50, 12, 170,110,150,  .52,  .40, 1.1, .55, -8,  6,   42, -6],   // 黃昏：紅紫
+          [19.4,  72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],   // 入夜
+          [24,    72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],
+      ];
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      function apply() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < K.length - 2 && h >= K[i + 1][0]) i++;
+          const a = K[i], b = K[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          const v = a.map((x, j) => x + (b[j] - x) * t);
+          const r = document.documentElement.style;
+          r.setProperty('--sunx', v[1] + '%');
+          r.setProperty('--suny', v[2] + '%');
+          r.setProperty('--sunc', `${v[3] | 0},${v[4] | 0},${v[5] | 0}`);
+          r.setProperty('--suna', v[6].toFixed(3));
+          r.setProperty('--sx', v[7].toFixed(1) + 'px');
+          r.setProperty('--sy', v[8].toFixed(1) + 'px');
+          r.setProperty('--ovc', `${v[9] | 0},${v[10] | 0},${v[11] | 0}`);
+          r.setProperty('--ova', v[12].toFixed(3));
+          r.setProperty('--lamp', v[13].toFixed(3));
+          r.setProperty('--leafk', v[14].toFixed(3));
+          r.setProperty('--win', v[15].toFixed(3));
+          r.setProperty('--wx', v[16].toFixed(1) + 'vw');
+          r.setProperty('--wy', v[17].toFixed(1) + 'vh');
+          r.setProperty('--wsk', v[18].toFixed(1) + 'deg');
+          r.setProperty('--wrot', v[19].toFixed(1) + 'deg');
+          document.documentElement.classList.toggle('night', v[12] > 0.45);
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = v[12] > 0.6 ? '#4b5270' : (v[12] > 0.3 ? '#c9a9a8' : '#efe6d8');
+      }
+      apply();
+      setInterval(apply, 60 * 1000);   // 每分鐘更新一次
+  })();
+
+        // ══════════════════════════════════════════
+  //  寫實光影（Canvas）
+  //  牆面在陰影中是偏冷的灰；陽光穿過窗戶，在牆上投出一塊暖色光斑，
+  //  窗框形成十字陰影，窗外的樹葉在光斑裡留下深淺不一的影子並隨風擺動。
+  //  早上太陽低、光斑又長又斜、偏右；中午太陽高、光斑小而低；
+  //  下午移到左邊；傍晚轉橘紅；夜晚只剩微弱的冷色月光。
+  // ══════════════════════════════════════════
+  (function () {
+      const cv = document.getElementById('scene');
+      const ctx = cv.getContext('2d');
+      const SCALE = 0.5;                       // 半解析度繪製：陰影本來就柔，也比較省電
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      let W = 0, H = 0;
+
+      // 亂數（固定種子，每次畫出來的樹一樣）
+      let seed = 11;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const R = (a, b) => a + rnd() * (b - a);
+
+      // ── 時間表 ──
+      //  時:  陰影牆色RGB      光的加亮RGB     光斑 x   y    寬   高   斜    葉影深淺 風力
+      const T = [
+          [0,    36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],   // 夜：月光
+          [4.6,  36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+          [5.6, 146,136,146,  105, 58, 46,   .50, .00, .56, .50,  .28,  .70, .7],  // 破曉
+          [7,   188,180,170,  100, 72, 34,   .44, .00, .52, .60,  .22,  .85, .8],  // 早晨
+          [10,  204,197,187,   72, 60, 40,   .33, .10, .44, .62,  .10,  .90, 1 ],
+          [12.5,212,206,196,   52, 48, 38,   .22, .44, .50, .50,  .00,  .80, 1 ],  // 正午：光斑低而小
+          [15,  204,196,185,   74, 60, 36,   .18, .10, .44, .62, -.10,  .90, 1 ],
+          [17,  178,163,148,  108, 64, 22,   .04, .00, .52, .62, -.22,  .90, .9],  // 傍晚
+          [18.2,126,106,112,   96, 40, 24,  -.06, .02, .56, .50, -.28,  .75, .7],  // 黃昏
+          [19.4, 36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],  // 入夜
+          [24,   36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+      ];
+      function sample() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < T.length - 2 && h >= T[i + 1][0]) i++;
+          const a = T[i], b = T[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          return a.map((x, j) => x + (b[j] - x) * t);
+      }
+
+      // ── 畫一根帶葉子的樹枝（黑色剪影）到離屏畫布，再用「縮小再放大」做出柔邊 ──
+      function leaf(c, L, Wd) {
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.bezierCurveTo(L * 0.28, -Wd * 1.05, L * 0.72, -Wd * 0.85, L, R(-1, 1));
+          c.bezierCurveTo(L * 0.70, Wd * 0.95, L * 0.30, Wd * 0.9, 0, 0);
+          c.fill();
+          c.lineWidth = 1.1; c.beginPath(); c.moveTo(-L * 0.12, 0); c.lineTo(0, 0); c.stroke();
+      }
+      function branchSprite(size, blurK, sd) {
+          seed = sd;
+          const s = document.createElement('canvas'); s.width = s.height = size;
+          const c = s.getContext('2d');
+          c.fillStyle = '#000'; c.strokeStyle = '#000'; c.lineCap = 'round';
+          function grow(x, y, ang, len, thick, depth) {
+              const steps = Math.max(6, len / 14 | 0);
+              let cx = x, cy = y, a = ang;
+              for (let i = 0; i < steps; i++) {
+                  a += R(-0.10, 0.10);
+                  const nx = cx + Math.cos(a) * len / steps, ny = cy + Math.sin(a) * len / steps;
+                  c.lineWidth = Math.max(0.8, thick * (1 - i / steps));
+                  c.beginPath(); c.moveTo(cx, cy); c.lineTo(nx, ny); c.stroke();
+                  cx = nx; cy = ny;
+                  // 葉子：左右交錯、大小不一、角度隨機
+                  if (i > 0 && rnd() < 0.85) {
+                      const side = i % 2 ? 1 : -1;
+                      c.save(); c.translate(cx, cy);
+                      c.rotate(a + side * R(0.6, 1.2));
+                      const L = R(22, 42) * (depth ? 0.85 : 1), Wd = L * R(0.26, 0.4);
+                      c.scale(1, R(0.55, 1));            // 有些葉子斜著，影子變扁
+                      leaf(c, L, Wd); c.restore();
+                  }
+                  // 小枝
+                  if (depth < 2 && i > 1 && rnd() < 0.28) {
+                      grow(cx, cy, a + (rnd() < 0.5 ? -1 : 1) * R(0.5, 1.0), len * R(0.3, 0.5), thick * 0.55, depth + 1);
+                  }
+              }
+              // 枝端一簇葉
+              for (let k = 0; k < 4; k++) {
+                  c.save(); c.translate(cx, cy); c.rotate(a + R(-0.9, 0.9));
+                  const L = R(20, 36); leaf(c, L, L * R(0.28, 0.38)); c.restore();
+              }
+          }
+          grow(size * 0.98, size * 0.04, R(2.3, 2.6), size * 0.95, 6, 0);
+          // 柔邊（模擬半影）：縮小再放大
+          const k = Math.max(1, blurK);
+          const t1 = document.createElement('canvas');
+          t1.width = Math.max(1, size / k | 0); t1.height = t1.width;
+          const c1 = t1.getContext('2d'); c1.imageSmoothingQuality = 'high';
+          c1.drawImage(s, 0, 0, t1.width, t1.height);
+          const out = document.createElement('canvas'); out.width = out.height = size;
+          const co = out.getContext('2d'); co.imageSmoothingQuality = 'high';
+          co.drawImage(t1, 0, 0, size, size);
+          return out;
+      }
+
+      // 三種距離的樹枝：遠的模糊、近的清楚
+      let sprites = [];
+      function buildSprites() {
+          const base = Math.round(Math.max(W, H) * 0.9);
+          sprites = [
+              { img: branchSprite(base,       7, 21), fx: .55, fy: -.18, rot: .25, s: 1.10, a: .55, amp: .020, f: .55, ph: 0   },
+              { img: branchSprite(base,       6, 37), fx: .10, fy:  .05, rot: -.1, s: 0.95, a: .55, amp: .018, f: .48, ph: 1.7 },
+              { img: branchSprite(base * .8,  3.5, 53), fx: .40, fy: -.05, rot: .05, s: 1.00, a: .78, amp: .030, f: .80, ph: 3.1 },
+              { img: branchSprite(base * .8,  3, 71), fx: -.05, fy: .25, rot: -.35, s: 0.90, a: .75, amp: .028, f: .72, ph: 4.4 },
+              { img: branchSprite(base * .6,  1.8, 97), fx: .62, fy: .10, rot: .45, s: 0.90, a: .88, amp: .045, f: 1.1, ph: 2.2 },
+          ];
+      }
+
+      // 光斑位置：手機直式畫面比較窄，光斑放大一些才看得到
+      function geo() {
+          const portrait = H > W * 1.2;
+          const kw = portrait ? 1.9 : 1, kh = portrait ? 1.05 : 1;
+          const w = P[9] * W * kw, h = P[10] * H * kh;
+          const x = portrait ? (P[7] - 0.22) * W * 1.35 : P[7] * W;
+          const y = P[8] * H * (portrait ? 0.8 : 1);
+          return [x, y, w, h, P[11] * W * kw];
+      }
+
+      // 光斑（含窗框十字），每分鐘依時間重畫一次
+      const patch = document.createElement('canvas');
+      let P = null;
+      function buildPatch() {
+          P = sample();
+          patch.width = W; patch.height = H;
+          const c = patch.getContext('2d');
+          c.clearRect(0, 0, W, H);
+          const [x, y, w, h, sk] = geo();
+          // 先畫在小畫布再放大 → 光斑邊緣自然柔和
+          const k = 6, sm = document.createElement('canvas');
+          sm.width = Math.ceil(W / k); sm.height = Math.ceil(H / k);
+          const s = sm.getContext('2d');
+          s.scale(1 / k, 1 / k);
+          s.fillStyle = `rgb(${P[4] | 0},${P[5] | 0},${P[6] | 0})`;
+          s.beginPath();
+          s.moveTo(x, y); s.lineTo(x + w, y); s.lineTo(x + w + sk, y + h); s.lineTo(x + sk, y + h); s.closePath();
+          s.fill();
+          // 窗框：一直一橫的陰影
+          s.globalCompositeOperation = 'destination-out';
+          const mw = Math.max(6, w * 0.035);
+          s.beginPath();
+          s.moveTo(x + w * .5 - mw / 2, y); s.lineTo(x + w * .5 + mw / 2, y);
+          s.lineTo(x + w * .5 + mw / 2 + sk, y + h); s.lineTo(x + w * .5 - mw / 2 + sk, y + h); s.closePath(); s.fill();
+          const yy = y + h * .46, sx = sk * .46;
+          s.fillRect(x + sx - 4, yy - mw / 2, w + 8, mw);
+          c.imageSmoothingQuality = 'high';
+          c.drawImage(sm, 0, 0, W, H);
+      }
+
+      const light = document.createElement('canvas');
+      function draw(t) {
+          if (!P) return;
+          const lc = light.getContext('2d');
+          lc.globalCompositeOperation = 'source-over';
+          lc.clearRect(0, 0, W, H);
+          lc.drawImage(patch, 0, 0);
+          // 樹葉擋光：從光斑中「挖掉」葉影
+          lc.globalCompositeOperation = 'destination-out';
+          const [x, y, w, h, sk] = geo();
+          const wind = P[13];
+          // 陣風：幾個慢速波疊起來，偶爾大一點
+          const gust = Math.max(0, Math.sin(t * 0.21) + Math.sin(t * 0.083 + 1.3) - 0.6) * 0.6;
+          sprites.forEach(sp => {
+              const sway = (Math.sin(t * sp.f + sp.ph) + 0.45 * Math.sin(t * sp.f * 2.3 + sp.ph * 1.7)) * sp.amp * wind
+                         + gust * sp.amp * 1.6 * wind;
+              const size = sp.img.width * sp.s;
+              lc.save();
+              lc.globalAlpha = sp.a * P[12];
+              lc.translate(x + w * sp.fx + sk * 0.3, y + h * sp.fy);
+              lc.transform(1, 0, P[11] * 0.6, 1, 0, 0);     // 影子跟著光線一起斜
+              lc.rotate(sp.rot + sway);
+              lc.translate(Math.sin(t * sp.f * 0.7 + sp.ph) * 3 * wind, 0);
+              lc.drawImage(sp.img, -size * 0.5, -size * 0.1, size, size);
+              lc.restore();
+          });
+          // 牆面＝陰影色，再「加上」光
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = `rgb(${P[1] | 0},${P[2] | 0},${P[3] | 0})`;
+          ctx.fillRect(0, 0, W, H);
+          // 室內的反射光：靠下方稍暗（地板方向）
+          const g = ctx.createLinearGradient(0, 0, 0, H);
+          g.addColorStop(0, 'rgba(255,255,255,0.04)'); g.addColorStop(1, 'rgba(40,25,10,0.10)');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.drawImage(light, 0, 0);
+          ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function resize() {
+          W = Math.max(1, Math.round(innerWidth * SCALE));
+          H = Math.max(1, Math.round(innerHeight * SCALE));
+          cv.width = W; cv.height = H; light.width = W; light.height = H;
+          buildSprites(); buildPatch(); draw(performance.now() / 1000);
+      }
+      resize();
+      let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 200); });
+      setInterval(() => { buildPatch(); if (reduce) draw(0); }, 60 * 1000);
+
+      if (!reduce) {
+          let last = 0;
+          (function loop(ts) {
+              requestAnimationFrame(loop);
+              if (document.hidden || ts - last < 33) return;   // 約每秒 30 張
+              last = ts;
+              draw(ts / 1000);
+          })(0);
+      }
+  })();
+
+
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbzebd2h7DoTUt0cTXZx-q2zkbz5DBbYvykI5OU-vIVL3TQmXJPi1tgFuesiQ2Zgw8JV/exec';
   const POLL_MS = 5000;
 
@@ -844,40 +789,90 @@
       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  /* ── 會員清單 ── */
+  /* ── 會員清單：每位會員一塊木吊牌，資料以刻印方式呈現（修改）── */
+  let lastSig = '';
+  let lastRows = [];
+  // 繪馬的木色：淺色松木，深淺略有不同
+  const WOODS = [
+    ['#f7f0dc', '#ece0c3'],
+    ['#f4ebd2', '#e7d7b5'],
+    ['#f8f2e2', '#efe4cb'],
+  ];
+  function colsFor() {
+    const w = document.getElementById('member-list').clientWidth || 320;
+    return w >= 430 ? 3 : 2;
+  }
   function renderList(rows) {
     const list  = document.getElementById('member-list');
     const badge = document.getElementById('count-badge');
+    rows = rows || [];
+    const sig = JSON.stringify(rows) + '|' + colsFor();
+    if (sig === lastSig) return;              // 資料沒變就不重畫，吊牌不會一直跳
+    lastSig = sig; lastRows = rows;
     list.innerHTML = '';
 
-    if (!rows || rows.length === 0) {
-      list.innerHTML = `<div class="empty-state">
-        <span class="empty-icon">🌱</span><p>目前尚無會員資料</p></div>`;
+    if (rows.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span class="empty-plaque">目前尚無會員資料</span></div>`;
       badge.style.display = 'none';
       return;
     }
-
     badge.style.display = 'inline-block';
     badge.textContent = `共 ${rows.length} 位`;
 
-    rows.forEach((r, i) => {
-      const card = document.createElement('div');
-      card.className = 'member-card';
-      card.style.animationDelay = (i * 0.05) + 's';
-      card.innerHTML = `
-        <div class="card-row-top">
-          <span class="num-bubble">${i + 1}</span>
-          <span class="member-name">${esc(r.name)}</span>
-        </div>
-        <div class="card-row-chips">
-          <span class="chip chip-account"><span class="chip-label">帳號</span>${esc(r.account)}</span>
-          <span class="chip chip-pwd"><span class="chip-label">密碼</span>${esc(r.password)}</span>
-          <span class="chip chip-date"><span class="chip-label">日期</span>${formatDate(r.time)}</span>
-        </div>
-      `;
-      list.appendChild(card);
-    });
+    const cols = colsFor();
+    for (let r0 = 0; r0 < rows.length; r0 += cols) {
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+      row.style.setProperty('--cols', cols);
+      row.innerHTML = '<span class="rail" aria-hidden="true"></span>';
+      rows.slice(r0, r0 + cols).forEach((r, k) => {
+        const i = r0 + k;
+        const [w1, w2] = WOODS[i % WOODS.length];
+        const rr = (n) => { const x = Math.sin((i + 1) * n) * 10000; return x - Math.floor(x); };   // 每塊固定的隨機值
+        const tl = Math.round(rr(5.3) * 14 - 7);   // 繩尾垂下的位置稍有不同
+        const t = document.createElement('div');
+        t.className = 'mtag';
+        t.style.cssText = `--w1:${w1};--w2:${w2};--delay:${(-(i * 0.73) % 5.5).toFixed(2)}s;--in:${(i * 0.04).toFixed(2)}s;--tilt:${(rr(12.9) * 8 - 4).toFixed(1)}deg;--dy:${(rr(78.2) * 12).toFixed(0)}px`;
+        t.innerHTML = `
+          <div class="swing">
+            <svg class="loop" viewBox="0 0 24 46" aria-hidden="true">
+              <path d="M5 0 C 7 16, 10 28, 12 38"/><path d="M19 0 C 17 16, 14 28, 12 38"/>
+              <ellipse cx="12" cy="39" rx="4.6" ry="3.8" fill="#c21f22" stroke="none"/>
+              <path d="M9.5 38.5 q2.5 -2.5 5 0" stroke="#e8585a" stroke-width="1.2"/>
+            </svg>
+            <svg class="tails" viewBox="0 0 110 150" aria-hidden="true">
+              <path d="M2 0 C 26 4, 52 14, 70 44 S ${84 + tl} 112, ${88 + tl} 148"/>
+              <path d="M3 1 C 30 8, 58 22, 74 52 S ${94 + tl} 108, ${100 + tl} 140"/>
+            </svg>
+            <div class="plate">
+              <span class="hole"></span>
+              <svg class="motif" viewBox="0 0 60 50" aria-hidden="true">
+                <path d="M30 47 C 12 36, 2 26, 2 15 C 2 7 8 2 15 2 C 22 2 27 6 30 11 C 33 6 38 2 45 2 C 52 2 58 7 58 15 C 58 26 48 36 30 47 Z"/>
+                <circle cx="21" cy="19" r="4.2"/><path d="M13 35 C 13 28 17 25 21 25 C 25 25 29 28 29 35"/>
+                <circle cx="39" cy="19" r="4.2"/><path d="M31 35 C 31 28 35 25 39 25 C 43 25 47 28 47 35"/>
+                <path d="M27 31 Q 30 28.5 33 31"/>
+              </svg>
+              <div class="info">
+                <span class="nm">${esc(r.name)}</span>
+                <span class="ln"><i>帳號</i><b>${esc(r.account)}</b></span>
+                <span class="ln pw"><i>密碼</i><b>${esc(r.password)}</b></span>
+                <span class="ln"><i>日期</i><b>${formatDate(r.time)}</b></span>
+              </div>
+              <span class="pray">社工科</span>
+            </div>
+          </div>`;
+        // 手指碰到時晃一下
+        t.addEventListener('touchstart', () => {
+          const s = t.querySelector('.swing');
+          s.style.animation = 'none'; void s.offsetWidth; s.style.animation = 'swing 1.2s ease-out';
+        }, { passive: true });
+        row.appendChild(t);
+      });
+      list.appendChild(row);
+    }
   }
+  // 螢幕寬度改變時（例如手機轉橫），重新排每排幾塊
+  let _rz; addEventListener('resize', () => { clearTimeout(_rz); _rz = setTimeout(() => { lastSig = ''; renderList(lastRows); }, 200); });
 
   async function fetchData() {
     setStatus('busy', '同步中…');
