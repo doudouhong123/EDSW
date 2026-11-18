@@ -244,6 +244,15 @@
 <div class="page" id="page-order">
   <div><span class="order-date-badge" id="order-date-badge" onclick="goBackToDates()" style="cursor:pointer;" title="點擊重新選擇日期">📅 —</span></div>
 
+  <!-- 訂餐人姓名（新增）：僅訂餐專用帳號顯示 -->
+  <div class="section-card" id="orderer-section" style="display:none">
+    <div class="section-header lunch">👤 訂餐人<span class="shop-badge lunch">社區醫學科</span></div>
+    <div class="section-body">
+      <div class="field"><label>訂餐人姓名 <span style="color:var(--danger);">*</span></label>
+        <input type="text" id="orderer-name" placeholder="請輸入您的姓名" autocomplete="off" maxlength="20"/></div>
+    </div>
+  </div>
+
   <div class="section-card" id="lunch-section" style="display:none">
     <div class="section-header lunch">🍱 午餐<span class="shop-badge lunch" id="lunch-shop-badge"></span></div>
     <div class="section-body">
@@ -285,6 +294,9 @@
 <script>
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
   const account = localStorage.getItem('account');
+  // 訂餐專用帳號（新增）：由 index 登入 2040 時設定
+  const MEAL_ONLY = localStorage.getItem('mealOnly') === '1' && account === '2040';
+  const MEAL_ONLY_UNIT = '社區醫學科';
   let currentDateData = null;
   let currentUserName = '';
   let lunchCount = 0;
@@ -299,6 +311,11 @@
 
   async function loadUser() {
     if (!account) { alert('請先登入'); window.location.href='index.html'; return; }
+    if (MEAL_ONLY) {   // 訂餐專用帳號：顯示單位名稱（新增）
+      currentUserName = MEAL_ONLY_UNIT;
+      document.getElementById('welcome').textContent = '👋 ' + currentUserName;
+      return;
+    }
     try {
       const res  = await fetch(`${GAS_URL}?account=${encodeURIComponent(account)}`);
       const data = await res.json();
@@ -514,6 +531,9 @@
       renderMenuView('drink', item.drinkMenu);   // （新增）顯示飲料菜單照片
     } else { document.getElementById('drink-section').style.display='none'; }
     document.getElementById('note-section').style.display='block';
+    // 訂餐人姓名（新增）：訂餐專用帳號才顯示，每次選日期清空
+    document.getElementById('orderer-section').style.display = MEAL_ONLY ? 'block' : 'none';
+    document.getElementById('orderer-name').value = '';
     document.getElementById('order-notes').value='';
     document.getElementById('form-msg').className='form-msg';
     showPage('page-order');
@@ -629,11 +649,19 @@
       });
     }
     if (!lunchRows.length&&!drinkRows.length) { showMsg('⚠ 請至少填寫一筆午餐或飲料','err'); return; }
+    // 訂餐人姓名（新增）：訂餐專用帳號必填，存成「姓名（社區醫學科）」
+    let orderName = currentUserName;
+    if (MEAL_ONLY) {
+      const nmEl = document.getElementById('orderer-name');
+      const nm = nmEl.value.trim();
+      if (!nm) { showMsg('⚠ 請輸入訂餐人姓名','err'); nmEl.focus(); return; }
+      orderName = nm + '（' + MEAL_ONLY_UNIT + '）';
+    }
     btn.disabled=true; showMsg('送出中…','ok');
     try {
       const rows=[];
-      lunchRows.forEach(r=>rows.push({date:dateStr,userName:currentUserName,lunchItem:r.name,lunchPrice:r.price,drinkItem:'',sugar:'',ice:'',drinkPrice:'',notes}));
-      drinkRows.forEach(r=>rows.push({date:dateStr,userName:currentUserName,lunchItem:'',lunchPrice:'',drinkItem:r.name,sugar:r.sugar,ice:r.ice,drinkPrice:r.price,notes}));
+      lunchRows.forEach(r=>rows.push({date:dateStr,userName:orderName,lunchItem:r.name,lunchPrice:r.price,drinkItem:'',sugar:'',ice:'',drinkPrice:'',notes}));
+      drinkRows.forEach(r=>rows.push({date:dateStr,userName:orderName,lunchItem:'',lunchPrice:'',drinkItem:r.name,sugar:r.sugar,ice:r.ice,drinkPrice:r.price,notes}));
       const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'saveMealOrder',rows})});
       const json=await res.json();
       if (json.status==='ok') {
