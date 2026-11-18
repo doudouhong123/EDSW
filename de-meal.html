@@ -2,386 +2,426 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="theme-color" content="#11151a"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#efe6d8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>義大社工科｜訂餐後台</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
+    /* ══════════ 訂餐後台：窗邊葉影＋點單繩＋點菜本（與後台、會員、設備、文具頁同一套）══════════ */
     :root {
-      --bg:#fff8f0;--white:#ffffff;--warm1:#ff8c42;--warm2:#e8641a;--warm3:#c44d0a;
-      --green:#06d6a0;--green2:#04a87e;--sky:#4fc3f7;--sky2:#0288d1;
-      --ink:#2d1b0e;--ink2:#5a3825;--muted:#a07858;
-      --border:#f0d8c0;--shadow:rgba(200,80,10,0.10);--danger:#e05555;
+      --ink: #2f2a24; --ink-2: #5b5348; --muted: #8f8579; --hair: #e3d9ca;
+      --sage: #6f8a68; --terra: #b0603f;
+      --engrave: #4a2d14;
+      --sx: 14px; --sy: 24px; --ovc: 255,255,255; --ova: 0; --lamp: 0;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--bg);
-      background-image:radial-gradient(circle at 10% 20%,rgba(255,140,66,0.12) 0%,transparent 50%),
-        radial-gradient(circle at 90% 80%,rgba(6,214,160,0.08) 0%,transparent 45%);
-      min-height:100vh;display:flex;flex-direction:column;align-items:center;
-      padding:24px 14px 56px;color:var(--ink);}
-    .deco{position:fixed;pointer-events:none;opacity:0.08;z-index:0;animation:floatY 8s ease-in-out infinite;}
-    .deco:nth-child(1){top:5%;left:3%;font-size:2rem;animation-delay:0s;}
-    .deco:nth-child(2){top:18%;right:4%;font-size:1.3rem;animation-delay:2s;}
-    .deco:nth-child(3){top:60%;left:2%;font-size:1.1rem;animation-delay:4s;}
-    .deco:nth-child(4){top:78%;right:3%;font-size:1.6rem;animation-delay:1.5s;}
-    @keyframes floatY{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-14px) rotate(6deg);}}
-    @keyframes slideDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
-    @keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
-    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-    @keyframes rowIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { min-height: 100%; background: #e6ddd0; }
+    body {
+      font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      color: var(--ink);
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 22px 14px 48px;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    header{width:100%;max-width:500px;background:var(--white);border:1.5px solid var(--border);
-      border-radius:20px;padding:14px 20px;margin-bottom:16px;
-      box-shadow:0 4px 20px var(--shadow);z-index:1;animation:slideDown 0.5s ease both;}
-    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-    .site-title{display:flex;align-items:center;gap:9px;font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
-    .title-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--warm1),var(--warm3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(200,80,10,0.3);flex-shrink:0;}
-    .btn-return{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#fff8f4;color:var(--muted);transition:all 0.2s;}
-    .btn-return:hover{background:#ffe8d8;border-color:var(--warm1);color:var(--warm3);transform:translateX(-2px);}
-    #clock{font-size:0.8rem;color:var(--muted);font-family:'Zen Maru Gothic',sans-serif;}
+    /* ── 寫實光影（牆面、窗光、葉影）── */
+    #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }   /* 用最大視窗高度，手機網址列伸縮時不跳動（修改） */
+    .grain {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      mix-blend-mode: multiply;
+    }
+    .ambient-top {   /* 卡片：只稍微變暗，保持好讀 */
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: rgb(var(--ovc)); opacity: calc(var(--ova) * 0.38);
+        mix-blend-mode: multiply;
+    }
+    /* 夜晚：背板稍微不透明一點，小字加深，維持好讀 */
+    html.night .container { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    .page{display:none;width:100%;max-width:500px;flex-direction:column;gap:16px;z-index:1;}
-    .page.active{display:flex;animation:fadeIn 0.35s ease;}
+    /* 寫實光影畫布＋牆面顆粒 */
+    #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }   /* 用最大視窗高度，手機網址列伸縮時不跳動（修改） */
+    .grain {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        mix-blend-mode: multiply;
+    }
+    /* 夜間桌燈：卡片附近一圈暖光，晚上也看得清楚 */
+    .lamp {
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255,186,110,0.45), rgba(255,186,110,0) 70%);
+        mix-blend-mode: soft-light; opacity: var(--lamp);
+    }
+    html.night .panel { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    .card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
-    .card-header{padding:13px 18px;display:flex;align-items:center;gap:8px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.95rem;font-weight:700;}
-    .card-header.lunch{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);}
-    .card-header.drink{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:var(--sky2);}
-    .card-body{padding:18px;display:flex;flex-direction:column;gap:12px;}
+    /* ── 半透明紙卡 ── */
+    .panel {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 560px;
+      border-radius: 6px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(170deg, rgba(253,251,247,0.40) 0%, rgba(251,248,242,0.34) 45%, rgba(244,238,228,0.30) 100%);
+      -webkit-backdrop-filter: blur(2.5px) saturate(1.1);
+      backdrop-filter: blur(2.5px) saturate(1.1);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 1px rgba(120,100,70,0.08),
+        2px 3px 4px rgba(70,50,30,0.10),
+        calc(var(--sx) * 0.9) calc(var(--sy) * 1) 30px rgba(70,50,30,0.22),
+        calc(var(--sx) * 2.2) calc(var(--sy) * 2.4) 70px rgba(70,50,30,0.20);
+      animation: rise .7s cubic-bezier(.2,.7,.2,1) both;
+    }
+    @keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
 
-    .field{display:flex;flex-direction:column;gap:6px;}
-    .field label{font-size:0.82rem;font-weight:600;color:var(--ink2);}
-    .field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
-    .field input:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);background:var(--white);}
+    /* 頁首 */
+    header { padding: 22px 22px 14px; text-align: center; position: relative; }
+    .site-title {
+      font-family: 'Noto Serif TC', serif; font-size: 1.55rem; font-weight: 700;
+      letter-spacing: 0.14em; padding-left: 0.14em; color: var(--ink);
+    }
+    .site-sub {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 0.72rem; letter-spacing: 0.3em; color: var(--muted); margin-top: 6px;
+    }
+    .site-sub::before, .site-sub::after { content: ''; width: 30px; height: 1px; background: var(--hair); }
+    #clock {
+      font-size: 0.78rem; color: var(--muted); letter-spacing: 0.08em;
+      font-variant-numeric: tabular-nums; margin-bottom: 10px;
+    }
+    /* 返回：小原木牌 */
+    .btn-return {
+      position: absolute; top: 16px; left: 16px;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px 0 12px;
+      border: none; border-radius: 4px; cursor: pointer;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.015 0.45' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .26 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #e2c49c 0%, #cfa978 60%, #b98f5d 100%);
+      background-size: 200px 34px, auto;
+      box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), inset -2px -2px 0 rgba(80,50,20,0.18), 3px 5px 7px rgba(70,50,30,0.25);
+      color: var(--engrave); font-family: 'Noto Serif TC', serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.18em;
+      text-shadow: 0 1px 0 rgba(255,240,215,0.55), 0 -1px 0 rgba(70,40,15,0.2);
+    }
+    .btn-return:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), 1px 2px 3px rgba(70,50,30,0.25); }
 
-    .btn-row{width:100%;max-width:500px;display:flex;gap:12px;z-index:1;}
-    .btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .btn:active{transform:scale(0.97);}
-    .btn-submit{background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#fff;box-shadow:0 4px 14px rgba(200,80,10,0.28);}
-    .btn-submit:hover{box-shadow:0 6px 20px rgba(200,80,10,0.38);transform:translateY(-2px);}
-    .btn-skip{background:#fff3e8;color:var(--muted);border:1.5px solid var(--border);}
-    .btn-skip:hover{background:#ffe0c8;color:var(--warm3);border-color:var(--warm1);}
-    .btn-back{background:#fff3e8;color:var(--muted);border:1.5px solid var(--border);}
-    .btn-back:hover{background:#ffe0c8;color:var(--warm3);border-color:var(--warm1);}
+    /* 狀態列：一行小字 */
+    #status-bar {
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px;
+      font-size: 0.74rem; color: var(--muted);
+      padding: 0 18px 4px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #c9bfb1; flex-shrink: 0; }
+    .dot.ok   { background: var(--sage); }
+    .dot.err  { background: #a8432c; }
+    .dot.busy { background: #c39b4c; animation: breathe 1.2s infinite; }
+    @keyframes breathe { 50% { opacity: .35; } }
+    #status-text { color: var(--ink-2); }
+    #last-sync { color: var(--muted); }
+    #count-badge {
+      padding: 1px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.55); border: 1px solid #d3c7b6;
+      color: var(--ink-2); font-weight: 700;
+    }
+    #pending-badge {
+      padding: 2px 10px; border-radius: 999px; border: none; cursor: pointer;
+      background: #b04a32; color: #fff8ef; font-family: inherit; font-size: 0.74rem; font-weight: 700;
+      box-shadow: 1px 2px 4px rgba(60,30,15,0.3); transform: rotate(-3deg);
+    }
+    #pending-diag { display: none; margin: 6px 18px 0; padding: 8px 12px; border-left: 3px solid #a8432c;
+      background: rgba(247,236,228,0.85); color: #7a3a26; font-size: 0.8rem; border-radius: 2px; }
 
-    .overlay{position:fixed;inset:0;background:rgba(45,27,14,0.5);backdrop-filter:blur(6px);z-index:300;display:flex;align-items:center;justify-content:center;}
-    .dialog{background:var(--white);border:1.5px solid var(--border);border-radius:24px;padding:28px 24px 24px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(45,27,14,0.2);animation:popIn 0.35s cubic-bezier(0.34,1.5,0.64,1) both;display:flex;flex-direction:column;gap:16px;}
-    .dialog-icon{font-size:2rem;text-align:center;}
-    .dialog h2{font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);text-align:center;}
-    .dialog p{font-size:0.82rem;color:var(--muted);text-align:center;margin-top:-8px;}
-    .dialog-field{display:flex;flex-direction:column;gap:6px;}
-    .dialog-field label{font-size:0.8rem;font-weight:600;color:var(--ink2);}
-    .dialog-field input[type="date"]{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
-    .dialog-field input[type="date"]:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);}
-    .dialog-btn-row{display:flex;gap:10px;}
-    .dialog-btn-row .btn{padding:13px;}
+    /* ══════════ 訂餐後台：曬衣繩點單＋菜單夾板＋點菜本＋收據＋黑板 ══════════ */
+    .page { display: none; flex-direction: column; gap: 16px; padding: 4px 16px 6px; }
+    .page.active { display: flex; animation: fadeIn .35s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sec-title { font-family: 'Noto Serif TC', serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.16em; }
+    .sec-note  { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; }
+    .divider { border-top: 1px solid var(--hair); margin: 4px 0 0; }
 
-    .dates-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
-    .dates-header{background:linear-gradient(135deg,#f3e5f5,#e1bee7);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid var(--border);}
-    .dates-header-title{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:#7b1fa2;display:flex;align-items:center;gap:6px;}
-    .dates-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
-    .date-btn{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid #e0d0f0;background:linear-gradient(135deg,#f9f0ff,#f3e5f5);font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:#7b1fa2;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;animation:rowIn 0.3s ease both;box-shadow:0 2px 8px rgba(123,31,162,0.10);}
-    .date-btn:hover{background:linear-gradient(135deg,#e8d5ff,#dbb8f5);transform:translateY(-2px);box-shadow:0 4px 14px rgba(123,31,162,0.18);}
-    .date-btn:active{transform:scale(0.97);}
-    .date-btn-left{display:flex;align-items:center;gap:10px;}
-    .date-btn-icon{font-size:1.3rem;}
-    .date-btn-tags{display:flex;gap:6px;}
-    .tag{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;}
-    .tag-lunch{background:#fff3e0;color:var(--warm2);border:1px solid #ffd8b0;}
-    .tag-drink{background:#e0f7fa;color:var(--sky2);border:1px solid #b2e8f5;}
-    .btn-delete-date{padding:5px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid #f5c5c5;background:#fff0f0;color:#e05555;transition:all 0.2s;flex-shrink:0;}
-    .btn-delete-date:hover{background:#e05555;color:#fff;border-color:#e05555;}
-    .btn-close-date{padding:5px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid #b8d8c8;background:#e8f5ec;color:#04a87e;transition:all 0.2s;flex-shrink:0;}
-    .btn-close-date:hover{background:#04a87e;color:#fff;border-color:#04a87e;}
-    .btn-close-date.closed{background:#fde8e4;color:#e05555;border-color:#f5c5bb;}
-    .btn-close-date.closed:hover{background:#e05555;color:#fff;border-color:#e05555;}
-    .dates-empty-icon{font-size:2.2rem;display:block;margin-bottom:10px;}
-    .dates-empty p{font-size:0.88rem;}
-    .btn-add-date{width:100%;padding:13px;border-radius:14px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-size:0.9rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .btn-add-date:hover{border-color:var(--warm1);color:var(--warm2);background:#fff8f3;}
+    /* 小木板按鍵 */
+    .wbtn, .btn {
+      flex: 0 0 auto; height: 40px; padding: 0 18px; border: none; border-radius: 4px; cursor: pointer;
+      font-family: 'Noto Serif TC', serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.14em;
+      color: #fff8ec; text-shadow: 0 -1px 0 rgba(40,25,10,0.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset -2px -3px 0 rgba(40,25,10,0.18), 3px 5px 8px rgba(70,50,30,0.22);
+      background-size: 240px 100%, auto;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .wbtn:active, .btn:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 1px 2px 4px rgba(70,50,30,0.22); }
+    .wbtn:disabled, .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .sage, .btn-submit { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #88a77a, #617f55); }
+    .terra { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='5'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #c78464, #a35d3f); }
+    .ochre { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='6'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #cfab62, #a8833a); }
+    .slate { background: linear-gradient(175deg, #4d6e8f, #34506d); }
+    .oak, .btn-skip, .btn-back { color: #4a2d14; text-shadow: 0 1px 0 rgba(255,240,215,0.55);
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #e2c49c, #c9a171); }
+    .btn-row { display: none; justify-content: center; gap: 12px; padding: 6px 16px 20px; }
 
-    /* ── 餐點整理 ── */
-    .arrange-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-top:14px;box-shadow:0 2px 12px var(--shadow);}
-    .arrange-card-header{padding:10px 16px;font-family:'Zen Maru Gothic',sans-serif;font-size:0.85rem;font-weight:700;border-bottom:1.5px solid var(--border);}
-    .arrange-card-header.lunch-h{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:var(--warm2);}
-    .arrange-card-header.drink-h{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:var(--sky2);}
-    .arrange-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
-    .arrange-table th{padding:7px 8px;text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap;font-weight:700;}
-    .arrange-table th.lunch-th{background:linear-gradient(135deg,#fff8f0,#fff3e0);color:var(--warm2);}
-    .arrange-table th.drink-th{background:linear-gradient(135deg,#f0fbff,#e0f7fa);color:var(--sky2);}
-    .arrange-table td{padding:7px 8px;border-bottom:1px solid #f5f0ea;color:var(--ink);vertical-align:middle;}
-    .arrange-table tr:last-child td{border-bottom:none;}
-    .arrange-table tr:hover td{background:#fffaf5;}
-    .arrange-save-msg{font-size:0.78rem;padding:6px 12px;}
+    /* ══ 頁面一：菜單夾板（午餐／飲料） ══ */
+    #input-date-badge {   /* 日期章 */
+      align-self: center; display: inline-block; padding: 4px 14px;
+      border: 2px solid rgba(47,93,154,0.75); border-radius: 4px; color: #2f5d9a;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.08em;
+      transform: rotate(-2deg); background: rgba(255,255,255,0.5);
+    }
+    .clipboard {
+      position: relative; border-radius: 8px; padding: 26px 12px 12px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.02 0.35' numOctaves='3' seed='8'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .1  0 0 0 .2 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #c9a273, #a87f52);
+      box-shadow: inset 0 1px 0 rgba(255,240,215,0.45), inset 0 0 0 1px rgba(90,60,30,0.3), 6px 10px 18px rgba(70,50,30,0.25);
+    }
+    .clipboard .clip {   /* 金屬夾子 */
+      position: absolute; top: -8px; left: 50%; width: 110px; height: 28px; margin-left: -55px; z-index: 2;
+      border-radius: 6px 6px 4px 4px;
+      background: linear-gradient(180deg, #e9ecef, #b5bcc3 55%, #8e969e);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 4px rgba(40,30,20,0.35);
+    }
+    .clipboard .clip::after { content: ''; position: absolute; left: 50%; top: 6px; width: 30px; height: 8px; margin-left: -15px; border-radius: 4px; background: #7d858d; box-shadow: inset 0 1px 2px rgba(0,0,0,0.4); }
+    .clipboard .sheet {
+      background:
+        repeating-linear-gradient(180deg, transparent 0 31px, rgba(90,130,180,0.25) 31px 32px) 0 52px / 100% calc(100% - 52px) no-repeat,
+        linear-gradient(175deg, #fffdf6, #f6efdf);
+      border-radius: 2px; padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 12px;
+      box-shadow: 0 1px 3px rgba(60,40,20,0.2);
+    }
+    .sheet-title { font-family: 'Noto Serif TC', serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.2em; display: flex; align-items: center; gap: 8px; }
+    .sheet-title .dot-l { width: 10px; height: 10px; border-radius: 50%; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field > label, .lbl { font-size: 0.74rem; letter-spacing: 0.14em; color: #7d8aa0; font-weight: 700; }
+    .field input[type="text"] {
+      width: 100%; padding: 6px 2px; border: none; border-bottom: 1.5px solid rgba(60,70,90,0.45); background: transparent; outline: none;
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.2rem; font-weight: 700; color: #1e2733;
+    }
+    .field input[type="text"]:focus { border-bottom-color: var(--sage); }
+    .menu-upload-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .menu-count { font-size: 0.72rem; color: var(--muted); }
+    .menu-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 12px 10px; }
+    .menu-thumbs:empty { display: none; }
+    .menu-thumb {   /* 拍立得照片＋紙膠帶 */
+      position: relative; background: #fff; padding: 5px 5px 16px; border-radius: 2px;
+      box-shadow: 2px 3px 6px rgba(60,40,20,0.25); transform: rotate(var(--r, -2deg));
+    }
+    .menu-thumb:nth-child(2n) { --r: 2deg; } .menu-thumb:nth-child(3n) { --r: -1deg; }
+    .menu-thumb::before { content: ''; position: absolute; top: -7px; left: 50%; width: 40px; height: 14px; margin-left: -20px; background: rgba(244,211,94,0.7); transform: rotate(-4deg); }
+    .menu-thumb img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; cursor: zoom-in; background: #eee; }
+    .menu-thumb .rm { position: absolute; top: 2px; right: 2px; width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(40,30,20,0.7); color: #fff; font-size: 0.72rem; cursor: pointer; padding: 0; }
+    .menu-thumb .new-badge { position: absolute; left: 6px; bottom: 1px; font-size: 0.6rem; font-weight: 700; color: #a8432c; font-family: 'LXGW WenKai TC', sans-serif; }
+    .btn-upload {
+      display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; cursor: pointer;
+      border: 1.5px dashed rgba(60,70,90,0.4); border-radius: 4px; background: rgba(255,255,255,0.5);
+      font-size: 0.86rem; font-weight: 700; color: #4d5a6e;
+    }
+    .btn-upload:active { transform: translateY(1px); }
+    .input-tip { font-size: 0.74rem; color: var(--muted); text-align: center; }
 
-    /* ── 編輯彈窗 ── */
-    .edit-overlay{position:fixed;inset:0;background:rgba(45,27,14,0.55);backdrop-filter:blur(6px);z-index:400;display:none;align-items:center;justify-content:center;}
-    .edit-overlay.show{display:flex;}
-    .edit-dialog{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:22px 20px 18px;width:92%;max-width:400px;box-shadow:0 20px 60px rgba(45,27,14,0.2);display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto;}
-    .edit-dialog-title{font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
-    .edit-field{display:flex;flex-direction:column;gap:4px;}
-    .edit-field label{font-size:0.78rem;font-weight:600;color:var(--ink2);}
-    .edit-field input,.edit-field select,.edit-field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.92rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;transition:border-color 0.2s;}
-    .edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus{border-color:var(--warm1);background:var(--white);}
-    .edit-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .edit-select-wrap{position:relative;}
-    .edit-select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.85rem;}
-    .edit-select-wrap select{appearance:none;-webkit-appearance:none;}
-    .edit-btn-row{display:flex;gap:10px;margin-top:4px;}
-    .edit-btn{flex:1;padding:11px;border-radius:12px;border:none;font-size:0.92rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;}
-    .edit-btn-save{background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#fff;box-shadow:0 3px 10px rgba(200,80,10,0.25);}
-    .edit-btn-save:hover{transform:translateY(-1px);}
-    .edit-btn-cancel{background:#f5f0ea;color:var(--muted);border:1.5px solid var(--border);}
-    .edit-btn-cancel:hover{background:#ffe8d8;color:var(--warm3);}
-    .edit-btn-delete{background:#fff0f0;color:#e05555;border:1.5px solid #f5c5c5;flex:0.8;}
-    .edit-btn-delete:hover{background:#e05555;color:#fff;border-color:#e05555;}
-    .edit-msg{font-size:0.78rem;text-align:center;min-height:18px;}
-    .row-clickable{cursor:pointer;}
-    .row-clickable:hover td{background:#fff3e8!important;}
-    .order-view-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
-    .order-view-header{background:linear-gradient(135deg,#e8f4f8,#d8ecf4);padding:13px 18px;font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:#0288d1;border-bottom:1.5px solid #c0d8e4;}
-    .order-view-body{padding:16px 18px;}
-    .select-label{font-size:0.8rem;font-weight:600;color:var(--ink2);display:block;margin-bottom:6px;}
-    .select-wrap{position:relative;}
-    .select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.9rem;}
-    .date-select-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#fff8f4;outline:none;appearance:none;-webkit-appearance:none;transition:border-color 0.2s,box-shadow 0.2s;}
-    .date-select-input:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,140,66,0.15);}
-    .order-table-wrap{overflow-x:auto;margin-top:12px;}
-    .order-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
-    .order-table th{background:linear-gradient(135deg,#f0f8ff,#e4f0f8);color:#0288d1;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;padding:8px;text-align:left;border-bottom:1.5px solid #c0d8e4;white-space:nowrap;}
-    .order-table td{padding:8px;border-bottom:1px solid #f0f4f8;color:var(--ink);vertical-align:middle;}
-    .order-table tr:last-child td{border-bottom:none;}
-    .order-table tr:hover td{background:#f5faff;}
-    .order-empty{text-align:center;padding:28px;color:var(--muted);font-size:0.88rem;}
-    /* 訂單清單：餐點、甜度冰塊、價錢同一行（新增） */
-    .order-table td.one-line{white-space:nowrap;}
-    .order-table td.notes-cell{min-width:160px;white-space:normal;word-break:break-word;line-height:1.5;}   /* 備註欄加寬（新增） */
-    .ol-item{font-weight:600;}
-    .ol-opt{color:var(--sky2);font-size:0.72rem;margin-left:6px;}
-    .ol-price{color:var(--warm2);font-weight:700;font-family:'Zen Maru Gothic',sans-serif;margin-left:6px;}
-    .ol-none{color:#c9b8a8;}
-    .order-count-badge{display:inline-block;background:#e8f4f8;color:#0288d1;font-size:0.72rem;font-weight:700;border-radius:20px;padding:2px 10px;margin-left:6px;border:1px solid #c0d8e4;}
-    /* ── 總計表格 ── */
-    .summary-wrap{margin-top:14px;}
-    .summary-title{font-family:'Zen Maru Gothic',sans-serif;font-size:0.85rem;font-weight:700;color:#7b1fa2;margin-bottom:8px;}
-    .summary-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
-    .summary-table th{background:linear-gradient(135deg,#f3e5f5,#e1bee7);color:#7b1fa2;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;padding:8px;text-align:left;border-bottom:1.5px solid #d7b8e8;white-space:nowrap;}
-    .summary-table td{padding:8px;border-bottom:1px solid #f3e5f5;color:var(--ink);vertical-align:middle;}
-    .summary-table tr:last-child td{border-bottom:none;}
-    .summary-table tr:hover td{background:#faf5ff;}
-    .summary-total-row td{background:linear-gradient(135deg,#f3e5f5,#ede0f8);font-weight:700;color:#7b1fa2;border-top:2px solid #c8a0e0;}
-    .price-cell{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--warm2);}
-    .price-total{color:#7b1fa2;}
+    /* ══ 頁面二：曬衣繩上的點單（已建立的日期） ══ */
+    .line-wrap { position: relative; padding-top: 6px; }
+    .dates-body { display: flex; flex-direction: column; gap: 18px; }
+    .ticket-row { position: relative; padding-top: 14px; }
+    .ticket-row::before {   /* 麻繩 */
+      content: ''; position: absolute; left: -16px; right: -16px; top: 9px; height: 3px; border-radius: 2px;
+      background: repeating-linear-gradient(110deg, #b8925f 0 4px, #8f6b40 4px 7px);
+      box-shadow: 0 2px 3px rgba(60,40,20,0.2);
+    }
+    .ticket {
+      position: relative; width: 100%; text-align: left; border: none; cursor: pointer; font-family: inherit; color: #24303f;
+      padding: 18px 14px 12px; border-radius: 2px;
+      background: linear-gradient(175deg, #fffef9, #f7f1e3);
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.10), 2px 3px 4px rgba(70,50,30,0.08), 6px 10px 16px rgba(70,50,30,0.14);
+      transform: rotate(var(--tilt, 0deg)); transform-origin: 50% 0;
+      animation: tIn .45s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: var(--in, 0s);
+    }
+    @keyframes tIn { from { opacity: 0; transform: translateY(-8px) rotate(var(--tilt, 0deg)); } to { opacity: 1; } }
+    .no-intro .ticket { animation: none; }
+    .ticket::after {   /* 紙張下緣鋸齒 */
+      content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 7px;
+      background: linear-gradient(-45deg, transparent 4px, #f7f1e3 0) 0 0 / 8px 7px repeat-x, linear-gradient(45deg, transparent 4px, #f7f1e3 0) 0 0 / 8px 7px repeat-x;
+    }
+    .ticket .pin {   /* 木頭曬衣夾 */
+      position: absolute; top: -22px; left: 26px; width: 14px; height: 34px; border-radius: 3px; z-index: 2;
+      background: linear-gradient(90deg, #c49a68, #e3c08f 45%, #b48756); box-shadow: 1px 2px 3px rgba(60,40,20,0.3);
+    }
+    .ticket .pin::after { content: ''; position: absolute; left: -2px; right: -2px; top: 14px; height: 4px; border-radius: 2px; background: #9aa1a8; }
+    .ticket .t-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-right: 4px; }
+    .ticket .t-date { font-family: 'Noto Serif TC', serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em; }
+    .ticket .t-wk { font-size: 0.76rem; color: #6c7686; font-weight: 700; }
+    .ticket .t-row { display: grid; grid-template-columns: 34px 1fr; align-items: baseline; column-gap: 6px; margin-top: 6px; }
+    .ticket .t-row > i { font-style: normal; font-size: 0.66rem; letter-spacing: 0.12em; color: #8a93a3; }
+    .ticket .t-shop { font-family: 'LXGW WenKai TC', sans-serif; font-size: 1.02rem; font-weight: 700; overflow-wrap: anywhere; }
+    .ticket .t-shop.lunch { color: #8a4a30; } .ticket .t-shop.drink { color: #2c5a7a; }
+    .ticket .t-none { color: #b0b6bf; }
+    .ticket .t-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+    .ticket .t-btn {
+      height: 30px; padding: 0 12px; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      border: 1px solid #d3c7b6; background: rgba(255,255,255,0.7); color: var(--ink-2);
+    }
+    .ticket .t-btn.close { border-color: rgba(111,138,104,0.6); color: #4f6b48; }
+    .ticket .t-btn.reopen { border-color: rgba(168,67,44,0.5); color: #a8432c; }
+    .ticket .t-btn.del { border-color: rgba(168,67,44,0.35); color: #a8432c; }
+    .ticket .closed-stamp {   /* 已結單：紅色印章 */
+      position: absolute; top: 12px; right: 12px; padding: 2px 8px;
+      border: 2.5px solid #c0392b; border-radius: 4px; color: #c0392b;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.16em;
+      transform: rotate(10deg); opacity: .82; mix-blend-mode: multiply;
+    }
+    .ticket.is-closed { background: linear-gradient(175deg, #f8f4ec, #eee6d6); }
+    .dates-empty { text-align: center; padding: 24px 0; color: #7d8aa0; font-family: 'LXGW WenKai TC', sans-serif; }
+    .btn-add-date {
+      align-self: center; height: 40px; padding: 0 22px; cursor: pointer; border-radius: 4px;
+      border: 1.5px dashed rgba(111,138,104,0.7); background: rgba(255,255,255,0.55); color: #4f6b48;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.14em;
+    }
 
-    /* ── 菜單照片上傳（新增）── */
-    .menu-upload{display:flex;flex-direction:column;gap:8px;}
-    .menu-upload-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-    .menu-count{font-size:0.72rem;color:var(--muted);font-weight:600;}
-    .menu-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;}
-    .menu-thumbs:empty{display:none;}
-    .menu-thumb{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);background:#fff8f4;}
-    .menu-thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
-    .menu-thumb .rm{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(45,27,14,0.7);color:#fff;font-size:0.8rem;line-height:26px;padding:0;cursor:pointer;}
-    .menu-thumb .rm:hover{background:var(--danger);}
-    .menu-thumb .new-badge{position:absolute;left:4px;bottom:4px;font-size:0.62rem;font-weight:700;background:var(--warm1);color:#fff;border-radius:6px;padding:1px 6px;}
-    .field label.btn-upload{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:12px;border:2px dashed var(--border);background:#fffaf6;color:var(--warm2);font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
-    .field label.btn-upload.drink-up{color:var(--sky2);border-color:#b2e8f5;background:#f5fcff;}
-    .field label.btn-upload:hover{border-color:var(--warm1);background:#fff3e8;}
-    .field label.btn-upload.drink-up:hover{border-color:var(--sky);background:#e0f7fa;}
-    .menu-loading{font-size:0.75rem;color:var(--muted);}
+    /* ══ 訂單查詢：點菜本 ══ */
+    .orderpad {
+      position: relative; border-radius: 3px; overflow: hidden;
+      background: linear-gradient(175deg, #fbfdf7, #eef3e6);
+      box-shadow: 0 0 0 1px rgba(100,120,90,0.18), 2px 3px 4px rgba(70,50,30,0.08), 8px 12px 22px rgba(70,50,30,0.14);
+    }
+    .orderpad-top {   /* 點菜本的綠色頁首 */
+      background: linear-gradient(180deg, #5f7f58, #4f6b48); color: #f3f6ee; padding: 10px 14px 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; letter-spacing: 0.18em;
+    }
+    .orderpad-body { padding: 12px 14px 14px; }
+    .select-wrap { position: relative; }
+    .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #6c7686; pointer-events: none; }
+    .date-select-input {
+      width: 100%; padding: 9px 30px 9px 12px; border-radius: 3px; border: 1px solid #c9d3bf; background: #fff; outline: none;
+      -webkit-appearance: none; appearance: none; font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1rem; color: #1e2733;
+    }
+    .date-select-input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(111,138,104,0.18); }
+    .order-count-line { margin: 12px 0 4px; font-size: 0.8rem; color: #4f6b48; font-weight: 700; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .order-count-badge { padding: 1px 10px; border-radius: 999px; background: #e4ecdd; border: 1px solid #bfd0b3; }
+    .order-tip { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .order-list { display: flex; flex-direction: column; }
+    .ord {   /* 一筆訂單：一項一行 */
+      position: relative; padding: 10px 4px 10px 30px; cursor: pointer;
+      border-bottom: 1px solid rgba(110,150,110,0.3);
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; color: #24303f;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .ord:last-child { border-bottom: none; }
+    .ord:active { background: rgba(111,138,104,0.08); }
+    .ord .o-no { position: absolute; left: 2px; top: 12px; font-size: 0.72rem; color: #a8574a; font-weight: 700; font-family: 'Noto Serif TC', serif; }
+    .ord .o-name { font-size: 1.12rem; font-weight: 700; color: #1e2733; padding-right: 22px; }
+    .ord .o-edit { position: absolute; right: 4px; top: 12px; font-size: 0.8rem; color: #8a93a3; }
+    .ord .o-row { display: grid; grid-template-columns: 34px 1fr; align-items: baseline; column-gap: 6px; }
+    .ord .o-row > i { font-style: normal; font-size: 0.66rem; letter-spacing: 0.12em; color: #8a93a3; font-family: 'Noto Sans TC', sans-serif; }
+    .ol-item { font-weight: 700; font-size: 0.98rem; overflow-wrap: anywhere; }
+    .ol-opt { color: #2c5a7a; font-size: 0.82rem; margin-left: 6px; }
+    .ol-price { color: #a8432c; font-weight: 700; margin-left: 6px; }
+    .ol-none { color: #b0b6bf; }
+    .ord .o-memo { font-size: 0.84rem; color: #6b6b6b; overflow-wrap: anywhere; }
+    .order-empty { text-align: center; padding: 22px 0 10px; color: #7d8aa0; font-family: 'LXGW WenKai TC', sans-serif; }
+    .tool-row { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
 
-    /* ── 菜單照片放大檢視（新增）── */
-    .menu-viewer{position:fixed;inset:0;background:rgba(20,12,6,0.9);z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;}
-    .menu-viewer.show{display:flex;}
-    .menu-viewer img{max-width:100%;max-height:calc(100dvh - 110px);object-fit:contain;border-radius:8px;background:#fff;}
-    .mv-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;color:#fff;font-size:0.85rem;}
-    .mv-btn{min-width:44px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;font-size:0.85rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;text-decoration:none;text-align:center;}
-    .mv-btn:hover{background:rgba(255,255,255,0.25);}
-  </style>
-  <!-- ══════════ 工業科技風（與後台 deleloper 同步，修改）══════════ -->
-  <style>
-    :root{--st0:#0d1014;--st1:#161b21;--st2:#212831;--ln:#3a4552;--tx:#e7edf3;--mu:#98a6b4;
-      --hz:#ffc400;--cy:#00d2ff;--or:#ff6a13;--gr:#3cff6a;--rd:#ff4d4d;}
-    html{min-height:100%;background-color:var(--st0);
-      background-image:radial-gradient(circle at 15% 10%,rgba(0,210,255,.16),transparent 42%),
-        radial-gradient(circle at 85% 90%,rgba(255,106,19,.16),transparent 45%),
-        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
-        repeating-linear-gradient(45deg,#12161b 0 6px,#0f1317 6px 12px);
-      background-size:auto,auto,28px 28px,28px 28px,auto;background-attachment:fixed;color-scheme:dark;}
-    body{background:transparent!important;background-image:none!important;color:var(--tx)!important;
-      min-height:100vh;min-height:100dvh;font-family:'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif!important;}
-    /* 金屬面板 */
-    header,.ind-panel{position:relative;overflow:hidden;
-      background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(180deg,var(--st2),var(--st1))!important;
-      border:1px solid var(--ln)!important;border-radius:16px!important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.5),0 5px 0 #07090c,0 18px 36px rgba(0,0,0,.55)!important;}
-    header{padding-top:22px!important;}
-    header::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;
-      background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
-    .site-title{min-width:0;color:#fff!important;letter-spacing:1px;text-shadow:0 2px 0 #000,0 0 14px rgba(255,196,0,.3);font-family:inherit!important;font-weight:900!important;}
-    .title-icon{background:linear-gradient(180deg,#3a4450,#1d232a)!important;border:2px solid var(--hz);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;}
-    #clock{display:inline-block;font-family:Consolas,'Courier New',monospace!important;font-weight:700;color:var(--cy)!important;
-      text-shadow:0 0 8px rgba(0,210,255,.7);background:#07090c;border:1px solid #1f2a33;border-radius:8px;
-      padding:4px 12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.8);}
-    header #clock{display:block;width:fit-content;margin:0 auto;}
-    /* 返回：方形金屬鍵＋警示斜紋，和後台一致 */
-    .btn-return{position:relative;overflow:hidden;border-radius:8px!important;border:2px solid var(--hz)!important;
-      background:linear-gradient(180deg,#3a4450,#1d232a)!important;color:var(--hz)!important;
-      padding:6px 20px!important;font-weight:900!important;letter-spacing:2px;white-space:nowrap;flex-shrink:0;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #07090c!important;transform:none!important;}
-    .btn-return::before,.btn-return::after{content:'';position:absolute;top:0;bottom:0;width:7px;
-      background:repeating-linear-gradient(-45deg,var(--hz) 0 4px,#111 4px 8px);}
-    .btn-return::before{left:0}.btn-return::after{right:0}
-    .btn-return:hover{color:#fff!important;}
-    .btn-return:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 #07090c!important;}
-    /* 狀態列 */
-    #status-bar{background:#0b0e12;border:1px solid #26303a;border-radius:8px;padding:5px 10px;box-shadow:inset 0 2px 5px rgba(0,0,0,.8);}
-    #status-text,#last-sync{color:var(--mu)!important;}
-    .dot.ok{background:var(--gr)!important;box-shadow:0 0 8px var(--gr)!important;}
-    .dot.err{background:var(--rd)!important;box-shadow:0 0 8px var(--rd)!important;}
-    .dot.busy{background:var(--cy)!important;box-shadow:0 0 8px var(--cy)!important;}
-    /* 區塊標題列：深色＋青色底線 */
-    .ind-head{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;
-      box-shadow:0 2px 10px rgba(0,210,255,.18);}
-    .ind-head-title{color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
-    .ind-count{background:linear-gradient(180deg,#ffd84d,var(--hz))!important;color:#2a1d00!important;font-weight:900!important;
-      box-shadow:0 2px 0 #7a5200!important;}
-    /* 列表 */
-    .ind-row{border-bottom:1px solid #2b343e!important;}
-    .ind-row:hover{background:rgba(0,210,255,.06)!important;}
-    .ind-seq{background:radial-gradient(circle at 35% 30%,#8ff0ff,#00b4e6 55%,#00415e)!important;color:#00202e!important;
-      font-weight:900!important;box-shadow:0 2px 0 #00293b,0 0 8px rgba(0,210,255,.5);}
-    .ind-name{color:#fff!important;}
-    .empty-state{color:var(--mu)!important;}
-    mark{background:rgba(255,196,0,.28)!important;color:var(--hz)!important;}
-    /* 輸入欄 */
-    .ind-input{background:#0b0e12!important;color:var(--tx)!important;border:1px solid #33404c!important;
-      box-shadow:inset 0 2px 5px rgba(0,0,0,.8)!important;}
-    .ind-input:focus{border-color:var(--cy)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(0,210,255,.2)!important;}
-    .ind-input::placeholder{color:#6b7885;}
-    /* 立體按鍵 */
-    .ind-btn{border:none!important;border-radius:10px!important;font-weight:900!important;transition:transform .1s,box-shadow .1s!important;}
-    .ind-btn:active{transform:translateY(3px)!important;}
-    .ind-cy{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #005a78,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-hz{background:linear-gradient(180deg,#ffe066,var(--hz))!important;color:#2a1d00!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 4px 0 #8a6200,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-gr{background:linear-gradient(180deg,#6cf08a,#22b545)!important;color:#04210b!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #0d5a1e,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-rd{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;}
-    .ind-gy{background:linear-gradient(180deg,#4a5562,#2b333c)!important;color:#dfe6ec!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 0 #0d1014!important;}
-    .ind-cy:active,.ind-hz:active,.ind-gr:active,.ind-rd:active,.ind-gy:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
-    .ind-sm-del{background:linear-gradient(180deg,#3a2226,#24161a)!important;color:#ff8a8a!important;border:1px solid #7a1f1f!important;
-      border-radius:6px!important;box-shadow:0 2px 0 #07090c!important;}
-    .ind-sm-del:hover{background:linear-gradient(180deg,#d42020,#8f0f0f)!important;color:#fff!important;}
-    /* 標籤 chips：深底＋發光字 */
-    .ind-chip{background:#0b0e12!important;border:1px solid #2f3b46!important;}
-    .c-cy{color:#7fe6ff!important;border-color:rgba(0,210,255,.45)!important;}
-    .c-hz{color:#ffd84d!important;border-color:rgba(255,196,0,.45)!important;}
-    .c-gr{color:#7dff9e!important;border-color:rgba(60,255,106,.4)!important;}
-    .c-or{color:#ffb27a!important;border-color:rgba(255,106,19,.5)!important;background:rgba(255,106,19,.1)!important;}
-    .c-bl{color:#a5d8ff!important;border-color:rgba(120,190,255,.5)!important;background:rgba(0,120,255,.12)!important;}
-    .c-mu{color:#c3ccd5!important;}
-    .c-pk{color:#ff9ec4!important;border-color:rgba(255,80,150,.5)!important;background:rgba(255,80,150,.1)!important;}
-    .chip-label,.chip-lbl{opacity:.7;}
-    @media (max-width:400px){.site-title{font-size:.9rem!important;gap:7px!important;letter-spacing:0;} .btn-return{padding:6px 14px!important;letter-spacing:1px;}}
+    /* ══ 總計：收據 ══ */
+    .summary-wrap { margin: 16px auto 0; max-width: 340px; }
+    .receipt {
+      position: relative; background: #fffefb; padding: 18px 16px 22px;
+      font-family: 'Courier New', 'Noto Sans TC', monospace; color: #2a2a2a; font-size: 0.86rem;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 4px 8px 16px rgba(70,50,30,0.18);
+    }
+    .receipt::after {   /* 收據下緣鋸齒 */
+      content: ''; position: absolute; left: 0; right: 0; bottom: -7px; height: 8px;
+      background: linear-gradient(-45deg, transparent 5px, #fffefb 0) 0 0 / 10px 8px repeat-x, linear-gradient(45deg, transparent 5px, #fffefb 0) 0 0 / 10px 8px repeat-x;
+    }
+    .receipt .r-title { text-align: center; font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.2em; }
+    .receipt .r-sub { text-align: center; font-size: 0.76rem; color: #666; margin-top: 2px; }
+    .receipt .r-hr { border-top: 1.5px dashed #9a9a9a; margin: 10px 0; }
+    .receipt .r-line { display: grid; grid-template-columns: 1fr 64px 64px; gap: 6px; padding: 2px 0; }
+    .receipt .r-line span:nth-child(n+2) { text-align: right; }
+    .receipt .r-line.head { font-size: 0.72rem; color: #777; }
+    .receipt .r-line.sub { font-weight: 700; }
+    .receipt .r-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; }
+    .receipt .r-name { font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; overflow-wrap: anywhere; }
+    .save-msg { font-size: 0.78rem; text-align: center; margin-top: 12px; font-family: 'LXGW WenKai TC', sans-serif; min-height: 1.2em; }
 
-    /* ── 訂餐後台頁 ── */
-    :root{--bg:#0d1014;--white:#1b2128;--ink:#e7edf3;--ink2:#c3ccd5;--muted:#98a6b4;--border:#33404c;--shadow:rgba(0,0,0,.5);}
-    body{font-size:20px;}
-    .deco{opacity:.12!important;filter:drop-shadow(0 0 6px rgba(0,210,255,.6));}
-    .card,.dates-card,.order-view-card,.dialog,.edit-dialog,.arrange-card{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(180deg,var(--st2),var(--st1))!important;border:1px solid var(--ln)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.5),0 5px 0 #07090c,0 18px 36px rgba(0,0,0,.55)!important;}
-    .card-header.lunch,.arrange-card-header.lunch-h{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--or)!important;color:var(--or)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(255,106,19,.45);}
-    .card-header.drink,.arrange-card-header.drink-h{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
-    .dates-header{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--hz)!important;color:var(--hz)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(255,196,0,.45);}
-    .dates-header-title{color:var(--hz)!important;font-family:inherit!important;}
-    #dates-count{color:var(--mu)!important;}
-    .order-view-header{background:linear-gradient(180deg,#2a323c,#1c2229)!important;border-bottom:2px solid var(--cy)!important;color:var(--cy)!important;font-family:inherit!important;font-weight:900!important;letter-spacing:1px;text-shadow:0 0 8px rgba(0,210,255,.45);}
-    #input-date-badge{background:#0b0e12!important;color:var(--hz)!important;border:1px solid rgba(255,196,0,.5)!important;font-family:inherit!important;box-shadow:0 0 10px rgba(255,196,0,.2);}
-    .field input,.dialog-field input[type="date"],.edit-field input,.edit-field select,.edit-field textarea,.date-select-input{background:#0b0e12!important;color:var(--tx)!important;border:1px solid #33404c!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8)!important;}
-    .field input:focus,.dialog-field input[type="date"]:focus,.edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus,.date-select-input:focus{border-color:var(--cy)!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),0 0 0 3px rgba(0,210,255,.2)!important;}
-    .select-wrap::after,.edit-select-wrap::after{color:var(--cy)!important;}
-    .btn,.edit-btn{border-radius:12px!important;}
-    .btn-submit,.edit-btn-save{background:linear-gradient(180deg,#ffa060,#ff6a13)!important;color:#2a0e00!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #8a2c00,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;}
-    .btn-skip,.btn-back,.edit-btn-cancel{background:linear-gradient(180deg,#4a5562,#2b333c)!important;color:#dfe6ec!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #0d1014,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;}
-    .edit-btn-delete{background:linear-gradient(180deg,#ff7373,#d42020)!important;color:#fff!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #6b0000,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;}
-    .btn:hover,.btn-submit:hover,.edit-btn-save:hover{transform:none!important;}
-    .btn:active,.edit-btn:active,#btn-summary:active,#btn-arrange:active,.date-btn:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #07090c!important;}
-    .overlay,.edit-overlay{background:rgba(5,7,10,.75)!important;}
-    .dialog,.edit-dialog{position:relative;overflow:hidden;}
-    .dialog::before,.edit-dialog::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;background:repeating-linear-gradient(-45deg,var(--hz) 0 12px,#111 12px 24px);}
-    .dialog h2{color:#fff!important;font-family:inherit!important;}
-    .edit-dialog-title{color:var(--hz)!important;font-family:inherit!important;font-weight:900!important;}
-    /* 日期按鈕：立體金屬鍵 */
-    .date-btn{background:linear-gradient(180deg,#2e3741,#1a2027)!important;border:1px solid #3a4552!important;border-left:4px solid var(--hz)!important;color:#fff!important;font-family:inherit!important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 0 #07090c,0 8px 16px rgba(0,0,0,.4)!important;}
-    .date-btn:hover{transform:none!important;border-left-color:var(--cy)!important;}
-    .tag-lunch{background:#0b0e12!important;color:#ffb27a!important;border:1px solid rgba(255,106,19,.5)!important;}
-    .tag-drink{background:#0b0e12!important;color:#7fe6ff!important;border:1px solid rgba(0,210,255,.45)!important;}
-    .btn-delete-date{background:linear-gradient(180deg,#3a2226,#24161a)!important;color:#ff8a8a!important;border:1px solid #7a1f1f!important;box-shadow:0 2px 0 #07090c!important;}
-    .btn-close-date{background:#0b0e12!important;color:#7dff9e!important;border:1px solid rgba(60,255,106,.4)!important;}
-    .btn-close-date.closed{color:#ff9a9a!important;border-color:#7a1f1f!important;}
-    .btn-add-date{border:2px dashed var(--hz)!important;color:var(--hz)!important;background:rgba(255,196,0,.06)!important;}
-    .btn-add-date:hover{background:rgba(255,196,0,.14)!important;}
-    .dates-empty,.order-empty{color:var(--mu)!important;}
-    #btn-summary{background:linear-gradient(180deg,#ffe066,#ffc400)!important;color:#2a1d00!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #8a6200,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;border-radius:12px!important;}
-    #btn-arrange{background:linear-gradient(180deg,#5fe6ff,#00a8d6)!important;color:#00202e!important;border:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 #005a78,0 8px 16px rgba(0,0,0,.4)!important;font-weight:900!important;border-radius:12px!important;}
-    /* 表格 */
-    .order-table th,.summary-table th,.arrange-table th,.arrange-table th.lunch-th,.arrange-table th.drink-th{background:#0b0e12!important;color:var(--cy)!important;font-family:inherit!important;border-bottom:2px solid rgba(0,210,255,.5)!important;}
-    .summary-table th{color:var(--hz)!important;border-bottom-color:rgba(255,196,0,.5)!important;}
-    .arrange-table th.lunch-th{color:#ffb27a!important;border-bottom-color:rgba(255,106,19,.5)!important;}
-    .order-table td,.summary-table td,.arrange-table td{border-bottom:1px solid #2b343e!important;}
-    .order-table tr:hover td,.summary-table tr:hover td,.arrange-table tr:hover td,.row-clickable:hover td{background:rgba(0,210,255,.07)!important;}
-    .summary-title{color:var(--hz)!important;font-family:inherit!important;}
-    .summary-total-row td{background:rgba(255,196,0,.1)!important;color:var(--hz)!important;border-top:2px solid var(--hz)!important;}
-    .price-cell,.ol-price{color:#ffb27a!important;font-family:inherit!important;}
-    .price-total{color:var(--hz)!important;}
-    .ol-opt{color:#7fe6ff!important;} .ol-none{color:#5b6672!important;}
-    .order-count-badge{background:linear-gradient(180deg,#ffd84d,var(--hz))!important;color:#2a1d00!important;border:none!important;font-weight:900!important;}
-    /* 菜單照片 */
-    .menu-thumb{border:1px solid #3a4552!important;background:#0b0e12!important;box-shadow:0 3px 0 #07090c;}
-    .field label.btn-upload{background:rgba(255,106,19,.08)!important;border:2px dashed var(--or)!important;color:#ffb27a!important;}
-    .field label.btn-upload.drink-up{background:rgba(0,210,255,.08)!important;border-color:var(--cy)!important;color:#7fe6ff!important;}
-    .menu-thumb .new-badge{background:var(--hz)!important;color:#2a1d00!important;}
-  </style>
-  <!-- ── 版面調整（修改）── -->
-  <style>
-    /* 1. 選擇日期對話框：日期輸入框改為適中寬度 */
-    .dialog-field{align-items:center;}
-    .dialog-field label{align-self:center;}
-    .dialog-field input[type="date"]{width:220px!important;max-width:100%;min-width:0;height:44px;
-      -webkit-appearance:none;appearance:none;text-align:center;font-size:1rem!important;padding:8px 12px!important;}
-    .dialog-field input[type="date"]::-webkit-date-and-time-value{text-align:center;}
+    /* ══ 餐點整理：黑板 ══ */
+    .chalkboard {
+      margin-top: 16px; border-radius: 6px; padding: 14px 14px 12px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23c)'/></svg>"),
+        radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.06), rgba(255,255,255,0) 60%),
+        linear-gradient(175deg, #2f3e36, #26332c);
+      border: 8px solid #9c7547;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3), 6px 10px 18px rgba(50,35,20,0.3);
+      color: #eef0e8; font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif;
+    }
+    .chalkboard .cb-title { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.16em; text-align: center; margin-bottom: 8px; text-shadow: 0 0 1px rgba(255,255,255,0.6); }
+    .chalkboard .cb-title.lunch { color: #f5d7a8; } .chalkboard .cb-title.drink { color: #bfe0f0; }
+    .chalkboard .cb-line { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 5px 2px; border-bottom: 1px dashed rgba(238,240,232,0.22); font-size: 0.98rem; }
+    .chalkboard .cb-line:last-child { border-bottom: none; }
+    .chalkboard .cb-line .who { color: rgba(238,240,232,0.75); font-size: 0.88rem; text-align: right; }
+    .chalkboard .cb-line .opt { color: #bfe0f0; font-size: 0.8rem; margin-left: 6px; }
+    .chalkboard .cb-empty { text-align: center; color: rgba(238,240,232,0.6); padding: 8px 0; }
+    .chalkboard .save-msg { color: rgba(238,240,232,0.85); }
+    .chalkboard + .chalkboard { margin-top: 12px; }
 
-    /* 2. 已建立的日期：日期、週幾、結單狀態排整齊；太長時可在框內往右滑 */
-    .dates-body{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    .date-btn{display:flex!important;align-items:center;gap:12px;white-space:nowrap;
-      width:max-content!important;min-width:100%;justify-content:space-between;}
-    .date-btn-left{flex:1 0 auto;min-width:270px;}   /* 每列左邊同寬，右邊的結單／刪除鍵上下對齊 */
-    .date-main{display:flex;align-items:center;gap:8px;font-size:1rem;}
-    .date-wk{font-size:.8rem;color:var(--mu);font-weight:700;background:#0b0e12;border:1px solid #2f3b46;border-radius:6px;padding:1px 7px;}
-    .closed-badge{font-size:.72rem;font-weight:900;color:#ff9a9a;background:rgba(255,77,77,.12);border:1px solid #7a1f1f;border-radius:6px;padding:1px 7px;}
-    .date-btn-tags{flex-wrap:nowrap;}
-    .date-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-    .date-actions .btn-close-date,.date-actions .btn-delete-date{min-width:62px;text-align:center;white-space:nowrap;}
-    .date-btn.is-closed{opacity:.75;border-left-color:#ff4d4d!important;}
+    /* ══ 對話框：紙卡 ══ */
+    .overlay, .edit-overlay {
+      position: fixed; inset: 0; z-index: 300; align-items: center; justify-content: center; padding: 18px;
+      background: rgba(60,45,30,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+    }
+    .overlay { display: flex; }
+    .edit-overlay { display: none; z-index: 400; }
+    .edit-overlay.show { display: flex; }
+    .dialog, .edit-dialog {
+      width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto;
+      background: linear-gradient(170deg, #fdfbf7, #f4eee4); border-radius: 6px;
+      padding: 22px 20px 20px; display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.08), 14px 24px 50px rgba(50,35,20,0.3);
+      animation: popIn .35s cubic-bezier(.3,1.3,.5,1) both;
+    }
+    @keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+    .dialog-icon { display: flex; justify-content: center; color: var(--sage); }
+    .dialog-icon svg, .edit-icon svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .dialog h2 { font-family: 'Noto Serif TC', serif; font-size: 1.2rem; letter-spacing: 0.14em; text-align: center; }
+    .dialog p { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: -8px; }
+    .dialog-field { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .dialog-field label { font-size: 0.74rem; letter-spacing: 0.16em; color: #7d8aa0; font-weight: 700; }
+    .dialog-field input[type="date"] {
+      width: 220px; max-width: 100%; height: 46px; text-align: center; -webkit-appearance: none; appearance: none;
+      border: 2px solid rgba(47,93,154,0.7); border-radius: 4px; background: rgba(255,255,255,0.7);
+      color: #2f5d9a; font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1.05rem; outline: none;
+    }
+    .dialog-btn-row, .edit-btn-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .edit-dialog-title { font-family: 'Noto Serif TC', serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.14em; }
+    #edit-info { font-size: 0.82rem; color: var(--ink-2); margin-top: -8px; font-family: 'LXGW WenKai TC', sans-serif; }
+    .edit-field { display: flex; flex-direction: column; gap: 4px; }
+    .edit-field label { font-size: 0.72rem; letter-spacing: 0.14em; color: #7d8aa0; font-weight: 700; }
+    .edit-field input, .edit-field select, .edit-field textarea {
+      width: 100%; padding: 8px 12px; border-radius: 3px; border: 1px solid #d8ccbb; background: #fff; outline: none;
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1rem; color: #1e2733;
+    }
+    .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(111,138,104,0.18); }
+    .edit-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .edit-select-wrap { position: relative; }
+    .edit-select-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #6c7686; pointer-events: none; }
+    .edit-select-wrap select { -webkit-appearance: none; appearance: none; }
+    .edit-msg { font-size: 0.8rem; text-align: center; min-height: 1.2em; font-family: 'LXGW WenKai TC', sans-serif; }
 
-    /* 3. 訂單查詢：字放大（仍維持手機版），太長可往右滑 */
-    .order-table,.summary-table,.arrange-table{font-size:.95rem!important;}
-    .order-table th,.summary-table th,.arrange-table th{font-size:.88rem;padding:10px!important;}
-    .order-table td,.summary-table td,.arrange-table td{padding:10px!important;white-space:nowrap;}
-    .order-table td.notes-cell{white-space:nowrap!important;min-width:0!important;}
-    .ol-opt{font-size:.85rem!important;}
-    .order-count-badge{font-size:.85rem!important;}
-    .order-count-line{font-size:.9rem!important;}
-    .summary-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    .summary-title{font-size:1rem!important;}
-  </style>
-  <!-- ── 從後台立體球進入時，頁面以「浮現」方式出現（新增）── -->
-  <style>
-    html.fade-in { background: #0d1014; }
+    /* ══ 菜單照片放大檢視 ══ */
+    .menu-viewer { position: fixed; inset: 0; background: rgba(30,22,14,0.9); z-index: 900; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
+    .menu-viewer.show { display: flex; }
+    .menu-viewer img { max-width: 100%; max-height: calc(100dvh - 110px); object-fit: contain; border-radius: 4px; background: #fff; }
+    .mv-bar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; color: #fff; font-size: 0.85rem; }
+    .mv-btn { min-width: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.12); color: #fff; font-size: 0.85rem; font-weight: 700; font-family: inherit; cursor: pointer; text-decoration: none; text-align: center; }
+
+    @media (prefers-reduced-motion: reduce) { .ticket { animation: none; } }
+    /* 從後台進入時以「浮現」方式出現 */
+    html.fade-in { background: #efe6d8; }
     html.fade-in body { animation: pageFloatIn 0.8s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes pageFloatIn {
-      from { opacity: 0; transform: translateY(28px) scale(0.97); filter: blur(8px); }
+      from { opacity: 0; transform: translateY(24px) scale(0.98); filter: blur(6px); }
       to   { opacity: 1; transform: none; filter: none; }
     }
     @media (prefers-reduced-motion: reduce) { html.fade-in body { animation: none; } }
@@ -401,124 +441,104 @@
   </script>
 </head>
 <body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="ambient-top" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
 
-<div class="deco">🍱</div>
-<div class="deco">🧋</div>
-<div class="deco">🌿</div>
-<div class="deco">🍜</div>
-
-<header>
-  <div class="header-top">
-    <div class="site-title"><div class="title-icon">🍱</div>義大社工科｜訂餐後台</div>
+<div class="panel">
+  <header>
     <button class="btn-return" onclick="window.location.href='deleloper.html'">← 返回</button>
-  </div>
-  <div><span id="clock"></span></div>
-</header>
+    <div id="clock">載入中…</div>
+    <h1 class="site-title">訂餐後台</h1>
+    <div class="site-sub">義大社工科</div>
+  </header>
 
-<!-- 頁面一：輸入店家 -->
-<div class="page" id="page-input">
-  <div style="z-index:1">
-    <span id="input-date-badge" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);color:#7b1fa2;border-radius:8px;padding:5px 14px;font-size:0.88rem;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;border:1px solid #d7b8e8;">📅 —</span>
-  </div>
-  <div class="card">
-    <div class="card-header lunch">🍱 午餐</div>
-    <div class="card-body">
-      <div class="field"><label>店家名稱</label>
-        <input type="text" id="lunch-shop" placeholder="請輸入午餐店家名稱" autocomplete="off"/></div>
-      <div class="field menu-upload">
-        <div class="menu-upload-top"><span style="font-size:0.82rem;font-weight:600;color:var(--ink2);">午餐菜單照片（選填，可多張）</span><span class="menu-count" id="lunch-menu-count"></span></div>
-        <div class="menu-thumbs" id="lunch-menu-thumbs"></div>
-        <label class="btn-upload" for="lunch-menu-file">📷 上傳午餐菜單照片</label>
-        <input type="file" id="lunch-menu-file" accept="image/*" multiple hidden onchange="onMenuFiles('lunch', this)"/>
+  <!-- 頁面一：菜單夾板（輸入店家） -->
+  <div class="page" id="page-input">
+    <span id="input-date-badge">—</span>
+
+    <div class="clipboard">
+      <span class="clip" aria-hidden="true"></span>
+      <div class="sheet">
+        <div class="sheet-title"><span class="dot-l" style="background:#c78464"></span>午餐</div>
+        <div class="field"><label>店家名稱</label>
+          <input type="text" id="lunch-shop" placeholder="請寫上午餐店家" autocomplete="off"/></div>
+        <div class="field menu-upload">
+          <div class="menu-upload-top"><span class="lbl">菜單照片（選填，可多張）</span><span class="menu-count" id="lunch-menu-count"></span></div>
+          <div class="menu-thumbs" id="lunch-menu-thumbs"></div>
+          <label class="btn-upload" for="lunch-menu-file">＋ 夾上午餐菜單照片</label>
+          <input type="file" id="lunch-menu-file" accept="image/*" multiple hidden onchange="onMenuFiles('lunch', this)"/>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-header drink">🧋 飲料</div>
-    <div class="card-body">
-      <div class="field"><label>店家名稱</label>
-        <input type="text" id="drink-shop" placeholder="請輸入飲料店家名稱" autocomplete="off"/></div>
-      <div class="field menu-upload">
-        <div class="menu-upload-top"><span style="font-size:0.82rem;font-weight:600;color:var(--ink2);">飲料菜單照片（選填，可多張）</span><span class="menu-count" id="drink-menu-count"></span></div>
-        <div class="menu-thumbs" id="drink-menu-thumbs"></div>
-        <label class="btn-upload drink-up" for="drink-menu-file">📷 上傳飲料菜單照片</label>
-        <input type="file" id="drink-menu-file" accept="image/*" multiple hidden onchange="onMenuFiles('drink', this)"/>
+
+    <div class="clipboard">
+      <span class="clip" aria-hidden="true"></span>
+      <div class="sheet">
+        <div class="sheet-title"><span class="dot-l" style="background:#7892ad"></span>飲料</div>
+        <div class="field"><label>店家名稱</label>
+          <input type="text" id="drink-shop" placeholder="請寫上飲料店家" autocomplete="off"/></div>
+        <div class="field menu-upload">
+          <div class="menu-upload-top"><span class="lbl">菜單照片（選填，可多張）</span><span class="menu-count" id="drink-menu-count"></span></div>
+          <div class="menu-thumbs" id="drink-menu-thumbs"></div>
+          <label class="btn-upload" for="drink-menu-file">＋ 夾上飲料菜單照片</label>
+          <input type="file" id="drink-menu-file" accept="image/*" multiple hidden onchange="onMenuFiles('drink', this)"/>
+        </div>
       </div>
     </div>
+    <div class="input-tip">午餐或飲料可只填一個，送出後會掛到點單繩上</div>
   </div>
-  <div style="font-size:0.78rem;color:var(--muted);text-align:center;z-index:1;">
-    午餐或飲料可只填一個，送出後可在日期頁面查看
+
+  <div class="btn-row" id="btn-row-input">
+    <button class="btn btn-back" onclick="showDateDialog()">← 重選日期</button>
+    <button class="btn btn-submit" onclick="submitShops()">送出 →</button>
   </div>
-</div>
 
-<div class="btn-row" id="btn-row-input" style="display:none;max-width:500px;width:100%;z-index:1;">
-  <button class="btn btn-back" onclick="showDateDialog()">← 重選日期</button>
-  <button class="btn btn-submit" onclick="submitShops()">送出 →</button>
-</div>
-
-<!-- 頁面二：日期按鈕頁 -->
-<div class="page" id="page-dates">
-  <div class="dates-card">
-    <div class="dates-header">
-      <div class="dates-header-title">📅 已建立的日期</div>
-      <span id="dates-count" style="font-size:0.72rem;color:#9c4dcc;font-weight:600;"></span>
+  <!-- 頁面二：點單繩＋點菜本 -->
+  <div class="page" id="page-dates">
+    <div class="sec-head">
+      <span class="sec-title">已建立的日期</span>
+      <span class="sec-note" id="dates-count"></span>
     </div>
     <div class="dates-body" id="dates-body">
-      <div class="dates-empty"><span class="dates-empty-icon">📭</span><p>尚未建立任何日期的餐點</p></div>
+      <div class="dates-empty">尚未建立任何日期的餐點</div>
     </div>
-  </div>
+    <button class="btn-add-date" onclick="showDateDialog()">＋ 掛上新的日期</button>
 
-  <button class="btn-add-date" onclick="showDateDialog()">＋ 新增日期餐點</button>
+    <div class="divider"></div>
 
-  <!-- 訂單查詢區 -->
-  <div class="order-view-card">
-    <div class="order-view-header">📋 訂單查詢</div>
-    <div class="order-view-body">
-      <span class="select-label">選擇日期</span>
-      <div class="select-wrap">
-        <select id="order-date-select" class="date-select-input" onchange="loadOrdersByDate(this.value)">
-          <option value="">－ 請選擇日期 －</option>
-        </select>
+    <!-- 訂單查詢：點菜本 -->
+    <div class="orderpad">
+      <div class="orderpad-top"><span>點菜本・訂單查詢</span></div>
+      <div class="orderpad-body">
+        <div class="select-wrap">
+          <select id="order-date-select" class="date-select-input" onchange="loadOrdersByDate(this.value)">
+            <option value="">－ 請選擇日期 －</option>
+          </select>
+        </div>
+        <div id="order-view-result"></div>
+        <div class="tool-row">
+          <button id="btn-summary" class="wbtn ochre" onclick="showSummary()" style="display:none">算帳・總計</button>
+          <button id="btn-arrange" class="wbtn slate" onclick="showArrangement()" style="display:none">餐點整理</button>
+        </div>
       </div>
-      <div id="order-view-result"></div>
-
-      <!-- 總計按鈕 -->
-      <button id="btn-summary" onclick="showSummary()"
-        style="display:none;width:100%;margin-top:12px;padding:11px;border-radius:12px;border:none;
-               background:linear-gradient(135deg,#7b1fa2,#9c4dcc);color:#fff;font-size:0.95rem;
-               font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;
-               box-shadow:0 3px 10px rgba(123,31,162,0.3);transition:all 0.2s;">
-        📊 查看總計
-      </button>
-
-      <!-- 總計結果 -->
-      <div id="summary-result"></div>
-
-      <!-- 餐點整理按鈕 -->
-      <button id="btn-arrange" onclick="showArrangement()"
-        style="display:none;width:100%;margin-top:10px;padding:11px;border-radius:12px;border:none;
-               background:linear-gradient(135deg,#0288d1,#4fc3f7);color:#fff;font-size:0.95rem;
-               font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;
-               box-shadow:0 3px 10px rgba(2,136,209,0.3);transition:all 0.2s;">
-        🍽 餐點整理
-      </button>
-
-      <!-- 餐點整理結果 -->
-      <div id="arrange-result"></div>
     </div>
+    <div id="summary-result"></div>
+    <div id="arrange-result" style="padding-bottom:14px;"></div>
   </div>
+
+  <div class="btn-row" id="btn-row-dates"></div>
 </div>
 
-<div class="btn-row" id="btn-row-dates" style="display:none;max-width:500px;width:100%;z-index:1;"></div>
-
-<!-- 日期對話視窗 -->
-<div class="overlay" id="date-overlay">
+<!-- 選擇日期 -->
+<div class="overlay" id="date-overlay" style="display:none">
   <div class="dialog">
-    <div class="dialog-icon">📅</div>
+    <div class="dialog-icon"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="1.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg></div>
     <h2>選擇日期</h2>
     <p>請選擇要新增餐點的日期</p>
     <div class="dialog-field">
-      <label>日期（年月日）</label>
+      <label>日期</label>
       <input type="date" id="date-picker"/>
     </div>
     <div class="dialog-btn-row">
@@ -528,71 +548,300 @@
   </div>
 </div>
 
-<!-- ── 編輯彈窗 ── -->
+<!-- 編輯訂單 -->
 <div class="edit-overlay" id="edit-overlay">
   <div class="edit-dialog">
-    <div class="edit-dialog-title">✏️ 編輯訂單</div>
-    <div style="font-size:0.78rem;color:var(--muted);" id="edit-info"></div>
-
-    <div class="edit-field">
-      <label>餐點名稱</label>
-      <input type="text" id="edit-lunch-item" placeholder="請輸入餐點名稱" autocomplete="off"/>
-    </div>
-    <div class="edit-field">
-      <label>餐點價錢</label>
-      <input type="text" id="edit-lunch-price" placeholder="請輸入價錢" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
-    </div>
-    <div class="edit-field">
-      <label>飲料名稱</label>
-      <input type="text" id="edit-drink-item" placeholder="請輸入飲料名稱" autocomplete="off"/>
-    </div>
+    <div class="edit-dialog-title">修改點單</div>
+    <div id="edit-info"></div>
+    <div class="edit-field"><label>餐點名稱</label><input type="text" id="edit-lunch-item" placeholder="請輸入餐點名稱" autocomplete="off"/></div>
+    <div class="edit-field"><label>餐點價錢</label><input type="text" id="edit-lunch-price" placeholder="請輸入價錢" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/></div>
+    <div class="edit-field"><label>飲料名稱</label><input type="text" id="edit-drink-item" placeholder="請輸入飲料名稱" autocomplete="off"/></div>
     <div class="edit-field-row">
-      <div class="edit-field">
-        <label>甜度</label>
-        <div class="edit-select-wrap">
-          <select id="edit-sugar">
-            <option value="">—</option>
-            <option value="全糖">全糖</option>
-            <option value="少糖">少糖</option>
-            <option value="半糖">半糖</option>
-            <option value="微糖">微糖</option>
-            <option value="一分糖">一分糖</option>
-            <option value="無糖">無糖</option>
-          </select>
-        </div>
-      </div>
-      <div class="edit-field">
-        <label>冰塊</label>
-        <div class="edit-select-wrap">
-          <select id="edit-ice">
-            <option value="">—</option>
-            <option value="正常冰">正常冰</option>
-            <option value="少冰">少冰</option>
-            <option value="微冰">微冰</option>
-            <option value="去冰">去冰</option>
-            <option value="溫">溫</option>
-          </select>
-        </div>
-      </div>
+      <div class="edit-field"><label>甜度</label><div class="edit-select-wrap"><select id="edit-sugar">
+        <option value="">—</option><option value="全糖">全糖</option><option value="少糖">少糖</option><option value="半糖">半糖</option><option value="微糖">微糖</option><option value="一分糖">一分糖</option><option value="無糖">無糖</option>
+      </select></div></div>
+      <div class="edit-field"><label>冰塊</label><div class="edit-select-wrap"><select id="edit-ice">
+        <option value="">—</option><option value="正常冰">正常冰</option><option value="少冰">少冰</option><option value="微冰">微冰</option><option value="去冰">去冰</option><option value="溫">溫</option>
+      </select></div></div>
     </div>
-    <div class="edit-field">
-      <label>飲料價錢</label>
-      <input type="text" id="edit-drink-price" placeholder="請輸入價錢" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
-    </div>
-    <div class="edit-field">
-      <label>備註</label>
-      <textarea id="edit-notes" placeholder="備註（選填）" style="min-height:60px;resize:vertical;"></textarea>
-    </div>
+    <div class="edit-field"><label>飲料價錢</label><input type="text" id="edit-drink-price" placeholder="請輸入價錢" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/></div>
+    <div class="edit-field"><label>備註</label><textarea id="edit-notes" placeholder="備註（選填）" style="min-height:60px;resize:vertical;"></textarea></div>
     <div class="edit-msg" id="edit-msg"></div>
     <div class="edit-btn-row">
-      <button class="edit-btn edit-btn-cancel" onclick="closeEditModal()">取消</button>
-      <button class="edit-btn edit-btn-delete" onclick="deleteEditOrder()">🗑 刪除</button>
-      <button class="edit-btn edit-btn-save" onclick="saveEditOrder()">✅ 儲存</button>
+      <button class="btn oak" onclick="closeEditModal()">取消</button>
+      <button class="btn terra" onclick="deleteEditOrder()">刪除</button>
+      <button class="btn sage" onclick="saveEditOrder()">儲存</button>
     </div>
   </div>
 </div>
 
 <script>
+        // ══ 光線隨時間變化（新增）══
+  //  早上太陽在左邊（東）低低的、偏金黃；中午在正上方、白亮；
+  //  下午移到右邊；傍晚右側低角度橘紅；入夜後房間變暗、改成月光＋桌燈。
+  //  測試用：網址後面加 ?hour=18.5 可以直接看某個時間的樣子
+  (function () {
+      //  時間   太陽X  太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影
+      //  時間   太陽X 太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影  窗光  窗X(vw) 窗Y(vh) 傾斜  旋轉
+      const K = [
+          [0,     72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],   // 深夜：月光
+          [4.6,   72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],
+          [5.6,    0, 66,  255,160,130,  .80,   48, 12, 214,160,200,  .45,  .35, .80, .55, 52,  6,  -42,  6],   // 破曉：粉紫
+          [7,      2, 42,  255,206,130,  .95,   40, 18, 255,226,190,  .18,  0,   1.5, .75, 46,  4,  -34,  4],   // 早晨：金黃
+          [10,    24, 12,  255,226,170,  .85,   22, 30, 255,248,236,  .04,  0,   1.6, .65, 34, 14,  -18,  2],
+          [12.5,  50,  0,  255,246,226,  .70,    0, 38, 255,255,255,  0,    0,   1.4, .55, 22, 34,    0,  0],   // 正午：白亮、影子短
+          [15,    78, 12,  255,220,150,  .85,  -22, 30, 255,244,226,  .06,  0,   1.6, .65,  8, 14,   18, -2],
+          [17,    98, 40,  255,160, 80,  1,    -42, 18, 255,190,140,  .30,  0,   1.7, .80, -4,  4,   34, -4],   // 傍晚：橘
+          [18.2, 100, 66,  255,110, 90,  .85,  -50, 12, 170,110,150,  .52,  .40, 1.1, .55, -8,  6,   42, -6],   // 黃昏：紅紫
+          [19.4,  72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],   // 入夜
+          [24,    72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],
+      ];
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      function apply() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < K.length - 2 && h >= K[i + 1][0]) i++;
+          const a = K[i], b = K[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          const v = a.map((x, j) => x + (b[j] - x) * t);
+          const r = document.documentElement.style;
+          r.setProperty('--sunx', v[1] + '%');
+          r.setProperty('--suny', v[2] + '%');
+          r.setProperty('--sunc', `${v[3] | 0},${v[4] | 0},${v[5] | 0}`);
+          r.setProperty('--suna', v[6].toFixed(3));
+          r.setProperty('--sx', v[7].toFixed(1) + 'px');
+          r.setProperty('--sy', v[8].toFixed(1) + 'px');
+          r.setProperty('--ovc', `${v[9] | 0},${v[10] | 0},${v[11] | 0}`);
+          r.setProperty('--ova', v[12].toFixed(3));
+          r.setProperty('--lamp', v[13].toFixed(3));
+          r.setProperty('--leafk', v[14].toFixed(3));
+          r.setProperty('--win', v[15].toFixed(3));
+          r.setProperty('--wx', v[16].toFixed(1) + 'vw');
+          r.setProperty('--wy', v[17].toFixed(1) + 'vh');
+          r.setProperty('--wsk', v[18].toFixed(1) + 'deg');
+          r.setProperty('--wrot', v[19].toFixed(1) + 'deg');
+          document.documentElement.classList.toggle('night', v[12] > 0.45);
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = v[12] > 0.6 ? '#4b5270' : (v[12] > 0.3 ? '#c9a9a8' : '#efe6d8');
+      }
+      apply();
+      setInterval(apply, 60 * 1000);   // 每分鐘更新一次
+  })();
+
+        // ══════════════════════════════════════════
+  //  寫實光影（Canvas）
+  //  牆面在陰影中是偏冷的灰；陽光穿過窗戶，在牆上投出一塊暖色光斑，
+  //  窗框形成十字陰影，窗外的樹葉在光斑裡留下深淺不一的影子並隨風擺動。
+  //  早上太陽低、光斑又長又斜、偏右；中午太陽高、光斑小而低；
+  //  下午移到左邊；傍晚轉橘紅；夜晚只剩微弱的冷色月光。
+  // ══════════════════════════════════════════
+  (function () {
+      const cv = document.getElementById('scene');
+      const ctx = cv.getContext('2d');
+      const SCALE = 0.5;                       // 半解析度繪製：陰影本來就柔，也比較省電
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      let W = 0, H = 0;
+
+      // 亂數（固定種子，每次畫出來的樹一樣）
+      let seed = 11;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const R = (a, b) => a + rnd() * (b - a);
+
+      // ── 時間表 ──
+      //  時:  陰影牆色RGB      光的加亮RGB     光斑 x   y    寬   高   斜    葉影深淺 風力
+      const T = [
+          [0,    36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],   // 夜：月光
+          [4.6,  36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+          [5.6, 146,136,146,  105, 58, 46,   .50, .00, .56, .50,  .28,  .70, .7],  // 破曉
+          [7,   188,180,170,  100, 72, 34,   .44, .00, .52, .60,  .22,  .85, .8],  // 早晨
+          [10,  204,197,187,   72, 60, 40,   .33, .10, .44, .62,  .10,  .90, 1 ],
+          [12.5,212,206,196,   52, 48, 38,   .22, .44, .50, .50,  .00,  .80, 1 ],  // 正午：光斑低而小
+          [15,  204,196,185,   74, 60, 36,   .18, .10, .44, .62, -.10,  .90, 1 ],
+          [17,  178,163,148,  108, 64, 22,   .04, .00, .52, .62, -.22,  .90, .9],  // 傍晚
+          [18.2,126,106,112,   96, 40, 24,  -.06, .02, .56, .50, -.28,  .75, .7],  // 黃昏
+          [19.4, 36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],  // 入夜
+          [24,   36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+      ];
+      function sample() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < T.length - 2 && h >= T[i + 1][0]) i++;
+          const a = T[i], b = T[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          return a.map((x, j) => x + (b[j] - x) * t);
+      }
+
+      // ── 畫一根帶葉子的樹枝（黑色剪影）到離屏畫布，再用「縮小再放大」做出柔邊 ──
+      function leaf(c, L, Wd) {
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.bezierCurveTo(L * 0.28, -Wd * 1.05, L * 0.72, -Wd * 0.85, L, R(-1, 1));
+          c.bezierCurveTo(L * 0.70, Wd * 0.95, L * 0.30, Wd * 0.9, 0, 0);
+          c.fill();
+          c.lineWidth = 1.1; c.beginPath(); c.moveTo(-L * 0.12, 0); c.lineTo(0, 0); c.stroke();
+      }
+      function branchSprite(size, blurK, sd) {
+          seed = sd;
+          const s = document.createElement('canvas'); s.width = s.height = size;
+          const c = s.getContext('2d');
+          c.fillStyle = '#000'; c.strokeStyle = '#000'; c.lineCap = 'round';
+          function grow(x, y, ang, len, thick, depth) {
+              const steps = Math.max(6, len / 14 | 0);
+              let cx = x, cy = y, a = ang;
+              for (let i = 0; i < steps; i++) {
+                  a += R(-0.10, 0.10);
+                  const nx = cx + Math.cos(a) * len / steps, ny = cy + Math.sin(a) * len / steps;
+                  c.lineWidth = Math.max(0.8, thick * (1 - i / steps));
+                  c.beginPath(); c.moveTo(cx, cy); c.lineTo(nx, ny); c.stroke();
+                  cx = nx; cy = ny;
+                  // 葉子：左右交錯、大小不一、角度隨機
+                  if (i > 0 && rnd() < 0.85) {
+                      const side = i % 2 ? 1 : -1;
+                      c.save(); c.translate(cx, cy);
+                      c.rotate(a + side * R(0.6, 1.2));
+                      const L = R(22, 42) * (depth ? 0.85 : 1), Wd = L * R(0.26, 0.4);
+                      c.scale(1, R(0.55, 1));            // 有些葉子斜著，影子變扁
+                      leaf(c, L, Wd); c.restore();
+                  }
+                  // 小枝
+                  if (depth < 2 && i > 1 && rnd() < 0.28) {
+                      grow(cx, cy, a + (rnd() < 0.5 ? -1 : 1) * R(0.5, 1.0), len * R(0.3, 0.5), thick * 0.55, depth + 1);
+                  }
+              }
+              // 枝端一簇葉
+              for (let k = 0; k < 4; k++) {
+                  c.save(); c.translate(cx, cy); c.rotate(a + R(-0.9, 0.9));
+                  const L = R(20, 36); leaf(c, L, L * R(0.28, 0.38)); c.restore();
+              }
+          }
+          grow(size * 0.98, size * 0.04, R(2.3, 2.6), size * 0.95, 6, 0);
+          // 柔邊（模擬半影）：縮小再放大
+          const k = Math.max(1, blurK);
+          const t1 = document.createElement('canvas');
+          t1.width = Math.max(1, size / k | 0); t1.height = t1.width;
+          const c1 = t1.getContext('2d'); c1.imageSmoothingQuality = 'high';
+          c1.drawImage(s, 0, 0, t1.width, t1.height);
+          const out = document.createElement('canvas'); out.width = out.height = size;
+          const co = out.getContext('2d'); co.imageSmoothingQuality = 'high';
+          co.drawImage(t1, 0, 0, size, size);
+          return out;
+      }
+
+      // 三種距離的樹枝：遠的模糊、近的清楚
+      let sprites = [];
+      function buildSprites() {
+          const base = Math.round(Math.max(W, H) * 0.9);
+          sprites = [
+              { img: branchSprite(base,       7, 21), fx: .55, fy: -.18, rot: .25, s: 1.10, a: .55, amp: .020, f: .55, ph: 0   },
+              { img: branchSprite(base,       6, 37), fx: .10, fy:  .05, rot: -.1, s: 0.95, a: .55, amp: .018, f: .48, ph: 1.7 },
+              { img: branchSprite(base * .8,  3.5, 53), fx: .40, fy: -.05, rot: .05, s: 1.00, a: .78, amp: .030, f: .80, ph: 3.1 },
+              { img: branchSprite(base * .8,  3, 71), fx: -.05, fy: .25, rot: -.35, s: 0.90, a: .75, amp: .028, f: .72, ph: 4.4 },
+              { img: branchSprite(base * .6,  1.8, 97), fx: .62, fy: .10, rot: .45, s: 0.90, a: .88, amp: .045, f: 1.1, ph: 2.2 },
+          ];
+      }
+
+      // 光斑位置：手機直式畫面比較窄，光斑放大一些才看得到
+      function geo() {
+          const portrait = H > W * 1.2;
+          const kw = portrait ? 1.9 : 1, kh = portrait ? 1.05 : 1;
+          const w = P[9] * W * kw, h = P[10] * H * kh;
+          const x = portrait ? (P[7] - 0.22) * W * 1.35 : P[7] * W;
+          const y = P[8] * H * (portrait ? 0.8 : 1);
+          return [x, y, w, h, P[11] * W * kw];
+      }
+
+      // 光斑（含窗框十字），每分鐘依時間重畫一次
+      const patch = document.createElement('canvas');
+      let P = null;
+      function buildPatch() {
+          P = sample();
+          patch.width = W; patch.height = H;
+          const c = patch.getContext('2d');
+          c.clearRect(0, 0, W, H);
+          const [x, y, w, h, sk] = geo();
+          // 先畫在小畫布再放大 → 光斑邊緣自然柔和
+          const k = 6, sm = document.createElement('canvas');
+          sm.width = Math.ceil(W / k); sm.height = Math.ceil(H / k);
+          const s = sm.getContext('2d');
+          s.scale(1 / k, 1 / k);
+          s.fillStyle = `rgb(${P[4] | 0},${P[5] | 0},${P[6] | 0})`;
+          s.beginPath();
+          s.moveTo(x, y); s.lineTo(x + w, y); s.lineTo(x + w + sk, y + h); s.lineTo(x + sk, y + h); s.closePath();
+          s.fill();
+          // 窗框：一直一橫的陰影
+          s.globalCompositeOperation = 'destination-out';
+          const mw = Math.max(6, w * 0.035);
+          s.beginPath();
+          s.moveTo(x + w * .5 - mw / 2, y); s.lineTo(x + w * .5 + mw / 2, y);
+          s.lineTo(x + w * .5 + mw / 2 + sk, y + h); s.lineTo(x + w * .5 - mw / 2 + sk, y + h); s.closePath(); s.fill();
+          const yy = y + h * .46, sx = sk * .46;
+          s.fillRect(x + sx - 4, yy - mw / 2, w + 8, mw);
+          c.imageSmoothingQuality = 'high';
+          c.drawImage(sm, 0, 0, W, H);
+      }
+
+      const light = document.createElement('canvas');
+      function draw(t) {
+          if (!P) return;
+          const lc = light.getContext('2d');
+          lc.globalCompositeOperation = 'source-over';
+          lc.clearRect(0, 0, W, H);
+          lc.drawImage(patch, 0, 0);
+          // 樹葉擋光：從光斑中「挖掉」葉影
+          lc.globalCompositeOperation = 'destination-out';
+          const [x, y, w, h, sk] = geo();
+          const wind = P[13];
+          // 陣風：幾個慢速波疊起來，偶爾大一點
+          const gust = Math.max(0, Math.sin(t * 0.21) + Math.sin(t * 0.083 + 1.3) - 0.6) * 0.6;
+          sprites.forEach(sp => {
+              const sway = (Math.sin(t * sp.f + sp.ph) + 0.45 * Math.sin(t * sp.f * 2.3 + sp.ph * 1.7)) * sp.amp * wind
+                         + gust * sp.amp * 1.6 * wind;
+              const size = sp.img.width * sp.s;
+              lc.save();
+              lc.globalAlpha = sp.a * P[12];
+              lc.translate(x + w * sp.fx + sk * 0.3, y + h * sp.fy);
+              lc.transform(1, 0, P[11] * 0.6, 1, 0, 0);     // 影子跟著光線一起斜
+              lc.rotate(sp.rot + sway);
+              lc.translate(Math.sin(t * sp.f * 0.7 + sp.ph) * 3 * wind, 0);
+              lc.drawImage(sp.img, -size * 0.5, -size * 0.1, size, size);
+              lc.restore();
+          });
+          // 牆面＝陰影色，再「加上」光
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = `rgb(${P[1] | 0},${P[2] | 0},${P[3] | 0})`;
+          ctx.fillRect(0, 0, W, H);
+          // 室內的反射光：靠下方稍暗（地板方向）
+          const g = ctx.createLinearGradient(0, 0, 0, H);
+          g.addColorStop(0, 'rgba(255,255,255,0.04)'); g.addColorStop(1, 'rgba(40,25,10,0.10)');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.drawImage(light, 0, 0);
+          ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function resize() {
+          W = Math.max(1, Math.round(innerWidth * SCALE));
+          H = Math.max(1, Math.round(Math.max(innerHeight, document.documentElement.clientHeight) * 1.15 * SCALE));
+          cv.width = W; cv.height = H; light.width = W; light.height = H;
+          buildSprites(); buildPatch(); draw(performance.now() / 1000);
+      }
+      resize();
+      // 只有寬度改變（例如手機轉向）才重畫；捲動時網址列伸縮只改高度，不理會（修改）
+      let lastW = innerWidth, rt;
+      addEventListener('resize', () => { if (Math.abs(innerWidth - lastW) < 2) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(resize, 200); });
+      setInterval(() => { buildPatch(); if (reduce) draw(0); }, 60 * 1000);
+
+      if (!reduce) {
+          let last = 0;
+          (function loop(ts) {
+              requestAnimationFrame(loop);
+              if (document.hidden || ts - last < 33) return;   // 約每秒 30 張
+              last = ts;
+              draw(ts / 1000);
+          })(0);
+      }
+  })();
+
+
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
   let mealData = JSON.parse(localStorage.getItem('de_meal_data') || '{}');
   let currentDate = '';
@@ -624,7 +873,7 @@
     currentDate = val;
     const d = new Date(val+'T00:00:00');
     const label = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    document.getElementById('input-date-badge').textContent = '📅 '+label;
+    document.getElementById('input-date-badge').textContent = label;
     if (mealData[currentDate]) {
       document.getElementById('lunch-shop').value = mealData[currentDate].lunch||'';
       document.getElementById('drink-shop').value = mealData[currentDate].drink||'';
@@ -772,7 +1021,7 @@
 
   function showToast(msg) {
     let t=document.getElementById('toast');
-    if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:#06d6a0;color:#fff;padding:12px 24px;border-radius:14px;font-size:0.92rem;font-weight:600;z-index:1000;opacity:0;transition:all 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:320px;width:90%;text-align:center;';document.body.appendChild(t);}
+    if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:linear-gradient(175deg,#fffdf6,#f4eee4);color:#2f2a24;border-left:4px solid #6f8a68;padding:12px 20px;border-radius:3px;font-size:0.92rem;font-weight:700;z-index:1000;opacity:0;transition:all 0.3s;box-shadow:6px 10px 20px rgba(60,40,20,0.25);max-width:320px;width:90%;text-align:center;font-family:"LXGW WenKai TC","Noto Sans TC",sans-serif;';document.body.appendChild(t);}
     t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
     setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)';},2500);
   }
@@ -808,48 +1057,47 @@
   async function renderDateButtons() {
     const body=document.getElementById('dates-body'),count=document.getElementById('dates-count');
     if (!body.querySelector('.date-btn')) {
-      body.innerHTML=`<div class="dates-empty"><span class="dates-empty-icon">⏳</span><p>載入中…</p></div>`;
+      body.innerHTML=`<div class="dates-empty">載入中…</div>`;
     }
     const [synced] = await Promise.all([syncMealData(), loadClosedDates()]);
     if (!synced) showToast('⚠ 無法連線 Google Sheets，目前顯示的是這台裝置的紀錄');
     const keys=Object.keys(mealData).sort().reverse();
+    const firstPaint = !body.querySelector('.ticket');
     body.innerHTML='';
+    body.classList.toggle('no-intro', !firstPaint);
     if (!keys.length) {
-      body.innerHTML=`<div class="dates-empty"><span class="dates-empty-icon">📭</span><p>尚未建立任何日期的餐點</p></div>`;
+      body.innerHTML=`<div class="dates-empty">尚未建立任何日期的餐點</div>`;
       count.textContent=''; return;
     }
     count.textContent=`共 ${keys.length} 個日期`;
+    // 每個日期是一張點單，用曬衣夾掛在麻繩上（修改）
     keys.forEach((dateKey,i)=>{
       const data=mealData[dateKey];
       const d=new Date(dateKey+'T00:00:00');
       const label=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      const weekdays=['日','一','二','三','四','五','六'];
-      const weekday=weekdays[d.getDay()];
+      const weekday='日一二三四五六'[d.getDay()];
       const isClosed = closedDates.has(dateKey);
-      const tags=[
-        data.lunch?`<span class="tag tag-lunch">🍱 ${esc(data.lunch)}</span>`:'',
-        data.drink?`<span class="tag tag-drink">🧋 ${esc(data.drink)}</span>`:''
-      ].filter(Boolean).join('');
-      const btn=document.createElement('button');
-      btn.className='date-btn'+(isClosed?' is-closed':'');btn.style.animationDelay=(i*0.06)+'s';
-      btn.innerHTML=`
-        <div class="date-btn-left">
-          <span class="date-btn-icon">${isClosed?'🔒':'📅'}</span>
-          <div>
-            <div class="date-main">${label}<span class="date-wk">週${weekday}</span>${isClosed?'<span class="closed-badge">🔒 已結單</span>':''}</div>
-            <div class="date-btn-tags" style="margin-top:5px;">${tags}</div>
-          </div>
-        </div>
-        <div class="date-actions">
-          <span style="font-size:1.1rem;opacity:0.4;">›</span>
-          <button class="btn-close-date${isClosed?' closed':''}"
-            onclick="event.stopPropagation();toggleCloseDate('${dateKey}',${isClosed})">
-            ${isClosed?'取消結單':'結單'}
-          </button>
-          <button class="btn-delete-date" onclick="event.stopPropagation();deleteDate('${dateKey}')">刪除</button>
+      const x = Math.sin((i + 3) * 7.3) * 10000, tilt = ((x - Math.floor(x)) * 1.6 - 0.8).toFixed(2);
+      const row=document.createElement('div'); row.className='ticket-row';
+      const t=document.createElement('div');
+      t.className='ticket'+(isClosed?' is-closed':'');
+      t.setAttribute('role','button'); t.tabIndex=0;
+      t.style.cssText=`--tilt:${tilt}deg;--in:${(i*0.05).toFixed(2)}s`;
+      t.innerHTML=`
+        <span class="pin" aria-hidden="true"></span>
+        ${isClosed?'<span class="closed-stamp">已結單</span>':''}
+        <div class="t-head"><span class="t-date">${label}</span><span class="t-wk">星期${weekday}</span></div>
+        <div class="t-row"><i>午餐</i><span class="t-shop lunch">${data.lunch?esc(data.lunch):'<span class="t-none">—</span>'}</span></div>
+        <div class="t-row"><i>飲料</i><span class="t-shop drink">${data.drink?esc(data.drink):'<span class="t-none">—</span>'}</span></div>
+        <div class="t-actions">
+          <button class="t-btn ${isClosed?'reopen':'close'}" type="button">${isClosed?'取消結單':'結單'}</button>
+          <button class="t-btn del" type="button">刪除</button>
         </div>`;
-      btn.addEventListener('click',()=>openDateDetail(dateKey));
-      body.appendChild(btn);
+      const [bClose,bDel]=t.querySelectorAll('.t-btn');
+      bClose.addEventListener('click',e=>{e.stopPropagation();toggleCloseDate(dateKey,isClosed);});
+      bDel.addEventListener('click',e=>{e.stopPropagation();deleteDate(dateKey);});
+      t.addEventListener('click',()=>openDateDetail(dateKey));
+      row.appendChild(t); body.appendChild(row);
     });
   }
 
@@ -899,7 +1147,7 @@
     const data=mealData[dateKey];
     const d=new Date(dateKey+'T00:00:00');
     const label=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    alert(`📅 ${label}\n\n🍱 午餐：${data.lunch||'（未填）'}\n🧋 飲料：${data.drink||'（未填）'}\n\n（詳細菜單功能開發中）`);
+    alert(`${label}\n\n午餐：${data.lunch||'（未填）'}\n飲料：${data.drink||'（未填）'}\n\n（詳細菜單功能開發中）`);
   }
 
   function showPage(id) {
@@ -948,47 +1196,38 @@
       const res  = await fetch(`${GAS_URL}?action=getMealOrders&date=${encodeURIComponent(date)}`,{cache:'no-store'});
       const json = await res.json();
       if (json.status!=='ok'||!json.data.length) {
-        result.innerHTML='<div class="order-empty">📭 此日期尚無訂單記錄</div>'; return;
+        result.innerHTML='<div class="order-empty">此日期尚無訂單</div>'; return;
       }
       const rows=json.data;
       const nameCount = {}; // 追蹤每個姓名出現次數（用於 rowIndex）
       result.innerHTML=`
-        <div class="order-count-line" style="font-size:0.78rem;color:#0288d1;font-weight:700;margin-top:10px;margin-bottom:4px;">
-          共 <span class="order-count-badge">${rows.length} 筆</span>
-          <span style="font-size:0.7rem;color:var(--muted);font-weight:400;margin-left:6px;">（點擊列可編輯）</span>
-        </div>
-        <div class="order-table-wrap">
-          <table class="order-table">
-            <thead><tr>
-              <th>姓名</th><th>🍱 午餐</th><th>🧋 飲料</th><th>備註</th>
-            </tr></thead>
-            <tbody id="order-tbody"></tbody>
-          </table>
-        </div>`;
-
+        <div class="order-count-line">共 <span class="order-count-badge">${rows.length} 筆</span><span class="order-tip">點一下該筆可修改</span></div>
+        <div class="order-list" id="order-tbody"></div>`;
+      // 每筆訂單：姓名、午餐、飲料、備註各一行（修改）
       const tbody = document.getElementById('order-tbody');
-      rows.forEach(r => {
+      rows.forEach((r, k) => {
         const nm = r.name || '';
         if (nameCount[nm] === undefined) nameCount[nm] = 0;
         const idx = nameCount[nm];
         nameCount[nm]++;
-        const tr = document.createElement('tr');
-        tr.className = 'row-clickable';
-        tr.title = '點擊編輯此筆資料';
-        tr.innerHTML = `
-          <td class="one-line">${esc(r.name)}</td>
-          <td class="one-line">${lunchLine(r)}</td>
-          <td class="one-line">${drinkLine(r)}</td>
-          <td class="notes-cell">${esc(r.notes)}</td>`;
-        tr.addEventListener('click', () => openEditModal(r, idx, date));
-        tbody.appendChild(tr);
+        const it = document.createElement('div');
+        it.className = 'ord';
+        it.title = '點一下修改這筆';
+        it.innerHTML = `
+          <span class="o-no">${k + 1}</span><span class="o-edit">✎</span>
+          <span class="o-name">${esc(r.name)}</span>
+          <div class="o-row"><i>午餐</i><span>${lunchLine(r)}</span></div>
+          <div class="o-row"><i>飲料</i><span>${drinkLine(r)}</span></div>
+          ${String(r.notes ?? '').trim() ? `<div class="o-row"><i>備註</i><span class="o-memo">${esc(r.notes)}</span></div>` : ''}`;
+        it.addEventListener('click', () => openEditModal(r, idx, date));
+        tbody.appendChild(it);
       });
       // 顯示總計按鈕和餐點整理按鈕
-      btnSummary.style.display='block';
+      btnSummary.style.display='inline-flex';
       btnSummary._rows = rows;
       btnSummary._date = date;
       const btnArrange = document.getElementById('btn-arrange');
-      btnArrange.style.display='block';
+      btnArrange.style.display='inline-flex';
       document.getElementById('arrange-result').innerHTML='';
     } catch { result.innerHTML='<div class="order-empty">⚠ 載入失敗，請稍後再試</div>'; }
   }
@@ -1029,34 +1268,22 @@
     const dateDrinkTotal = rows.reduce((sum, r) => sum + (parseInt(r.drinkPrice) || 0), 0);
     const dateTotal = dateLunchTotal + dateDrinkTotal;
 
+    // 總計做成一張收據（修改）
+    const money = v => v > 0 ? '$' + v : '—';
     result.innerHTML = `
       <div class="summary-wrap">
-        <div class="summary-title">📊 ${esc(date)} 訂單總計</div>
-        <div class="order-table-wrap">
-          <table class="summary-table">
-            <thead><tr>
-              <th>日期</th><th>姓名</th><th>午餐總價</th><th>飲料總價</th>
-            </tr></thead>
-            <tbody>
-              ${personData.map(p=>`<tr>
-                <td>${esc(date)}</td>
-                <td>${esc(p.name)}</td>
-                <td class="price-cell">${p.lunchTotal > 0 ? '$'+p.lunchTotal : '—'}</td>
-                <td class="price-cell">${p.drinkTotal > 0 ? '$'+p.drinkTotal : '—'}</td>
-              </tr>`).join('')}
-              <tr class="summary-total-row">
-                <td colspan="2">📅 日期午餐總價 / 飲料總價</td>
-                <td class="price-cell price-total">$${dateLunchTotal}</td>
-                <td class="price-cell price-total">$${dateDrinkTotal}</td>
-              </tr>
-              <tr class="summary-total-row">
-                <td colspan="3" style="font-size:0.9rem;">🧾 日期總價</td>
-                <td class="price-cell price-total" style="font-size:1rem;">$${dateTotal}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="receipt">
+          <div class="r-title">訂 餐 收 據</div>
+          <div class="r-sub">${esc(date)}・共 ${names.length} 人</div>
+          <div class="r-hr"></div>
+          <div class="r-line head"><span>姓名</span><span>午餐</span><span>飲料</span></div>
+          ${personData.map(p=>`<div class="r-line"><span class="r-name">${esc(p.name)}</span><span>${money(p.lunchTotal)}</span><span>${money(p.drinkTotal)}</span></div>`).join('')}
+          <div class="r-hr"></div>
+          <div class="r-line sub"><span>小計</span><span>$${dateLunchTotal}</span><span>$${dateDrinkTotal}</span></div>
+          <div class="r-hr"></div>
+          <div class="r-total"><span>總計</span><span>$${dateTotal}</span></div>
         </div>
-        <div id="summary-save-msg" style="font-size:0.8rem;margin-top:8px;"></div>
+        <div id="summary-save-msg" class="save-msg"></div>
       </div>`;
 
     // 同步寫入 Google Sheets「午餐總價」
@@ -1076,8 +1303,8 @@
       const json = await res.json();
       const msg = document.getElementById('summary-save-msg');
       if (json.status === 'ok') {
-        msg.style.color = '#04a87e';
-        msg.textContent = '✅ 已同步儲存至 Google Sheets「午餐總價」';
+        msg.style.color = '#4f6b48';
+        msg.textContent = '已同步儲存至 Google Sheets「午餐總價」';
       } else {
         msg.style.color = '#e05555';
         msg.textContent = '⚠ 儲存失敗：' + (json.message || '未知錯誤');
@@ -1117,35 +1344,17 @@
     const drinkRows = rows.filter(r => r.drinkItem).map(r => ({ item: r.drinkItem, sugar: r.sugar, ice: r.ice, name: r.name }));
     drinkRows.sort((a, b) => sortKey(a.item).localeCompare(sortKey(b.item), 'zh-TW'));
 
+    // 餐點整理寫在黑板上（修改）
     result.innerHTML = `
-      <div class="arrange-card">
-        <div class="arrange-card-header lunch-h">🍱 午餐整理</div>
-        <div style="overflow-x:auto;">
-          <table class="arrange-table">
-            <thead><tr>
-              <th class="lunch-th">餐點</th><th class="lunch-th">姓名</th>
-            </tr></thead>
-            <tbody>
-              ${lunchRows.length ? lunchRows.map(r=>`<tr><td>${esc(r.item)}</td><td>${esc(r.name)}</td></tr>`).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:16px;">無午餐資料</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-        <div id="lunch-arrange-msg" class="arrange-save-msg"></div>
+      <div class="chalkboard">
+        <div class="cb-title lunch">午餐整理</div>
+        ${lunchRows.length ? lunchRows.map(r=>`<div class="cb-line"><span>${esc(r.item)}</span><span class="who">${esc(r.name)}</span></div>`).join('') : '<div class="cb-empty">無午餐資料</div>'}
+        <div id="lunch-arrange-msg" class="save-msg"></div>
       </div>
-
-      <div class="arrange-card">
-        <div class="arrange-card-header drink-h">🧋 飲料整理</div>
-        <div style="overflow-x:auto;">
-          <table class="arrange-table">
-            <thead><tr>
-              <th class="drink-th">飲料</th><th class="drink-th">甜度</th><th class="drink-th">冰塊</th><th class="drink-th">姓名</th>
-            </tr></thead>
-            <tbody>
-              ${drinkRows.length ? drinkRows.map(r=>`<tr><td>${esc(r.item)}</td><td>${esc(r.sugar)}</td><td>${esc(r.ice)}</td><td>${esc(r.name)}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">無飲料資料</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-        <div id="drink-arrange-msg" class="arrange-save-msg"></div>
+      <div class="chalkboard">
+        <div class="cb-title drink">飲料整理</div>
+        ${drinkRows.length ? drinkRows.map(r=>`<div class="cb-line"><span>${esc(r.item)}<span class="opt">${esc([r.sugar, r.ice].filter(Boolean).join('／'))}</span></span><span class="who">${esc(r.name)}</span></div>`).join('') : '<div class="cb-empty">無飲料資料</div>'}
+        <div id="drink-arrange-msg" class="save-msg"></div>
       </div>`;
 
     // 同步寫入 GAS
@@ -1161,10 +1370,10 @@
 
       const lMsg = document.getElementById('lunch-arrange-msg');
       const dMsg = document.getElementById('drink-arrange-msg');
-      lMsg.style.color = lunchJson.status==='ok' ? '#04a87e' : '#e05555';
-      lMsg.textContent = lunchJson.status==='ok' ? '✅ 已同步儲存至「午餐整理」' : '⚠ 儲存失敗：'+(lunchJson.message||'');
-      dMsg.style.color = drinkJson.status==='ok' ? '#04a87e' : '#e05555';
-      dMsg.textContent = drinkJson.status==='ok' ? '✅ 已同步儲存至「飲料整理」' : '⚠ 儲存失敗：'+(drinkJson.message||'');
+      lMsg.style.color = lunchJson.status==='ok' ? '#cfe6c2' : '#ffb3a3';
+      lMsg.textContent = lunchJson.status==='ok' ? '已同步儲存至「午餐整理」' : '⚠ 儲存失敗：'+(lunchJson.message||'');
+      dMsg.style.color = drinkJson.status==='ok' ? '#cfe6c2' : '#ffb3a3';
+      dMsg.textContent = drinkJson.status==='ok' ? '已同步儲存至「飲料整理」' : '⚠ 儲存失敗：'+(drinkJson.message||'');
     } catch {
       const lMsg = document.getElementById('lunch-arrange-msg');
       if (lMsg) { lMsg.style.color='#e05555'; lMsg.textContent='⚠ 連線失敗'; }
@@ -1175,7 +1384,7 @@
 
   function openEditModal(row, rowIndex, date) {
     _editData = { row, rowIndex, date };
-    document.getElementById('edit-info').textContent = `📅 ${date}　👤 ${row.name}`;
+    document.getElementById('edit-info').textContent = `${date}　${row.name}`;
     document.getElementById('edit-lunch-item').value  = row.lunchItem  || '';
     document.getElementById('edit-lunch-price').value = row.lunchPrice || '';
     document.getElementById('edit-drink-item').value  = row.drinkItem  || '';
