@@ -2,909 +2,516 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#efe6d8"/>
   <title>義大社工科｜設備</title>
-  <meta name="theme-color" content="#b4d39b"/>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
+    /* ══════════ 前台設備：窗邊葉影＋設備掛板＋登記簿（與設備後台 de-device 同一套）══════════ */
     :root {
-      /* 鼠尾草綠 × 奶油白 × 霧藍（修改，與登入頁、主畫面一致） */
-      --bg:       #f5efe1;   /* 輸入框、卡片內底：淡奶油 */
-      --surface:  #fffaf0;   /* 背板：奶油白 */
-      --primary:  #5c7fa3;   /* 霧藍（與主畫面「設備」圓圈同色） */
-      --primary2: #4a6a8a;
-      --accent:   #b8694a;   /* 陶土橘 */
-      --accent2:  #c0504d;   /* 錯誤提示：柔和紅 */
-      --success:  #6b8f5e;   /* 成功：橄欖綠 */
-      --ink:      #3f4d38;
-      --ink2:     #5d6a55;
-      --muted:    #8a917e;
-      --border:   #e8dfc9;
-      --shadow:   rgba(86,105,79,0.12);
-      --radius:   18px;
+      --ink: #2f2a24; --ink-2: #5b5348; --muted: #8f8579; --hair: #e3d9ca;
+      --sage: #6f8a68; --terra: #b0603f;
+      --engrave: #4a2d14;
+      --sx: 14px; --sy: 24px; --ovc: 255,255,255; --ova: 0; --lamp: 0;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { background: #8fa682; }   /* 頁面很長時，底部也維持綠色 */
-
+    html { min-height: 100%; background: #e6ddd0; }
     body {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 18px;
-      background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%);   /* 鼠尾草綠（修改） */
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 14px 56px;
+      font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
       color: var(--ink);
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 22px 14px 48px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* ── 浮動裝飾 ── */
-    .deco {
-      position: fixed; pointer-events: none;
-      opacity: 0.07; z-index: 0;
-      animation: floatY 7s ease-in-out infinite;
+    /* ── 寫實光影（牆面、窗光、葉影）── */
+    #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }   /* 用最大視窗高度，手機網址列伸縮時不跳動（修改） */
+    .grain {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      mix-blend-mode: multiply;
     }
-    .deco:nth-child(1){ top:6%;  left:3%;  font-size:1.8rem; animation-delay:0s;   }
-    .deco:nth-child(2){ top:22%; right:4%; font-size:1.1rem; animation-delay:2s;   }
-    .deco:nth-child(3){ top:55%; left:2%;  font-size:1rem;   animation-delay:3.5s; }
-    .deco:nth-child(4){ top:73%; right:3%; font-size:1.5rem; animation-delay:1.5s; }
-    @keyframes floatY {
-      0%,100%{ transform:translateY(0) rotate(0deg); }
-      50%    { transform:translateY(-12px) rotate(6deg); }
+    .ambient-top {   /* 卡片：只稍微變暗，保持好讀 */
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: rgb(var(--ovc)); opacity: calc(var(--ova) * 0.38);
+        mix-blend-mode: multiply;
     }
+    /* 夜晚：背板稍微不透明一點，小字加深，維持好讀 */
+    html.night .container { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    /* ── Header ── */
-    header {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 22px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 24px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s ease both;
+    /* 寫實光影畫布＋牆面顆粒 */
+    #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }   /* 用最大視窗高度，手機網址列伸縮時不跳動（修改） */
+    .grain {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        mix-blend-mode: multiply;
     }
-    @keyframes slideDown {
-      from{ opacity:0; transform:translateY(-16px); }
-      to  { opacity:1; transform:translateY(0); }
+    /* 夜間桌燈：卡片附近一圈暖光，晚上也看得清楚 */
+    .lamp {
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255,186,110,0.45), rgba(255,186,110,0) 70%);
+        mix-blend-mode: soft-light; opacity: var(--lamp);
     }
+    html.night .panel { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
+    /* ── 半透明紙卡 ── */
+    .panel {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 560px;
+      border-radius: 6px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(170deg, rgba(253,251,247,0.40) 0%, rgba(251,248,242,0.34) 45%, rgba(244,238,228,0.30) 100%);
+      -webkit-backdrop-filter: blur(2.5px) saturate(1.1);
+      backdrop-filter: blur(2.5px) saturate(1.1);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 1px rgba(120,100,70,0.08),
+        2px 3px 4px rgba(70,50,30,0.10),
+        calc(var(--sx) * 0.9) calc(var(--sy) * 1) 30px rgba(70,50,30,0.22),
+        calc(var(--sx) * 2.2) calc(var(--sy) * 2.4) 70px rgba(70,50,30,0.20);
+      animation: rise .7s cubic-bezier(.2,.7,.2,1) both;
     }
+    @keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
 
-    /* 標題（修改）：圖示＋義大社工科｜設備 */
+    /* 頁首 */
+    header { padding: 22px 22px 14px; text-align: center; position: relative; }
     .site-title {
-      display: flex; align-items: center; gap: 9px;
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1.05rem; font-weight: 700;
-      color: var(--primary2);
-      white-space: nowrap;
+      font-family: 'Noto Serif TC', serif; font-size: 1.8rem; font-weight: 700;
+      letter-spacing: 0.14em; padding-left: 0.14em; color: var(--ink);
     }
-    .title-icon {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.05rem;
-      box-shadow: 0 2px 8px rgba(92,127,163,0.35);
-      flex-shrink: 0;
+    .site-sub {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 0.82rem; letter-spacing: 0.3em; color: var(--muted); margin-top: 6px;
     }
-    .welcome { font-size: 0.9rem; font-weight: 700; color: var(--primary2); }
-
-    /* 使用者資訊 */
-    .user-block {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .site-sub::before, .site-sub::after { content: ''; width: 30px; height: 1px; background: var(--hair); }
+    #timeDisplay {
+      display: block; margin-top: 40px; margin-bottom: 10px;   /* 放在返回鍵下方，避免重疊 */
+      font-size: 0.92rem; color: var(--muted); letter-spacing: 0.08em; font-variant-numeric: tabular-nums;
     }
-
-    .user-avatar {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      box-shadow: 0 2px 8px rgba(92,127,163,0.35);
-      flex-shrink: 0;
-    }
-
-    .user-name {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1.1rem; font-weight: 700;
-      color: var(--ink);
-    }
-
-    .user-sub {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
-    /* 返回按鈕 */
+    .header-info { display: flex; align-items: center; justify-content: center; margin-top: 6px; }
+    #userName { font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.12rem; font-weight: 700; color: #4f6b48; }
+    /* 返回：小原木牌 */
     .btn-return {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 7px 16px;
-      border-radius: 30px;
-      font-size: 0.82rem; font-weight: 700;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer;
-      border: 1.5px solid var(--border);
-      background: #f3ede0;
-      color: var(--muted);
-      transition: all 0.2s;
-      flex-shrink: 0;
+      position: absolute; top: 16px; left: 16px;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 38px; padding: 0 14px 0 12px;
+      border: none; border-radius: 4px; cursor: pointer;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.015 0.45' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .26 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #e2c49c 0%, #cfa978 60%, #b98f5d 100%);
+      background-size: 200px 38px, auto;
+      box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), inset -2px -2px 0 rgba(80,50,20,0.18), 3px 5px 7px rgba(70,50,30,0.25);
+      color: var(--engrave); font-family: 'Noto Serif TC', serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.18em;
+      text-shadow: 0 1px 0 rgba(255,240,215,0.55), 0 -1px 0 rgba(70,40,15,0.2);
     }
-    .btn-return:hover {
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      color: #fff; border-color: transparent;
-      transform: translateX(-2px);
-      box-shadow: 0 3px 10px var(--shadow);
-    }
+    .btn-return:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), 1px 2px 3px rgba(70,50,30,0.25); }
 
-    /* 時間列 */
-    .time-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    /* ══════════ 前台設備：與設備後台（de-device）同一套 ══════════ */
+    .section { padding: 4px 16px 16px; }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .sec-title { font-family: 'Noto Serif TC', serif; font-size: 1.22rem; font-weight: 700; letter-spacing: 0.16em; }
+    .req { color: #a8432c; }
 
-    .time-display {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 0.95rem;
-      color: var(--muted);
-      letter-spacing: 0.03em;
-    }
-
-    /* 說明文字 */
+    /* 說明：手寫小紙條，膠帶貼著 */
     .intro-card {
-      width: 100%; max-width: 520px;
-      background: linear-gradient(135deg, #eef3f7, #e3ebf2);
-      border: 1.5px solid #c9d7e4;
-      border-radius: 14px;
-      padding: 13px 18px;
-      margin-bottom: 14px;
-      font-size: 0.95rem;
-      color: #46617d;
-      line-height: 1.65;
-      text-align: center;
-      z-index: 1;
-      animation: slideDown 0.5s 0.08s ease both;
+      position: relative; margin: 6px 6px 0; padding: 16px 16px 14px;
+      background: linear-gradient(175deg, #fffef8, #f6f0e2);
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.08), 2px 3px 4px rgba(70,50,30,0.08), 6px 10px 16px rgba(70,50,30,0.12);
+      transform: rotate(-0.8deg);
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.05rem; line-height: 1.7; color: #3a4252; text-align: center;
+    }
+    .intro-card::before {   /* 紙膠帶 */
+      content: ''; position: absolute; top: -9px; left: 50%; width: 92px; height: 20px; margin-left: -46px;
+      background: rgba(214,196,150,0.72); transform: rotate(-3deg);
+      box-shadow: 0 1px 2px rgba(70,50,30,0.12);
     }
 
-    /* ── 提前預借（新增） ── */
-    .reserve-card {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 12px 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 12px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s 0.1s ease both;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .reserve-card.active {
-      border-color: #b08a35;
-      box-shadow: 0 4px 18px rgba(176,138,53,0.22);
-    }
+    /* 提前預借：黃色便利貼按鍵 */
+    .reserve-card { padding: 0; }
     .btn-reserve {
-      width: 100%;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1.5px dashed #b08a35;
-      background: #faf3df;
-      color: #8a5a14;
-      font-size: 1rem; font-weight: 700;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer;
-      transition: all 0.2s;
+      display: block; width: 100%; border: none; cursor: pointer; padding: 14px 12px 15px;
+      background: linear-gradient(175deg, #fbe7a1, #f3d675);
+      color: #5c4710; font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.06em;
+      box-shadow: 2px 3px 5px rgba(70,50,30,0.18), 6px 10px 16px rgba(70,50,30,0.12);
+      transform: rotate(-0.6deg);
+      transition: transform .2s, background .2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn-reserve:hover { background: #f3e8c8; }
-    .btn-reserve:active { transform: scale(0.98); }
-    .reserve-card.active .btn-reserve {
-      border-style: solid;
-      background: linear-gradient(135deg, #c9a24a, #b08a35);
-      color: #fff;
-    }
-    .reserve-date-wrap {
-      display: none;
-      margin-top: 12px;
-      flex-direction: column;
-    }
+    .btn-reserve:active { transform: rotate(-0.6deg) translateY(2px); }
+    .reserve-card.active .btn-reserve { background: linear-gradient(175deg, #f7c9a8, #eaa982); color: #5c2a10; transform: rotate(0.8deg); }
+    .reserve-date-wrap { display: none; margin-top: 14px; flex-direction: column; gap: 6px; min-width: 0; }
     .reserve-card.active .reserve-date-wrap { display: flex; }
-    /* ── 預借日期框（修改：修正手機超出框架） ── */
+    .purpose-label { display: block; font-size: 0.88rem; letter-spacing: 0.14em; color: #7d8aa0; font-weight: 700; }
+    /* 日期框：外框自己畫，原生日期欄位透明疊在上面 */
     .date-box {
-      position: relative;
-      width: 100%;
-      height: 44px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      background: var(--bg);
+      position: relative; width: 100%; height: 48px;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 12px;
-      overflow: hidden;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      padding: 0 4px; overflow: hidden;
+      border-bottom: 1.5px solid rgba(60,70,90,0.45);
+      transition: border-color .2s, background .2s;
     }
-    .date-box-text { font-size: 1rem; color: var(--ink); white-space: nowrap; }
-    .date-box-ic   { font-size: 1.05rem; }
-    .date-box:focus-within {
-      border-color: #b08a35;
-      box-shadow: 0 0 0 3px rgba(176,138,53,0.18);
-      background: var(--surface);
+    .date-box-text { font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.32rem; font-weight: 700; color: #1e2733; white-space: nowrap; }
+    .date-box-ic {
+      width: 22px; height: 22px; flex-shrink: 0;
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22' fill='none' stroke='%236c7686' stroke-width='1.6'><rect x='3' y='5' width='16' height='14' rx='2'/><path d='M3 9h16M7 3v4M15 3v4'/></svg>") no-repeat center;
     }
-    .date-box.error {
-      border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(192,80,77,0.15);
-    }
-    /* 真正的日期欄位：透明蓋在框上，點框就會跳出手機的日期選擇器 */
+    .date-box:focus-within { border-bottom-color: #c9951a; background: rgba(243,214,117,0.12); }
+    .date-box.error { border-bottom-color: #a8432c; background: rgba(168,67,44,0.06); }
     .reserve-date {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      opacity: 0;
-      border: 0; margin: 0; padding: 0;
-      min-width: 0;
-      -webkit-appearance: none; appearance: none;
-      font-size: 16px;               /* 避免 iPhone 點擊時自動放大畫面 */
-      cursor: pointer;
+      position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0;
+      border: 0; margin: 0; padding: 0; min-width: 0;
+      -webkit-appearance: none; appearance: none; font-size: 16px; cursor: pointer;
     }
-    .reserve-date::-webkit-calendar-picker-indicator {
-      position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
-    }
-    .reserve-date-wrap { min-width: 0; }
-    .reserve-hint {
-      font-size: 0.82rem;
-      color: #8a6420;
-      margin-top: 6px;
-      line-height: 1.5;
-    }
+    .reserve-date::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .reserve-hint { font-size: 0.92rem; color: #7a4530; line-height: 1.55; font-family: 'LXGW WenKai TC', sans-serif; }
 
-    /* ── 搜尋 ── */
-    .search-card {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 12px 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 12px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s 0.12s ease both;
-    }
-
+    /* 搜尋：底線輸入框 */
     .search-wrap { position: relative; }
     .search-icon-pos {
-      position: absolute; left: 13px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 1rem; pointer-events: none;
+      position: absolute; left: 2px; top: 50%; width: 22px; height: 22px; margin-top: -11px; pointer-events: none;
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22' fill='none' stroke='%236c7686' stroke-width='1.8' stroke-linecap='round'><circle cx='9.5' cy='9.5' r='6'/><path d='M14 14l5 5'/></svg>") no-repeat center;
     }
     .search-box {
-      width: 100%;
-      padding: 12px 14px 12px 38px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-size: 1rem;
-      font-family: 'Noto Sans TC', sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; padding: 8px 4px 8px 32px; border: none; border-bottom: 1.5px solid rgba(60,70,90,0.45); border-radius: 0;
+      background: transparent; outline: none; -webkit-appearance: none; appearance: none;
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.32rem; font-weight: 700; color: #1e2733;
     }
-    .search-box:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(92,127,163,0.15);
-      background: var(--surface);
-    }
+    .search-box:focus { border-bottom-color: #6f8a68; background: rgba(111,138,104,0.06); }
+    .search-box::placeholder { color: #a9aeb6; font-weight: 500; }
 
-    /* ── 設備區 ── */
-    .devices-card {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 6px 24px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s 0.16s ease both;
-    }
-
-    .devices-card-header {
-      background: linear-gradient(135deg, #eef3f7, #e3ebf2);
-      padding: 14px 18px;
-      border-bottom: 1.5px solid var(--border);
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      color: var(--primary2);
-      display: flex; align-items: center;
-      justify-content: space-between;
-    }
-
+    /* ── 設備掛板：洞洞板＋鑰匙牌 ── */
     #selected-count {
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      color: #fff;
-      font-size: 0.72rem; font-weight: 700;
-      padding: 2px 10px; border-radius: 20px;
-      display: none;
+      display: none; padding: 2px 10px;
+      border: 2px solid #c0392b; border-radius: 3px; color: #c0392b;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.92rem; letter-spacing: 0.1em;
+      transform: rotate(-4deg); opacity: .85; mix-blend-mode: multiply;
     }
-
-    /* 設備格線 */
     .devices-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));   /* 固定一排兩個，長名稱也不會把欄位撐開（修改） */
-      gap: 14px;
-      padding: 16px;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px;
+      position: relative; border-radius: 4px; padding: 10px 12px 18px;
+      background:
+        radial-gradient(circle, rgba(70,45,20,0.55) 0 2.2px, transparent 2.8px) 0 0 / 22px 22px,
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.02 0.3' numOctaves='3' seed='8'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .1  0 0 0 .18 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #d8b98e, #c4a072);
+      box-shadow: inset 0 1px 0 rgba(255,240,215,0.5), inset 0 0 0 1px rgba(90,60,30,0.25), 6px 10px 18px rgba(70,50,30,0.22);
     }
-
+    /* 每個設備＝一塊橫向上漆木牌，用黃銅圈掛在板上 */
     .device-card {
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 18px;                 /* 圓角方形（修改） */
-      aspect-ratio: 1 / 1;                 /* 正方形 */
-      padding: 12px 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-      position: relative;
-      overflow: hidden;
-      min-height: 0;
-      min-width: 0;
-      box-shadow: 0 2px 8px var(--shadow);
+      --c1: #c78464; --c2: #a35d3f;
+      position: relative; margin-top: 24px; min-height: 72px; min-width: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 18px 12px 12px; border-radius: 8px; cursor: pointer; text-align: center;
+      color: #fff8ec;
+      background:
+        radial-gradient(circle at 50% 10px, #4a3a2a 0 2.6px, #d9b56a 3px 4.6px, #8a6a30 5px 5.6px, transparent 6px),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.45' numOctaves='3' seed='9'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+        radial-gradient(ellipse at 25% 20%, rgba(255,255,255,0.25), rgba(255,255,255,0) 60%),
+        linear-gradient(175deg, var(--c1), var(--c2));
+      background-size: auto, 200px 100%, auto, auto;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35), inset -2px -3px 0 rgba(40,25,10,0.16),
+        calc(var(--sx) * 0.3) calc(var(--sy) * 0.25 + 3px) 6px rgba(60,40,22,0.32);
+      transform-origin: 50% -14px;
+      transition: rotate .45s cubic-bezier(.3,1.6,.5,1), translate .25s ease, box-shadow .25s ease;
+      -webkit-tap-highlight-color: transparent;
     }
-    .device-card::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(92,127,163,0.06), rgba(86,105,79,0.06));
-      opacity: 0; transition: opacity 0.25s;
+    .device-card:nth-child(4n+2) { --c1: #7892ad; --c2: #536f8b; }
+    .device-card:nth-child(4n+3) { --c1: #cfab62; --c2: #a8833a; }
+    .device-card:nth-child(4n+4) { --c1: #88a77a; --c2: #617f55; }
+    .device-card::before {   /* 黃銅鑰匙圈 */
+      content: ''; position: absolute; top: -17px; left: 50%; width: 20px; height: 22px; margin-left: -10px; border-radius: 50%;
+      border: 2.5px solid #c49a4c; box-shadow: inset 0 0 0 1px rgba(255,235,180,0.6), 0 0 0 1px rgba(90,60,20,0.35);
     }
-    .device-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--primary);
-      box-shadow: 0 6px 20px rgba(92,127,163,0.18);
-    }
-    .device-card:hover::after { opacity: 1; }
-
-    .device-card.selected {
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      border-color: transparent;
-      color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(92,127,163,0.32);
-    }
-    .device-card.selected::after { opacity: 0; }
-
-    /* 勾勾角標 */
-    .device-card.selected::before {
-      content: '✓';
-      position: absolute;
-      top: 8px; right: 10px;
-      font-size: 0.75rem; font-weight: 700;
-      color: rgba(255,255,255,0.85);
-    }
-
-    .device-icon {
-      font-size: 2.8rem;
-      margin-bottom: 8px;
-      transition: transform 0.25s;
-    }
-    .device-card.selected .device-icon { transform: scale(1.12); }
-
+    .device-card:hover { rotate: 2.5deg; }
+    .device-card:active { rotate: -1.5deg; }
+    .device-icon { display: none; }
     .device-name {
-      font-size: 1rem; font-weight: 600;
-      color: inherit;
-      line-height: 1.3;
-      display: block;
-      max-width: 100%;
-      word-break: keep-all;        /* 不在詞中間斷行（修改） */
-      overflow-wrap: normal;
+      display: block; max-width: 100%;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1.12rem; letter-spacing: 0.05em; line-height: 1.3;
+      word-break: keep-all; overflow-wrap: normal;
+      text-shadow: 0 -1px 0 rgba(40,25,10,0.35), 0 1px 0 rgba(255,255,255,0.15);   /* 雕刻字 */
     }
-
-    /* 空狀態 */
+    /* 選取：木牌被拿起來，綁上紅色借用籤 */
+    .device-card.selected {
+      translate: 0 -4px; rotate: -3deg;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35), inset -2px -3px 0 rgba(40,25,10,0.16),
+        0 0 0 3px rgba(255,244,214,0.95), 0 0 0 5px rgba(192,57,43,0.75),
+        calc(var(--sx) * 0.6) calc(var(--sy) * 0.5 + 8px) 14px rgba(60,40,22,0.38);
+    }
+    .device-card.selected:hover { rotate: -3deg; }
+    .device-card.selected::after {
+      content: '借'; position: absolute; top: -10px; right: -8px;
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: #fffaf0; border: 2px solid #c0392b; color: #c0392b;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.95rem;
+      box-shadow: 1px 2px 3px rgba(60,30,15,0.3); rotate: 12deg; text-shadow: none;
+    }
     .devices-empty {
-      grid-column: 1/-1;
-      text-align: center;
-      padding: 36px 24px;
-      color: var(--muted);
-      font-size: 0.9rem;
+      grid-column: 1 / -1; text-align: center; padding: 30px 0 18px;
+      color: #4a2d14; font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.14em;
+      text-shadow: 0 1px 0 rgba(255,240,215,0.55);
     }
 
-    /* ── 用途下拉選單（新增） ── */
-    .purpose-card {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-top: 14px;
-      box-shadow: 0 2px 12px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s 0.19s ease both;
+    /* 用途：紙上的底線選單 */
+    .purpose-sheet {
+      padding: 16px 16px 18px; border-radius: 2px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(175deg, #fffdf6, #f6efdf);
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.10), 2px 3px 4px rgba(70,50,30,0.08), 6px 10px 18px rgba(70,50,30,0.12);
     }
-    .purpose-label {
-      display: block;
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      color: var(--primary2);
-      margin-bottom: 8px;
-    }
-    .purpose-label .req { color: var(--accent2); }
+    .purpose-sheet .purpose-label { margin-bottom: 4px; }
+    .select-wrap { position: relative; }
+    .select-wrap::after { content: '▾'; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); color: #6c7686; pointer-events: none; font-size: 1.1rem; }
     .purpose-select {
-      width: 100%;
-      padding: 12px 40px 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-size: 1rem;
-      font-family: 'Noto Sans TC', sans-serif;
-      color: var(--ink);
-      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235c7fa3' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center;
-      appearance: none;
-      -webkit-appearance: none;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; padding: 8px 24px 8px 2px; border: none; border-bottom: 1.5px solid rgba(60,70,90,0.45); border-radius: 0;
+      background: transparent; outline: none; -webkit-appearance: none; appearance: none; cursor: pointer;
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.22rem; font-weight: 700; color: #1e2733;
+      text-overflow: ellipsis;
     }
-    .purpose-select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(92,127,163,0.15);
-      background-color: var(--surface);
-    }
-    .purpose-select.error {
-      border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(192,80,77,0.15);
-    }
+    .purpose-select:focus { border-bottom-color: #6f8a68; background: rgba(111,138,104,0.06); }
+    .purpose-select.error { border-bottom-color: #a8432c; background: rgba(168,67,44,0.06); }
 
-    /* ── 按鈕列 ── */
-    .btn-row {
-      width: 100%; max-width: 520px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 16px;
-      z-index: 1;
-      animation: slideDown 0.5s 0.22s ease both;
-    }
-
+    /* 下方小木板按鍵 */
+    .btn-row { display: flex; gap: 12px; padding: 4px 16px 18px; }
     .btn {
-      width: 100%; padding: 16px;
-      border-radius: 14px;
-      font-size: 1.05rem; font-weight: 700;
-      font-family: 'Noto Sans TC', sans-serif;
-      cursor: pointer; border: none;
-      display: flex; align-items: center;
-      justify-content: center; gap: 8px;
-      transition: all 0.2s;
+      flex: 1 1 0; height: 52px; padding: 0 16px; border: none; border-radius: 4px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Noto Serif TC', serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.14em;
+      color: #fff8ec; text-shadow: 0 -1px 0 rgba(40,25,10,0.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset -2px -3px 0 rgba(40,25,10,0.18), 3px 5px 8px rgba(70,50,30,0.22);
+      background-size: 240px 100%, auto;
     }
-    .btn:active { transform: scale(0.97); }
+    .btn:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 1px 2px 4px rgba(70,50,30,0.22); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-row .btn-submit { flex-grow: 1.6; }
+    .btn-submit { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #88a77a, #617f55); }
+    .btn-reset { color: #4a2d14; text-shadow: 0 1px 0 rgba(255,240,215,0.55);
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #e2c49c, #c9a171); }
 
-    .btn-submit {
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(92,127,163,0.32);
-    }
-    .btn-submit:hover { box-shadow: 0 6px 22px rgba(92,127,163,0.42); transform: translateY(-2px); }
-    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-
-    .btn-reset {
-      background: #f3ede0;
-      color: var(--muted);
-      border: 1.5px solid var(--border);
-    }
-    .btn-reset:hover { background: #e3ebf2; color: var(--primary); border-color: var(--primary); }
-
-    /* ── 預借設備時間排程（新增） ── */
-    .schedule-card {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-top: 18px;
-      box-shadow: 0 6px 24px var(--shadow);
-      z-index: 1;
-      animation: slideDown 0.5s 0.26s ease both;
-    }
-    .schedule-header {
-      background: linear-gradient(135deg, #faf3df, #f3e8c8);
-      padding: 13px 18px;
-      border-bottom: 1.5px solid #eadbb4;
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      color: #8a5a14;
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    /* ── 預借排程：登記簿，每個項目各佔一行 ── */
     .btn-refresh {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      border: 1.5px solid #ffd8a8;
-      background: #fff;
-      color: #8a5a14;
-      font-size: 1.05rem; font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.3s;
+      width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; flex-shrink: 0;
+      background: radial-gradient(circle at 35% 30%, #f6e3ad, #c2964a 60%, #8a6a30);
+      color: #4a2d14; font-size: 1.15rem; font-weight: 700; line-height: 36px; padding: 0;
+      box-shadow: inset 0 1px 0 rgba(255,250,230,0.7), 1px 3px 4px rgba(60,40,20,0.3);
+      transition: transform .3s;
     }
     .btn-refresh:hover { transform: rotate(90deg); }
     .btn-refresh.spin { animation: spin 0.8s linear infinite; }
-
-    .schedule-body { overflow-x: auto; }
-    .schedule-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
+    .schedule-body {
+      position: relative; overflow: hidden; padding: 4px 0 6px; border-radius: 3px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(175deg, #fffdf6, #f8f2e4);
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.10), 2px 3px 4px rgba(70,50,30,0.08), 8px 12px 22px rgba(70,50,30,0.14);
     }
-    .schedule-table th {
-      background: #fbf5e6;
-      color: #8a6420;
-      font-weight: 700;
-      text-align: left;
-      padding: 9px 10px;
-      border-bottom: 1.5px solid #eadbb4;
-      white-space: nowrap;
+    .schedule-body::before {   /* 左邊紅色邊界線 */
+      content: ''; position: absolute; top: 0; bottom: 0; left: 20px; width: 1.5px; background: rgba(200,70,60,0.45);
     }
-    .schedule-table td {
-      padding: 10px 10px;
-      border-bottom: 1px solid #f1f3f5;
-      color: var(--ink);
-      vertical-align: top;
-      line-height: 1.45;
+    .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td { display: block; }
+    .schedule-table { width: 100%; border-collapse: collapse; }
+    .schedule-table thead { display: none; }
+    .schedule-table tr {
+      padding: 10px 14px 10px 32px; border-bottom: 1px solid rgba(110,150,190,0.35);
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; color: #24303f;
     }
-    .schedule-table tr:last-child td { border-bottom: none; }
-    .schedule-table td.s-date { white-space: nowrap; font-weight: 700; color: #8a5a14; }
-    .schedule-table td.s-name { white-space: nowrap; font-weight: 600; }
-    .schedule-table td.s-dev  { color: var(--primary2); font-weight: 600; }
-    .schedule-table td.s-purpose { color: var(--ink2); font-size: 0.82rem; }
-    .schedule-table tr.mine td { background: #eaf0f5; }
+    .schedule-table tr:last-child { border-bottom: none; }
+    .schedule-table td { display: flex; align-items: baseline; gap: 8px; padding: 2px 0; line-height: 1.45; overflow-wrap: anywhere; }
+    .schedule-table td::before {
+      flex: 0 0 40px; font-family: 'Noto Sans TC', sans-serif; font-style: normal;
+      font-size: 0.8rem; letter-spacing: 0.12em; color: #8a93a3; font-weight: 400;
+    }
+    .schedule-table td.s-date::before    { content: '預借'; }
+    .schedule-table td.s-name::before    { content: '姓名'; }
+    .schedule-table td.s-dev::before     { content: '設備'; }
+    .schedule-table td.s-purpose::before { content: '用途'; }
+    .schedule-table td.s-date { font-family: 'Noto Serif TC', serif; font-size: 1.18rem; font-weight: 700; color: #7a5200; }
+    .schedule-table td.s-name { font-size: 1.28rem; font-weight: 700; color: #1e2733; letter-spacing: 0.04em; }
+    .schedule-table td.s-dev  { font-size: 1.12rem; font-weight: 700; color: #2c4a6e; }
+    .schedule-table td.s-purpose { font-size: 1rem; color: #5b6472; }
+    .schedule-table tr.mine { background: rgba(120,160,200,0.13); }
+    .schedule-table tr.mine td.s-name::after {
+      content: '您'; margin-left: 2px; padding: 0 6px; border: 1.5px solid #2f5d9a; border-radius: 3px;
+      color: #2f5d9a; font-family: 'Noto Serif TC', serif; font-size: 0.8rem; transform: rotate(-4deg); opacity: .85;
+    }
     .today-tag {
-      display: inline-block;
-      margin-left: 4px;
-      padding: 0 6px;
-      border-radius: 6px;
-      background: #b08a35;
-      color: #fff;
-      font-size: 0.68rem;
-      vertical-align: 1px;
+      display: inline-block; margin-left: 6px; padding: 2px 9px 3px;
+      background: linear-gradient(175deg, #fbe7a1, #f3d675); color: #5c4710;
+      font-family: 'LXGW WenKai TC', sans-serif; font-size: 0.86rem; font-weight: 700;
+      box-shadow: 2px 3px 4px rgba(70,50,30,0.18); transform: rotate(3deg);
     }
-    .schedule-empty {
-      text-align: center;
-      padding: 28px 20px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
+    .schedule-empty { text-align: center; padding: 24px 18px 22px 30px; font-family: 'LXGW WenKai TC', sans-serif; color: #7d8aa0; font-size: 1.05rem; line-height: 1.6; }
 
-    /* ── 訊息 Toast ── */
+    /* ── 訊息紙條 ── */
     .toast {
-      position: fixed;
-      top: 20px; left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 14px 26px;
-      border-radius: 14px;
-      font-size: 1rem; font-weight: 600;
-      text-align: center;
-      z-index: 1000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
-      max-width: 360px; width: 90%;
-      pointer-events: none;
+      position: fixed; top: 20px; left: 50%; z-index: 1000;
+      transform: translateX(-50%) translateY(-20px) rotate(-1deg);
+      max-width: 380px; width: 90%; padding: 14px 20px; text-align: center; pointer-events: none;
+      background: linear-gradient(175deg, #fffef8, #f6f0e2);
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.1rem; font-weight: 700;
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.12), 4px 8px 18px rgba(40,25,10,0.28);
+      opacity: 0; transition: all .3s ease;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .toast.success { background: #6b8f5e; color: #fff; }
-    .toast.error   { background: #c0504d; color: #fff; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) rotate(-1deg); }
+    .toast.success { color: #3f5f38; border-left: 4px solid #6f8a68; }
+    .toast.error   { color: #7a3a26; border-left: 4px solid #a8432c; }
 
-    /* ── Loading ── */
-    .loading-overlay {
-      position: fixed; inset: 0;
-      background: rgba(40,52,36,0.45);
-      backdrop-filter: blur(4px);
+    /* ── 送出中 ── */
+    .loading-overlay, .remind-overlay {
+      position: fixed; inset: 0; z-index: 2000; padding: 20px;
+      background: rgba(40,30,20,0.42); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
       display: flex; align-items: center; justify-content: center;
-      z-index: 2000;
-      opacity: 0; visibility: hidden;
-      transition: all 0.3s;
+      opacity: 0; visibility: hidden; transition: all .25s;
     }
-    .loading-overlay.show { opacity: 1; visibility: visible; }
+    .remind-overlay { z-index: 2100; }
+    .loading-overlay.show, .remind-overlay.show { opacity: 1; visibility: visible; }
+    .loading-box, .remind-box {
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(175deg, #fffdf6, #f6efdf);
+      border-radius: 3px; box-shadow: 0 0 0 1px rgba(120,100,70,0.12), 6px 12px 30px rgba(30,20,10,0.35);
+    }
+    .loading-box { padding: 26px 34px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .spinner { width: 34px; height: 34px; border: 3px solid rgba(111,138,104,0.25); border-top-color: #6f8a68; border-radius: 50%; animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'LXGW WenKai TC', sans-serif; font-size: 1.05rem; color: var(--ink-2); }
 
-    .loading-box {
-      background: var(--surface);
-      padding: 28px 32px;
-      border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      display: flex; flex-direction: column;
-      align-items: center; gap: 14px;
+    /* ── 未歸還提醒：紙本通知單 ── */
+    .remind-box { position: relative; width: 100%; max-width: 420px; padding: 26px 20px 18px; text-align: center; transform: rotate(-0.5deg); }
+    .remind-icon {
+      display: inline-block; margin-bottom: 10px; padding: 2px 12px;
+      border: 2.5px solid #c0392b; border-radius: 4px; color: #c0392b;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.2em;
+      transform: rotate(-6deg); opacity: .85; mix-blend-mode: multiply;
     }
-    .spinner {
-      width: 38px; height: 38px;
-      border: 4px solid #e2e8f0;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
-    .loading-text {
-      font-size: 0.9rem; font-weight: 600;
-      color: var(--ink2);
-      font-family: 'Zen Maru Gothic', sans-serif;
-    }
-
-    /* ── 未歸還提醒框（新增） ── */
-    .remind-overlay {
-      position: fixed; inset: 0;
-      background: rgba(40,52,36,0.45);
-      backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 2100; padding: 20px;
-      opacity: 0; visibility: hidden;
-      transition: all 0.25s;
-    }
-    .remind-overlay.show { opacity: 1; visibility: visible; }
-    .remind-box {
-      background: var(--surface);
-      width: 100%; max-width: 400px;
-      border-radius: 20px;
-      padding: 24px 22px 20px;
-      box-shadow: 0 10px 36px rgba(0,0,0,0.22);
-      text-align: center;
-    }
-    .remind-icon { font-size: 2.4rem; margin-bottom: 6px; }
-    .remind-title {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-size: 1.15rem; font-weight: 700;
-      color: #e8590c; margin-bottom: 14px;
-    }
+    .remind-title { font-family: 'Noto Serif TC', serif; font-size: 1.3rem; font-weight: 700; letter-spacing: 0.1em; color: #2f2a24; margin-bottom: 14px; }
     .remind-list {
-      list-style: none;
-      max-height: 45vh; overflow-y: auto;
-      text-align: left;
-      display: flex; flex-direction: column; gap: 8px;
-      margin-bottom: 18px;
+      list-style: none; max-height: 45vh; overflow-y: auto; text-align: left;
+      display: flex; flex-direction: column; margin-bottom: 18px;
+      border-top: 2px solid rgba(90,120,160,0.45);
     }
     .remind-list li {
-      background: #fff4e6;
-      border: 1.5px solid #ffd8a8;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 0.98rem;
-      line-height: 1.6;
-      color: var(--ink);
+      padding: 10px 4px; border-bottom: 1px solid rgba(110,150,190,0.35);
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.1rem; line-height: 1.6; color: #24303f;
     }
-    .remind-list b { color: #8a5a14; }
+    .remind-list b { color: #8a4a30; }
     .remind-btns { display: flex; gap: 10px; }
-    .remind-btns .btn { padding: 13px; font-size: 1rem; }
-    /* ══════════ 鮮艷＋立體感（修改）══════════ */
-    :root {
-      --primary:  #3f84c9;   /* 亮一階的藍 */
-      --primary2: #2c629c;
-      --border:   #e0d2ab;
-      --shadow:   rgba(45,75,35,0.20);
-    }
-    html { background: #86b06f; }
-    body { background: linear-gradient(135deg, #c3dda8 0%, #86b06f 100%) fixed; min-height: 100dvh; }
 
-    /* 卡片：下緣厚度＋較深陰影，浮在背景上 */
-    header, .reserve-card, .search-card, .devices-card, .purpose-card, .schedule-card {
-      box-shadow: 0 4px 0 #d6c898, 0 14px 28px rgba(45,75,35,0.24);
+    .devices-wrap .sec-head { margin-bottom: 4px; }
+    html.night .purpose-label { color: #4f5868; }
+    html.night .search-box::placeholder { color: #6f7580; }
+    html.night .search-icon-pos { opacity: .9; }
+    @media (max-width: 380px) {
+      .site-title { font-size: 1.6rem; }
+      .device-name { font-size: 1.02rem; }
+      .search-box, .date-box-text { font-size: 1.2rem; }
+      .purpose-select { font-size: 1.08rem; }
+      .btn { font-size: 1rem; letter-spacing: 0.08em; }
     }
-    .title-icon {
-      background: linear-gradient(145deg, #5a9fe0, #2c629c);
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 3px 0 #1f4a78, 0 6px 12px rgba(44,98,156,0.35);
-    }
-    .btn-return {
-      background: linear-gradient(180deg, #ffffff, #f1e7cc);
-      border-color: #d6c898; color: #2c629c;
-      box-shadow: 0 3px 0 #d2c193;
-    }
-    .btn-return:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #1f4a78; }
-    .btn-return:active { transform: translateY(3px); box-shadow: none; }
-
-    .intro-card {
-      background: linear-gradient(135deg, #e0efff, #c2dcf8);
-      border-color: #9cc3ec; color: #1d4c7e; font-weight: 500;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 4px 0 #a5c6e8, 0 10px 18px rgba(44,98,156,0.16);
-    }
-
-    /* 提前預借：亮黃色實體按鍵 */
-    .btn-reserve {
-      border: 1.5px solid #d9a520;
-      background: linear-gradient(180deg, #ffeeb5, #f6cf5a);
-      color: #4f3600;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 5px 0 #c9951a, 0 10px 16px rgba(201,149,26,0.22);
-    }
-    .btn-reserve:hover { background: linear-gradient(180deg, #fff3c9, #f3c84a); }
-    .btn-reserve:active { transform: translateY(4px); box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 1px 0 #c9951a; }
-    .reserve-card.active { border-color: #d9a520; }
-    .reserve-card.active .btn-reserve {
-      background: linear-gradient(180deg, #f6c445, #e0a21c);
-      color: #3d2a00;
-      transform: translateY(3px);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.18), 0 2px 0 #a97a10;
-    }
-
-    /* 輸入框：微微內凹 */
-    .search-box, .purpose-select, .date-box {
-      background-color: #ffffff;
-      border-color: #d6c898;
-      box-shadow: inset 0 2px 5px rgba(45,75,35,0.14);
-    }
-
-    /* 設備區標題：飽和藍色帶 */
-    .devices-card-header {
-      background: linear-gradient(135deg, #4f96db, #2c629c);
-      color: #ffffff; border-bottom: none;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.14);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    #selected-count {
-      background: #f6cf5a; color: #3d2a00; text-shadow: none;
-      box-shadow: 0 2px 0 #c9951a; padding: 3px 12px;
-    }
-
-    /* 設備按鍵：凸起的方塊，選取後按下去並變成藍色 */
-    .device-card {
-      background: linear-gradient(180deg, #ffffff, #f4ecd6);
-      border: 1.5px solid #d6c898;
-      box-shadow: inset 0 2px 0 #ffffff, 0 6px 0 #cfbe8e, 0 12px 18px rgba(45,75,35,0.18);
-    }
-    .device-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--primary);
-      box-shadow: inset 0 2px 0 #ffffff, 0 9px 0 #cfbe8e, 0 16px 22px rgba(45,75,35,0.22);
-    }
-    .device-card.selected {
-      background: linear-gradient(180deg, #4f96db, #2c629c);
-      border-color: #1f4a78;
-      transform: translateY(4px);
-      box-shadow: inset 0 3px 6px rgba(0,0,0,0.22), 0 2px 0 #1f4a78;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    .device-card.selected::before {
-      content: '✓';
-      top: 8px; right: 8px;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: #f6cf5a; color: #3d2a00;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; text-shadow: none;
-      box-shadow: 0 2px 0 #c9951a;
-    }
-    .device-icon { filter: drop-shadow(0 4px 4px rgba(0,0,0,0.22)); }
-
-    /* 主要按鈕：有厚度，按下會下沉 */
-    .btn-submit {
-      background: linear-gradient(180deg, #4f96db, #2c629c);
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 5px 0 #1f4a78, 0 12px 22px rgba(44,98,156,0.35);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 7px 0 #1f4a78, 0 16px 26px rgba(44,98,156,0.4);
-    }
-    .btn-submit:active { transform: translateY(4px); box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 1px 0 #1f4a78; }
-    .btn-reset {
-      background: linear-gradient(180deg, #ffffff, #f1e7cc);
-      border-color: #d6c898; color: #5d6a55;
-      box-shadow: 0 5px 0 #d2c193, 0 10px 16px rgba(45,75,35,0.12);
-    }
-    .btn-reset:active { transform: translateY(4px); box-shadow: 0 1px 0 #d2c193; }
-
-    /* 預借排程：亮黃色標題 */
-    .schedule-header {
-      background: linear-gradient(135deg, #fbdc77, #efb935);
-      color: #4a3200; border-bottom: none;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.55), inset 0 -3px 0 rgba(122,90,0,0.18);
-    }
-    .btn-refresh { border-color: #c9951a; color: #4a3200; box-shadow: 0 2px 0 #c9951a; }
-    .schedule-table th { background: #fff3cf; color: #6b4a00; border-bottom-color: #efd58a; }
-    .schedule-table td.s-date { color: #7a5200; }
-    .schedule-table tr.mine td { background: #dcebfb; }
-    .today-tag { background: #e0a21c; color: #3d2a00; font-weight: 700; }
-    .remind-box, .loading-box { box-shadow: 0 5px 0 #d6c898, 0 18px 40px rgba(0,0,0,0.3); }
   </style>
 </head>
 <body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="ambient-top" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
 
-<div class="deco">💻</div>
-<div class="deco">📽️</div>
-<div class="deco">🌿</div>
-<div class="deco">🔊</div>
-
-<!-- ─── Header ─── -->
-<header>
-  <div class="header-row">
-    <!-- 標題（修改）：圖示＋義大社工科｜設備，與訂餐、文具頁一致 -->
-    <div class="site-title"><div class="title-icon">💻</div>義大社工科｜設備</div>
+<div class="panel">
+  <!-- ─── Header ─── -->
+  <header>
     <button class="btn-return" id="backBtn">← 返回</button>
-  </div>
-  <div class="time-row">
-    <span class="time-display" id="timeDisplay">--:--:--</span>
-    <span class="welcome" id="userName">載入中…</span>
-  </div>
-</header>
+    <span id="timeDisplay">--:--:--</span>
+    <h1 class="site-title">設備借用</h1>
+    <div class="site-sub">義大社工科</div>
+    <div class="header-info"><span id="userName">載入中…</span></div>
+  </header>
 
-<!-- ─── 說明 ─── -->
-<div class="intro-card">
-  📌 請選擇需要借用的設備，可複選；完成後按「送出預約」即可記錄。
-</div>
+  <!-- ─── 說明 ─── -->
+  <div class="section">
+    <div class="intro-card">請點選要借用的設備，可以複選；<br>完成後按「送出預約」即可記錄。</div>
+  </div>
 
-<!-- ─── 提前預借（新增） ─── -->
-<div class="reserve-card" id="reserveCard">
-  <button class="btn-reserve" id="reserveBtn" type="button">
-    <span id="reserveBtnText">📅 提前預借設備</span>
-  </button>
-  <div class="reserve-date-wrap" id="reserveDateWrap">
-    <label class="purpose-label" for="reserveDate">📆 選擇預借日期 <span class="req">*</span></label>
-    <!-- 日期框（修改）：外框由我們自己畫，原生日期欄位透明疊在上面，手機上不會再撐出框外 -->
-    <div class="date-box" id="reserveDateBox">
-      <span class="date-box-text" id="reserveDateText">請選擇日期</span>
-      <span class="date-box-ic">📅</span>
-      <input type="date" class="reserve-date" id="reserveDate"/>
+  <!-- ─── 提前預借 ─── -->
+  <div class="section">
+    <div class="reserve-card" id="reserveCard">
+      <button class="btn-reserve" id="reserveBtn" type="button">
+        <span id="reserveBtnText">提前預借設備</span>
+      </button>
+      <div class="reserve-date-wrap" id="reserveDateWrap">
+        <label class="purpose-label" for="reserveDate">選擇預借日期 <span class="req">*</span></label>
+        <div class="date-box" id="reserveDateBox">
+          <span class="date-box-text" id="reserveDateText">請選擇日期</span>
+          <span class="date-box-ic" aria-hidden="true"></span>
+          <input type="date" class="reserve-date" id="reserveDate"/>
+        </div>
+        <div class="reserve-hint">選好日期後，再點選下方的設備並送出，即為該日期提前預借</div>
+      </div>
     </div>
-    <div class="reserve-hint">選好日期後，再點選下方的設備並送出，即為該日期提前預借</div>
+  </div>
+
+  <!-- ─── 設備掛板 ─── -->
+  <div class="section devices-wrap">
+    <div class="sec-head">
+      <span class="sec-title">設備掛板</span>
+      <span id="selected-count"></span>
+    </div>
+    <div class="search-card" style="margin-bottom:14px">
+      <div class="search-wrap">
+        <span class="search-icon-pos" aria-hidden="true"></span>
+        <input type="text" class="search-box" id="searchBox" placeholder="搜尋設備名稱…"/>
+      </div>
+    </div>
+    <div class="devices-grid" id="devicesGrid">
+      <div class="devices-empty">載入設備中…</div>
+    </div>
+  </div>
+
+  <!-- ─── 用途 ─── -->
+  <div class="section">
+    <div class="purpose-sheet">
+      <label class="purpose-label" for="purposeSelect">用途 <span class="req">*</span></label>
+      <div class="select-wrap">
+        <select class="purpose-select" id="purposeSelect">
+          <option value="">請選擇用途</option>
+          <option value="開會(科會、個案研討、讀書會、各項會議)">開會（科會、個案研討、讀書會、各項會議）</option>
+          <option value="科內活動">科內活動</option>
+          <option value="大廳活動">大廳活動</option>
+          <option value="其他活動(晨會、病房活動、共識營、各項研討會)">其他活動（晨會、病房活動、共識營、各項研討會）</option>
+          <option value="個人需求">個人需求</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 按鈕 ─── -->
+  <div class="btn-row">
+    <button class="btn btn-reset"  id="resetBtn">重置選擇</button>
+    <button class="btn btn-submit" id="submitBtn">送出預約</button>
+  </div>
+
+  <!-- ─── 預借設備時間排程 ─── -->
+  <div class="section" style="padding-bottom:22px">
+    <div class="schedule-card">
+      <div class="sec-head">
+        <span class="sec-title">預借排程</span>
+        <button class="btn-refresh" id="scheduleRefresh" type="button" title="重新整理">↻</button>
+      </div>
+      <div class="schedule-body" id="scheduleBody">
+        <div class="schedule-empty">載入中…</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ─── 搜尋 ─── -->
-<div class="search-card">
-  <div class="search-wrap">
-    <span class="search-icon-pos">🔍</span>
-    <input type="text" class="search-box" id="searchBox" placeholder="搜尋設備名稱…"/>
-  </div>
-</div>
-
-<!-- ─── 設備卡片 ─── -->
-<div class="devices-card">
-  <div class="devices-card-header">
-    <span>🖥 請選擇設備</span>
-    <span id="selected-count"></span>
-  </div>
-  <div class="devices-grid" id="devicesGrid">
-    <div class="devices-empty">載入設備中…</div>
-  </div>
-</div>
-
-<!-- ─── 用途（新增） ─── -->
-<div class="purpose-card">
-  <label class="purpose-label" for="purposeSelect">📝 用途 <span class="req">*</span></label>
-  <select class="purpose-select" id="purposeSelect">
-    <option value="">請選擇用途</option>
-    <option value="開會(科會、個案研討、讀書會、各項會議)">開會（科會、個案研討、讀書會、各項會議）</option>
-    <option value="科內活動">科內活動</option>
-    <option value="大廳活動">大廳活動</option>
-    <option value="其他活動(晨會、病房活動、共識營、各項研討會)">其他活動（晨會、病房活動、共識營、各項研討會）</option>
-    <option value="個人需求">個人需求</option>
-  </select>
-</div>
-
-<!-- ─── 按鈕 ─── -->
-<div class="btn-row">
-  <button class="btn btn-submit" id="submitBtn">✅ 送出預約</button>
-  <button class="btn btn-reset"  id="resetBtn">🔄 重置選擇</button>
-</div>
-
-<!-- ─── 預借設備時間排程（新增） ─── -->
-<div class="schedule-card">
-  <div class="schedule-header">
-    <span>🗓 預借設備時間排程</span>
-    <button class="btn-refresh" id="scheduleRefresh" type="button" title="重新整理">↻</button>
-  </div>
-  <div class="schedule-body" id="scheduleBody">
-    <div class="schedule-empty">載入中…</div>
-  </div>
-</div>
-
-<!-- ─── Loading ─── -->
+<!-- ─── 送出中 ─── -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-box">
     <div class="spinner"></div>
@@ -912,10 +519,10 @@
   </div>
 </div>
 
-<!-- ─── 未歸還提醒框（新增） ─── -->
+<!-- ─── 未歸還提醒 ─── -->
 <div class="remind-overlay" id="remindOverlay">
   <div class="remind-box">
-    <div class="remind-icon">⚠️</div>
+    <div class="remind-icon">提醒</div>
     <div class="remind-title">以下設備尚未歸還</div>
     <ul class="remind-list" id="remindList"></ul>
     <div class="remind-btns">
@@ -925,10 +532,276 @@
   </div>
 </div>
 
-<!-- ─── Toast ─── -->
+<!-- ─── 訊息 ─── -->
 <div class="toast" id="toast"></div>
 
 <script>
+        // ══ 光線隨時間變化（新增）══
+  //  早上太陽在左邊（東）低低的、偏金黃；中午在正上方、白亮；
+  //  下午移到右邊；傍晚右側低角度橘紅；入夜後房間變暗、改成月光＋桌燈。
+  //  測試用：網址後面加 ?hour=18.5 可以直接看某個時間的樣子
+  (function () {
+      //  時間   太陽X  太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影
+      //  時間   太陽X 太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影  窗光  窗X(vw) 窗Y(vh) 傾斜  旋轉
+      const K = [
+          [0,     72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],   // 深夜：月光
+          [4.6,   72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],
+          [5.6,    0, 66,  255,160,130,  .80,   48, 12, 214,160,200,  .45,  .35, .80, .55, 52,  6,  -42,  6],   // 破曉：粉紫
+          [7,      2, 42,  255,206,130,  .95,   40, 18, 255,226,190,  .18,  0,   1.5, .75, 46,  4,  -34,  4],   // 早晨：金黃
+          [10,    24, 12,  255,226,170,  .85,   22, 30, 255,248,236,  .04,  0,   1.6, .65, 34, 14,  -18,  2],
+          [12.5,  50,  0,  255,246,226,  .70,    0, 38, 255,255,255,  0,    0,   1.4, .55, 22, 34,    0,  0],   // 正午：白亮、影子短
+          [15,    78, 12,  255,220,150,  .85,  -22, 30, 255,244,226,  .06,  0,   1.6, .65,  8, 14,   18, -2],
+          [17,    98, 40,  255,160, 80,  1,    -42, 18, 255,190,140,  .30,  0,   1.7, .80, -4,  4,   34, -4],   // 傍晚：橘
+          [18.2, 100, 66,  255,110, 90,  .85,  -50, 12, 170,110,150,  .52,  .40, 1.1, .55, -8,  6,   42, -6],   // 黃昏：紅紫
+          [19.4,  72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],   // 入夜
+          [24,    72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],
+      ];
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      function apply() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < K.length - 2 && h >= K[i + 1][0]) i++;
+          const a = K[i], b = K[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          const v = a.map((x, j) => x + (b[j] - x) * t);
+          const r = document.documentElement.style;
+          r.setProperty('--sunx', v[1] + '%');
+          r.setProperty('--suny', v[2] + '%');
+          r.setProperty('--sunc', `${v[3] | 0},${v[4] | 0},${v[5] | 0}`);
+          r.setProperty('--suna', v[6].toFixed(3));
+          r.setProperty('--sx', v[7].toFixed(1) + 'px');
+          r.setProperty('--sy', v[8].toFixed(1) + 'px');
+          r.setProperty('--ovc', `${v[9] | 0},${v[10] | 0},${v[11] | 0}`);
+          r.setProperty('--ova', v[12].toFixed(3));
+          r.setProperty('--lamp', v[13].toFixed(3));
+          r.setProperty('--leafk', v[14].toFixed(3));
+          r.setProperty('--win', v[15].toFixed(3));
+          r.setProperty('--wx', v[16].toFixed(1) + 'vw');
+          r.setProperty('--wy', v[17].toFixed(1) + 'vh');
+          r.setProperty('--wsk', v[18].toFixed(1) + 'deg');
+          r.setProperty('--wrot', v[19].toFixed(1) + 'deg');
+          document.documentElement.classList.toggle('night', v[12] > 0.45);
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = v[12] > 0.6 ? '#4b5270' : (v[12] > 0.3 ? '#c9a9a8' : '#efe6d8');
+      }
+      apply();
+      setInterval(apply, 60 * 1000);   // 每分鐘更新一次
+  })();
+
+        // ══════════════════════════════════════════
+  //  寫實光影（Canvas）
+  //  牆面在陰影中是偏冷的灰；陽光穿過窗戶，在牆上投出一塊暖色光斑，
+  //  窗框形成十字陰影，窗外的樹葉在光斑裡留下深淺不一的影子並隨風擺動。
+  //  早上太陽低、光斑又長又斜、偏右；中午太陽高、光斑小而低；
+  //  下午移到左邊；傍晚轉橘紅；夜晚只剩微弱的冷色月光。
+  // ══════════════════════════════════════════
+  (function () {
+      const cv = document.getElementById('scene');
+      const ctx = cv.getContext('2d');
+      const SCALE = 0.5;                       // 半解析度繪製：陰影本來就柔，也比較省電
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      let W = 0, H = 0;
+
+      // 亂數（固定種子，每次畫出來的樹一樣）
+      let seed = 11;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const R = (a, b) => a + rnd() * (b - a);
+
+      // ── 時間表 ──
+      //  時:  陰影牆色RGB      光的加亮RGB     光斑 x   y    寬   高   斜    葉影深淺 風力
+      const T = [
+          [0,    36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],   // 夜：月光
+          [4.6,  36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+          [5.6, 146,136,146,  105, 58, 46,   .50, .00, .56, .50,  .28,  .70, .7],  // 破曉
+          [7,   188,180,170,  100, 72, 34,   .44, .00, .52, .60,  .22,  .85, .8],  // 早晨
+          [10,  204,197,187,   72, 60, 40,   .33, .10, .44, .62,  .10,  .90, 1 ],
+          [12.5,212,206,196,   52, 48, 38,   .22, .44, .50, .50,  .00,  .80, 1 ],  // 正午：光斑低而小
+          [15,  204,196,185,   74, 60, 36,   .18, .10, .44, .62, -.10,  .90, 1 ],
+          [17,  178,163,148,  108, 64, 22,   .04, .00, .52, .62, -.22,  .90, .9],  // 傍晚
+          [18.2,126,106,112,   96, 40, 24,  -.06, .02, .56, .50, -.28,  .75, .7],  // 黃昏
+          [19.4, 36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],  // 入夜
+          [24,   36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+      ];
+      function sample() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < T.length - 2 && h >= T[i + 1][0]) i++;
+          const a = T[i], b = T[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          return a.map((x, j) => x + (b[j] - x) * t);
+      }
+
+      // ── 畫一根帶葉子的樹枝（黑色剪影）到離屏畫布，再用「縮小再放大」做出柔邊 ──
+      function leaf(c, L, Wd) {
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.bezierCurveTo(L * 0.28, -Wd * 1.05, L * 0.72, -Wd * 0.85, L, R(-1, 1));
+          c.bezierCurveTo(L * 0.70, Wd * 0.95, L * 0.30, Wd * 0.9, 0, 0);
+          c.fill();
+          c.lineWidth = 1.1; c.beginPath(); c.moveTo(-L * 0.12, 0); c.lineTo(0, 0); c.stroke();
+      }
+      function branchSprite(size, blurK, sd) {
+          seed = sd;
+          const s = document.createElement('canvas'); s.width = s.height = size;
+          const c = s.getContext('2d');
+          c.fillStyle = '#000'; c.strokeStyle = '#000'; c.lineCap = 'round';
+          function grow(x, y, ang, len, thick, depth) {
+              const steps = Math.max(6, len / 14 | 0);
+              let cx = x, cy = y, a = ang;
+              for (let i = 0; i < steps; i++) {
+                  a += R(-0.10, 0.10);
+                  const nx = cx + Math.cos(a) * len / steps, ny = cy + Math.sin(a) * len / steps;
+                  c.lineWidth = Math.max(0.8, thick * (1 - i / steps));
+                  c.beginPath(); c.moveTo(cx, cy); c.lineTo(nx, ny); c.stroke();
+                  cx = nx; cy = ny;
+                  // 葉子：左右交錯、大小不一、角度隨機
+                  if (i > 0 && rnd() < 0.85) {
+                      const side = i % 2 ? 1 : -1;
+                      c.save(); c.translate(cx, cy);
+                      c.rotate(a + side * R(0.6, 1.2));
+                      const L = R(22, 42) * (depth ? 0.85 : 1), Wd = L * R(0.26, 0.4);
+                      c.scale(1, R(0.55, 1));            // 有些葉子斜著，影子變扁
+                      leaf(c, L, Wd); c.restore();
+                  }
+                  // 小枝
+                  if (depth < 2 && i > 1 && rnd() < 0.28) {
+                      grow(cx, cy, a + (rnd() < 0.5 ? -1 : 1) * R(0.5, 1.0), len * R(0.3, 0.5), thick * 0.55, depth + 1);
+                  }
+              }
+              // 枝端一簇葉
+              for (let k = 0; k < 4; k++) {
+                  c.save(); c.translate(cx, cy); c.rotate(a + R(-0.9, 0.9));
+                  const L = R(20, 36); leaf(c, L, L * R(0.28, 0.38)); c.restore();
+              }
+          }
+          grow(size * 0.98, size * 0.04, R(2.3, 2.6), size * 0.95, 6, 0);
+          // 柔邊（模擬半影）：縮小再放大
+          const k = Math.max(1, blurK);
+          const t1 = document.createElement('canvas');
+          t1.width = Math.max(1, size / k | 0); t1.height = t1.width;
+          const c1 = t1.getContext('2d'); c1.imageSmoothingQuality = 'high';
+          c1.drawImage(s, 0, 0, t1.width, t1.height);
+          const out = document.createElement('canvas'); out.width = out.height = size;
+          const co = out.getContext('2d'); co.imageSmoothingQuality = 'high';
+          co.drawImage(t1, 0, 0, size, size);
+          return out;
+      }
+
+      // 三種距離的樹枝：遠的模糊、近的清楚
+      let sprites = [];
+      function buildSprites() {
+          const base = Math.round(Math.max(W, H) * 0.9);
+          sprites = [
+              { img: branchSprite(base,       7, 21), fx: .55, fy: -.18, rot: .25, s: 1.10, a: .55, amp: .020, f: .55, ph: 0   },
+              { img: branchSprite(base,       6, 37), fx: .10, fy:  .05, rot: -.1, s: 0.95, a: .55, amp: .018, f: .48, ph: 1.7 },
+              { img: branchSprite(base * .8,  3.5, 53), fx: .40, fy: -.05, rot: .05, s: 1.00, a: .78, amp: .030, f: .80, ph: 3.1 },
+              { img: branchSprite(base * .8,  3, 71), fx: -.05, fy: .25, rot: -.35, s: 0.90, a: .75, amp: .028, f: .72, ph: 4.4 },
+              { img: branchSprite(base * .6,  1.8, 97), fx: .62, fy: .10, rot: .45, s: 0.90, a: .88, amp: .045, f: 1.1, ph: 2.2 },
+          ];
+      }
+
+      // 光斑位置：手機直式畫面比較窄，光斑放大一些才看得到
+      function geo() {
+          const portrait = H > W * 1.2;
+          const kw = portrait ? 1.9 : 1, kh = portrait ? 1.05 : 1;
+          const w = P[9] * W * kw, h = P[10] * H * kh;
+          const x = portrait ? (P[7] - 0.22) * W * 1.35 : P[7] * W;
+          const y = P[8] * H * (portrait ? 0.8 : 1);
+          return [x, y, w, h, P[11] * W * kw];
+      }
+
+      // 光斑（含窗框十字），每分鐘依時間重畫一次
+      const patch = document.createElement('canvas');
+      let P = null;
+      function buildPatch() {
+          P = sample();
+          patch.width = W; patch.height = H;
+          const c = patch.getContext('2d');
+          c.clearRect(0, 0, W, H);
+          const [x, y, w, h, sk] = geo();
+          // 先畫在小畫布再放大 → 光斑邊緣自然柔和
+          const k = 6, sm = document.createElement('canvas');
+          sm.width = Math.ceil(W / k); sm.height = Math.ceil(H / k);
+          const s = sm.getContext('2d');
+          s.scale(1 / k, 1 / k);
+          s.fillStyle = `rgb(${P[4] | 0},${P[5] | 0},${P[6] | 0})`;
+          s.beginPath();
+          s.moveTo(x, y); s.lineTo(x + w, y); s.lineTo(x + w + sk, y + h); s.lineTo(x + sk, y + h); s.closePath();
+          s.fill();
+          // 窗框：一直一橫的陰影
+          s.globalCompositeOperation = 'destination-out';
+          const mw = Math.max(6, w * 0.035);
+          s.beginPath();
+          s.moveTo(x + w * .5 - mw / 2, y); s.lineTo(x + w * .5 + mw / 2, y);
+          s.lineTo(x + w * .5 + mw / 2 + sk, y + h); s.lineTo(x + w * .5 - mw / 2 + sk, y + h); s.closePath(); s.fill();
+          const yy = y + h * .46, sx = sk * .46;
+          s.fillRect(x + sx - 4, yy - mw / 2, w + 8, mw);
+          c.imageSmoothingQuality = 'high';
+          c.drawImage(sm, 0, 0, W, H);
+      }
+
+      const light = document.createElement('canvas');
+      function draw(t) {
+          if (!P) return;
+          const lc = light.getContext('2d');
+          lc.globalCompositeOperation = 'source-over';
+          lc.clearRect(0, 0, W, H);
+          lc.drawImage(patch, 0, 0);
+          // 樹葉擋光：從光斑中「挖掉」葉影
+          lc.globalCompositeOperation = 'destination-out';
+          const [x, y, w, h, sk] = geo();
+          const wind = P[13];
+          // 陣風：幾個慢速波疊起來，偶爾大一點
+          const gust = Math.max(0, Math.sin(t * 0.21) + Math.sin(t * 0.083 + 1.3) - 0.6) * 0.6;
+          sprites.forEach(sp => {
+              const sway = (Math.sin(t * sp.f + sp.ph) + 0.45 * Math.sin(t * sp.f * 2.3 + sp.ph * 1.7)) * sp.amp * wind
+                         + gust * sp.amp * 1.6 * wind;
+              const size = sp.img.width * sp.s;
+              lc.save();
+              lc.globalAlpha = sp.a * P[12];
+              lc.translate(x + w * sp.fx + sk * 0.3, y + h * sp.fy);
+              lc.transform(1, 0, P[11] * 0.6, 1, 0, 0);     // 影子跟著光線一起斜
+              lc.rotate(sp.rot + sway);
+              lc.translate(Math.sin(t * sp.f * 0.7 + sp.ph) * 3 * wind, 0);
+              lc.drawImage(sp.img, -size * 0.5, -size * 0.1, size, size);
+              lc.restore();
+          });
+          // 牆面＝陰影色，再「加上」光
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = `rgb(${P[1] | 0},${P[2] | 0},${P[3] | 0})`;
+          ctx.fillRect(0, 0, W, H);
+          // 室內的反射光：靠下方稍暗（地板方向）
+          const g = ctx.createLinearGradient(0, 0, 0, H);
+          g.addColorStop(0, 'rgba(255,255,255,0.04)'); g.addColorStop(1, 'rgba(40,25,10,0.10)');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.drawImage(light, 0, 0);
+          ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function resize() {
+          W = Math.max(1, Math.round(innerWidth * SCALE));
+          H = Math.max(1, Math.round(Math.max(innerHeight, document.documentElement.clientHeight) * 1.15 * SCALE));
+          cv.width = W; cv.height = H; light.width = W; light.height = H;
+          buildSprites(); buildPatch(); draw(performance.now() / 1000);
+      }
+      resize();
+      // 只有寬度改變（例如手機轉向）才重畫；捲動時網址列伸縮只改高度，不理會（修改）
+      let lastW = innerWidth, rt;
+      addEventListener('resize', () => { if (Math.abs(innerWidth - lastW) < 2) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(resize, 200); });
+      setInterval(() => { buildPatch(); if (reduce) draw(0); }, 60 * 1000);
+
+      if (!reduce) {
+          let last = 0;
+          (function loop(ts) {
+              requestAnimationFrame(loop);
+              if (document.hidden || ts - last < 33) return;   // 約每秒 30 張
+              last = ts;
+              draw(ts / 1000);
+          })(0);
+      }
+  })();
+
+
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
   let selectedDevices  = new Set();
@@ -956,7 +829,7 @@
     } catch {
       currentUserName = '訪客';
     }
-    document.getElementById('userName').textContent = '👋 ' + currentUserName;
+    document.getElementById('userName').textContent = '您好，' + currentUserName;
   }
 
   /* ── 動態載入設備 ── */
@@ -1150,8 +1023,8 @@
     const input = document.getElementById('reserveDate');
     card.classList.toggle('active', on);
     document.getElementById('reserveBtnText').textContent =
-      on ? '📅 提前預借模式（再按一次取消）' : '📅 提前預借設備';
-    document.getElementById('submitBtn').textContent = on ? '📅 送出預借' : '✅ 送出預約';
+      on ? '提前預借模式（再按一次取消）' : '提前預借設備';
+    document.getElementById('submitBtn').textContent = on ? '送出預借' : '送出預約';
     setDateError(false);
     if (on) {
       // 只能選明天以後
@@ -1216,7 +1089,7 @@
 
     // GAS 未更新時，送出後再提示（避免被成功訊息蓋掉）
     if (conflicts === null) {
-      setTimeout(() => showToast('⚠ 未歸還檢查失敗：GAS 尚未更新為新版本', 'error'), 3200);
+      setTimeout(() => showToast('未歸還檢查失敗：GAS 尚未更新為新版本', 'error'), 3200);
     }
   });
 
@@ -1297,8 +1170,8 @@
       if (!result.success) throw new Error(result.error || '寫入失敗');
 
       showToast(reserveDate
-        ? `✓ 已提前預借 ${deviceList}（${reserveDate}）！`
-        : `✓ 已成功預約 ${deviceList}！`, 'success');
+        ? `已提前預借 ${deviceList}（${reserveDate}）！`
+        : `已成功預約 ${deviceList}！`, 'success');
 
       // 重置
       selectedDevices.clear();
@@ -1332,19 +1205,19 @@
       const text = await res.text();
       let json;
       try { json = JSON.parse(text); }
-      catch { showMsg('⚠ 後端回傳的不是資料（可能是 Apps Script 權限設定不是「所有人」）'); return; }
+      catch { showMsg('後端回傳的不是資料（可能是 Apps Script 權限設定不是「所有人」）'); return; }
 
       // （修改）依實際原因顯示
       if (json.error === 'Account not found') {
-        showMsg('⚠ 這個網址跑的是舊版程式，沒有排程功能。請在 Apps Script「管理部署作業 → 編輯 → 新版本 → 部署」。');
+        showMsg('這個網址跑的是舊版程式，沒有排程功能。請在 Apps Script「管理部署作業 → 編輯 → 新版本 → 部署」。');
         return;
       }
       if (json.status !== 'ok' || !Array.isArray(json.data)) {
-        showMsg('⚠ 讀取失敗：' + (json.message || json.error || '未知錯誤'));
+        showMsg('讀取失敗：' + (json.message || json.error || '未知錯誤'));
         return;
       }
       if (json.noReserveCol) {
-        showMsg('⚠ 「設備」工作表第 1 列找不到「提前預借時間」標題，請確認欄位名稱一字不差');
+        showMsg('「設備」工作表第 1 列找不到「提前預借時間」標題，請確認欄位名稱一字不差');
         return;
       }
       if (!json.data.length && json.pastCount) {
@@ -1353,7 +1226,7 @@
       }
       renderSchedule(json.data, json.today);
     } catch (err) {
-      showMsg('⚠ 連線失敗：' + err.message);
+      showMsg('連線失敗：' + err.message);
     } finally {
       btn.classList.remove('spin');
     }
@@ -1433,6 +1306,7 @@
   const style = document.createElement('style');
   style.textContent = `@keyframes rowIn { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }`;
   document.head.appendChild(style);
+
 </script>
 </body>
 </html>
