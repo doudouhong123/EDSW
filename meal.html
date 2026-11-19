@@ -2,296 +2,686 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="theme-color" content="#F6F9F2"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#efe6d8"/>
   <title>義大社工科｜訂餐</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
+    /* ══════════ 前台訂餐：窗邊葉影＋點單繩＋菜單夾板（與訂餐後台 de-meal 同一套）══════════ */
     :root {
-      /* 配色（修改）：主色 森林綠 #3F7D58｜輔色 嫩葉綠 #7FB77E｜強調 晨光黃 #F4D35E｜背景 淺綠白 #F6F9F2｜文字 墨綠灰 #33413A */
-      --bg:#F6F9F2;--white:#ffffff;--warm1:#7FB77E;--warm2:#3F7D58;--warm3:#2f6044;
-      --yellow:#F4D35E;--green:#7FB77E;--green2:#3F7D58;--sky:#F4D35E;--sky2:#7a6200;
-      --purple:#7FB77E;--purple2:#3F7D58;--ink:#33413A;--ink2:#33413A;--muted:#66756b;
-      --border:#d7e4cd;--shadow:rgba(63,125,88,0.12);--danger:#c94f4f;
+      --ink: #2f2a24; --ink-2: #5b5348; --muted: #8f8579; --hair: #e3d9ca;
+      --sage: #6f8a68; --terra: #b0603f;
+      --engrave: #4a2d14;
+      --sx: 14px; --sy: 24px; --ovc: 255,255,255; --ova: 0; --lamp: 0;
     }
-    /* 背景填滿整個畫面，不留白（修改） */
-    html{min-height:100%;background:#F6F9F2;}
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--bg);
-      background-image:radial-gradient(circle at 10% 15%,rgba(127,183,126,0.22) 0%,transparent 50%),
-        radial-gradient(circle at 90% 85%,rgba(244,211,94,0.16) 0%,transparent 45%);
-      background-attachment:fixed;
-      min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;
-      padding:24px 14px 56px;color:var(--ink);}
-    .deco{position:fixed;pointer-events:none;opacity:0.07;z-index:0;animation:floatY 8s ease-in-out infinite;}
-    .deco:nth-child(1){top:5%;left:3%;font-size:1.8rem;animation-delay:0s;}
-    .deco:nth-child(2){top:18%;right:4%;font-size:1.2rem;animation-delay:2s;}
-    .deco:nth-child(3){top:60%;left:2%;font-size:1rem;animation-delay:4s;}
-    .deco:nth-child(4){top:78%;right:3%;font-size:1.5rem;animation-delay:1.5s;}
-    @keyframes floatY{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-12px) rotate(6deg);}}
-    @keyframes slideDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
-    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-    @keyframes rowIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { min-height: 100%; background: #e6ddd0; }
+    body {
+      font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      color: var(--ink);
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 22px 14px 48px;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    header{width:100%;max-width:500px;background:var(--white);border:1.5px solid var(--border);
-      border-radius:20px;padding:14px 20px;margin-bottom:16px;
-      box-shadow:0 4px 20px var(--shadow);z-index:1;animation:slideDown 0.5s ease both;}
-    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-    .site-title{display:flex;align-items:center;gap:9px;font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);}
-    .title-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--warm1),var(--warm3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(63,125,88,0.3);flex-shrink:0;}
-    .btn-return{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#f8fbf5;color:var(--muted);transition:all 0.2s;}
-    .btn-return:hover{background:#e3f0da;border-color:var(--warm1);color:var(--warm3);transform:translateX(-2px);}
-    .header-info{display:flex;align-items:center;justify-content:space-between;}
-    #clock{font-size:0.8rem;color:var(--muted);font-family:'Zen Maru Gothic',sans-serif;}
-    #welcome{font-size:0.85rem;color:var(--warm2);font-weight:600;}
+    /* ── 寫實光影（牆面、窗光、葉影）── */
+    #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }   /* 用最大視窗高度，手機網址列伸縮時不跳動（修改） */
+    .grain {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      mix-blend-mode: multiply;
+    }
+    .ambient-top {   /* 卡片：只稍微變暗，保持好讀 */
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: rgb(var(--ovc)); opacity: calc(var(--ova) * 0.38);
+        mix-blend-mode: multiply;
+    }
+    /* 夜晚：背板稍微不透明一點，小字加深，維持好讀 */
+    html.night .container { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    .page{display:none;width:100%;max-width:500px;flex-direction:column;gap:16px;z-index:1;}
-    .page.active{display:flex;animation:fadeIn 0.35s ease;}
+    /* 寫實光影畫布＋牆面顆粒 */
+    #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }   /* 用最大視窗高度，手機網址列伸縮時不跳動（修改） */
+    .grain {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        mix-blend-mode: multiply;
+    }
+    /* 夜間桌燈：卡片附近一圈暖光，晚上也看得清楚 */
+    .lamp {
+        position: fixed; inset: 0; z-index: 4; pointer-events: none;
+        background: radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255,186,110,0.45), rgba(255,186,110,0) 70%);
+        mix-blend-mode: soft-light; opacity: var(--lamp);
+    }
+    html.night .panel { background-color: rgba(250,246,238,0.32); }
+    html.night { --muted: #6f665b; }
 
-    .dates-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
-    .dates-header{background:linear-gradient(135deg,#e7f2de,#d2e6c6);padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;font-weight:700;color:var(--warm2);display:flex;align-items:center;gap:7px;}
-    .dates-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
-    .date-btn{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid var(--border);background:linear-gradient(135deg,#fbfdf8,#edf5e6);font-family:'Zen Maru Gothic',sans-serif;font-size:1rem;font-weight:700;color:var(--warm2);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;animation:rowIn 0.3s ease both;box-shadow:0 2px 8px rgba(63,125,88,0.08);}
-    .date-btn:hover{background:linear-gradient(135deg,#e3f0da,#cfe4c2);transform:translateY(-2px);box-shadow:0 4px 14px rgba(63,125,88,0.18);}
-    .date-btn-left{display:flex;align-items:center;gap:10px;}
-    .date-tags{display:flex;gap:6px;margin-top:5px;}
-    .tag{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;}
-    .tag-lunch{background:#e7f2de;color:var(--warm2);border:1px solid #bfd9b3;}
-    .tag-drink{background:#fdf6d4;color:var(--sky2);border:1px solid #ecd77a;}
-    .dates-empty{padding:40px 18px;text-align:center;color:var(--muted);}
-    .dates-empty-icon{font-size:2.2rem;display:block;margin-bottom:10px;}
-    .dates-empty p{font-size:0.88rem;}
+    /* ── 半透明紙卡 ── */
+    .panel {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 560px;
+      border-radius: 6px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(170deg, rgba(253,251,247,0.40) 0%, rgba(251,248,242,0.34) 45%, rgba(244,238,228,0.30) 100%);
+      -webkit-backdrop-filter: blur(2.5px) saturate(1.1);
+      backdrop-filter: blur(2.5px) saturate(1.1);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 1px rgba(120,100,70,0.08),
+        2px 3px 4px rgba(70,50,30,0.10),
+        calc(var(--sx) * 0.9) calc(var(--sy) * 1) 30px rgba(70,50,30,0.22),
+        calc(var(--sx) * 2.2) calc(var(--sy) * 2.4) 70px rgba(70,50,30,0.20);
+      animation: rise .7s cubic-bezier(.2,.7,.2,1) both;
+    }
+    @keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
 
-    .order-date-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#e7f2de,#d2e6c6);color:var(--warm2);border-radius:8px;padding:5px 14px;font-size:0.88rem;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;border:1px solid #bfd9b3;}
-    .section-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);}
-    .section-header{padding:13px 18px;border-bottom:1.5px solid var(--border);font-family:'Zen Maru Gothic',sans-serif;font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
-    .section-header.lunch{background:linear-gradient(135deg,#e7f2de,#d2e6c6);color:var(--warm2);}
-    .section-header.drink{background:linear-gradient(135deg,#fdf6d4,#f8e89a);color:var(--sky2);}
-    .shop-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:auto;}
-    .shop-badge.lunch{background:#e7f2de;color:var(--warm2);border:1px solid #bfd9b3;}
-    .shop-badge.drink{background:#fdf6d4;color:var(--sky2);border:1px solid #ecd77a;}
-    .section-body{padding:18px;display:flex;flex-direction:column;gap:14px;}
+    /* 頁首 */
+    header { padding: 22px 22px 14px; text-align: center; position: relative; }
+    .site-title {
+      font-family: 'Noto Serif TC', serif; font-size: 1.55rem; font-weight: 700;
+      letter-spacing: 0.14em; padding-left: 0.14em; color: var(--ink);
+    }
+    .site-sub {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 0.72rem; letter-spacing: 0.3em; color: var(--muted); margin-top: 6px;
+    }
+    .site-sub::before, .site-sub::after { content: ''; width: 30px; height: 1px; background: var(--hair); }
+    #clock {
+      font-size: 0.78rem; color: var(--muted); letter-spacing: 0.08em;
+      font-variant-numeric: tabular-nums; margin-bottom: 10px;
+    }
+    /* 返回：小原木牌 */
+    .btn-return {
+      position: absolute; top: 16px; left: 16px;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px 0 12px;
+      border: none; border-radius: 4px; cursor: pointer;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='60'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.015 0.45' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .26 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #e2c49c 0%, #cfa978 60%, #b98f5d 100%);
+      background-size: 200px 34px, auto;
+      box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), inset -2px -2px 0 rgba(80,50,20,0.18), 3px 5px 7px rgba(70,50,30,0.25);
+      color: var(--engrave); font-family: 'Noto Serif TC', serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.18em;
+      text-shadow: 0 1px 0 rgba(255,240,215,0.55), 0 -1px 0 rgba(70,40,15,0.2);
+    }
+    .btn-return:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,245,225,0.6), 1px 2px 3px rgba(70,50,30,0.25); }
 
-    .field{display:flex;flex-direction:column;gap:6px;}
-    .field label{font-size:1rem;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:4px;}
-    .field input[type="text"],.field input[type="number"],.field select{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:#f8fbf5;outline:none;transition:border-color 0.2s,box-shadow 0.2s;appearance:none;-webkit-appearance:none;}
-    .field input:focus,.field select:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(63,125,88,0.18);background:var(--white);}
-    .select-wrap{position:relative;}
-    .select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.9rem;}
-    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
-    input[type="number"]{appearance:textfield;-moz-appearance:textfield;}
+    /* 狀態列：一行小字 */
+    #status-bar {
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px;
+      font-size: 0.74rem; color: var(--muted);
+      padding: 0 18px 4px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #c9bfb1; flex-shrink: 0; }
+    .dot.ok   { background: var(--sage); }
+    .dot.err  { background: #a8432c; }
+    .dot.busy { background: #c39b4c; animation: breathe 1.2s infinite; }
+    @keyframes breathe { 50% { opacity: .35; } }
+    #status-text { color: var(--ink-2); }
+    #last-sync { color: var(--muted); }
+    #count-badge {
+      padding: 1px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.55); border: 1px solid #d3c7b6;
+      color: var(--ink-2); font-weight: 700;
+    }
+    #pending-badge {
+      padding: 2px 10px; border-radius: 999px; border: none; cursor: pointer;
+      background: #b04a32; color: #fff8ef; font-family: inherit; font-size: 0.74rem; font-weight: 700;
+      box-shadow: 1px 2px 4px rgba(60,30,15,0.3); transform: rotate(-3deg);
+    }
+    #pending-diag { display: none; margin: 6px 18px 0; padding: 8px 12px; border-left: 3px solid #a8432c;
+      background: rgba(247,236,228,0.85); color: #7a3a26; font-size: 0.8rem; border-radius: 2px; }
 
-    .form-msg{font-size:0.82rem;padding:9px 14px;border-radius:10px;display:none;}
-    .form-msg.show{display:block;}
-    .form-msg.ok{background:#e7f2de;color:#2f6044;border:1px solid #bfd9b3;}
-    .form-msg.err{background:#fde8e4;color:var(--danger);border:1px solid #f5c5bb;}
+    /* ══════════ 前台訂餐：與訂餐後台（de-meal）同一套 ══════════ */
+    .header-info { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+    #welcome { font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 0.95rem; font-weight: 700; color: #4f6b48; }
+    .page { display: none; flex-direction: column; gap: 16px; padding: 4px 16px 10px; }
+    .page.active { display: flex; animation: fadeIn .35s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sec-title { font-family: 'Noto Serif TC', serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.16em; }
+    .sec-note  { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; }
 
-    .btn-row{width:100%;max-width:500px;display:flex;gap:12px;z-index:1;margin-top:16px;}
-    .btn{flex:1;padding:16px;border-radius:14px;border:none;font-size:1.1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .btn:active{transform:scale(0.97);}
-    .btn-submit{background:linear-gradient(135deg,#4b8f67,#3F7D58);color:#fff;box-shadow:0 4px 14px rgba(63,125,88,0.28);}
-    .btn-submit:hover{box-shadow:0 6px 20px rgba(63,125,88,0.38);transform:translateY(-2px);}
-    .btn-submit:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
-    .btn-back{background:#eef5e8;color:var(--muted);border:1.5px solid var(--border);}
-    .btn-back:hover{background:#dcebd2;color:var(--warm3);border-color:var(--warm1);}
+    /* 載入中 */
+    .loading-card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 30px 0; }
+    .spinner { width: 34px; height: 34px; border: 3px solid rgba(111,138,104,0.25); border-top-color: #6f8a68; border-radius: 50%; animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'LXGW WenKai TC', sans-serif; color: var(--ink-2); }
 
-    .btn-add-item{width:100%;padding:13px;border-radius:12px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-size:1rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;}
-    .btn-add-item.lunch-add{border-color:#bfd9b3;color:var(--warm2);}
-    .btn-add-item.lunch-add:hover{background:#eef5e8;border-color:var(--warm1);}
-    .btn-add-item.drink-add{border-color:#ecd77a;color:var(--sky2);}
-    .btn-add-item.drink-add:hover{background:#fdf6d4;border-color:var(--sky);}
+    /* ── 選擇日期：曬衣繩上的點單 ── */
+    .dates-card { display: flex; flex-direction: column; gap: 14px; }
+    .dates-body { display: flex; flex-direction: column; gap: 18px; }
+    .ticket-row { position: relative; padding-top: 14px; }
+    .ticket-row::before {
+      content: ''; position: absolute; left: -16px; right: -16px; top: 9px; height: 3px; border-radius: 2px;
+      background: repeating-linear-gradient(110deg, #b8925f 0 4px, #8f6b40 4px 7px);
+      box-shadow: 0 2px 3px rgba(60,40,20,0.2);
+    }
+    .date-btn {
+      position: relative; width: 100%; text-align: left; border: none; cursor: pointer; font-family: inherit; color: #24303f;
+      padding: 18px 14px 14px; border-radius: 2px;
+      background: linear-gradient(175deg, #fffef9, #f7f1e3);
+      box-shadow: 0 0 0 1px rgba(120,100,70,0.10), 2px 3px 4px rgba(70,50,30,0.08), 6px 10px 16px rgba(70,50,30,0.14);
+      transform: rotate(var(--tilt, 0deg)); transform-origin: 50% 0;
+      animation: tIn .45s cubic-bezier(.2,.7,.2,1) backwards;
+      transition: transform .2s ease, box-shadow .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes tIn { from { opacity: 0; transform: translateY(-8px) rotate(var(--tilt, 0deg)); } to { opacity: 1; } }
+    .date-btn:not(:disabled):hover { transform: translateY(-2px) rotate(var(--tilt, 0deg)); box-shadow: 0 0 0 1px rgba(120,100,70,0.10), 4px 6px 8px rgba(70,50,30,0.1), 10px 16px 24px rgba(70,50,30,0.18); }
+    .date-btn:not(:disabled):active { transform: translateY(1px) rotate(var(--tilt, 0deg)); }
+    .date-btn::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 7px;
+      background: linear-gradient(-45deg, transparent 4px, #f7f1e3 0) 0 0 / 8px 7px repeat-x, linear-gradient(45deg, transparent 4px, #f7f1e3 0) 0 0 / 8px 7px repeat-x;
+    }
+    .date-btn:disabled { cursor: not-allowed; background: linear-gradient(175deg, #f6f2ea, #ebe4d6); color: #8a8f99; }
+    .date-btn:disabled::after { background: linear-gradient(-45deg, transparent 4px, #ebe4d6 0) 0 0 / 8px 7px repeat-x, linear-gradient(45deg, transparent 4px, #ebe4d6 0) 0 0 / 8px 7px repeat-x; }
+    .date-btn .pin {
+      position: absolute; top: -22px; left: 26px; width: 14px; height: 34px; border-radius: 3px; z-index: 2;
+      background: linear-gradient(90deg, #c49a68, #e3c08f 45%, #b48756); box-shadow: 1px 2px 3px rgba(60,40,20,0.3);
+    }
+    .date-btn .pin::after { content: ''; position: absolute; left: -2px; right: -2px; top: 14px; height: 4px; border-radius: 2px; background: #9aa1a8; }
+    .date-btn .t-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-right: 30px; }
+    .date-btn .t-date { font-family: 'Noto Serif TC', serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em; }
+    .date-btn .t-wk { font-size: 0.76rem; color: #6c7686; font-weight: 700; }
+    .date-btn .t-row { display: grid; grid-template-columns: 34px 1fr; align-items: baseline; column-gap: 6px; margin-top: 6px; }
+    .date-btn .t-row > i { font-style: normal; font-size: 0.66rem; letter-spacing: 0.12em; color: #8a93a3; }
+    .date-btn .t-shop { font-family: 'LXGW WenKai TC', sans-serif; font-size: 1.02rem; font-weight: 700; overflow-wrap: anywhere; }
+    .date-btn .t-shop.lunch { color: #8a4a30; } .date-btn .t-shop.drink { color: #2c5a7a; }
+    .date-btn:disabled .t-shop { color: #9a9fa8; }
+    .date-btn .t-none { color: #b0b6bf; }
+    .date-btn .t-go { position: absolute; right: 14px; top: 50%; margin-top: -12px; font-size: 1.3rem; color: #b5a993; }
+    .date-btn .t-tip { margin-top: 8px; font-size: 0.74rem; color: #4f6b48; font-weight: 700; letter-spacing: 0.08em; }
+    .date-btn .closed-stamp {
+      position: absolute; top: 12px; right: 12px; padding: 2px 8px;
+      border: 2.5px solid #c0392b; border-radius: 4px; color: #c0392b;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.16em;
+      transform: rotate(10deg); opacity: .8; mix-blend-mode: multiply;
+    }
+    .date-btn .closed-tip { margin-top: 8px; font-size: 0.74rem; color: #a8432c; font-weight: 700; letter-spacing: 0.08em; }
+    .dates-empty { text-align: center; padding: 24px 0; color: #7d8aa0; font-family: 'LXGW WenKai TC', sans-serif; }
 
-    .order-item{border:1px solid var(--border);border-radius:12px;padding:16px;background:#fafcf7;display:flex;flex-direction:column;gap:12px;position:relative;animation:rowIn 0.3s ease both;}
-    .order-item+.order-item{margin-top:12px;}
-    .item-header{display:flex;align-items:center;justify-content:space-between;font-size:1rem;font-weight:700;color:var(--muted);}
-    .btn-remove-item{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--danger);padding:4px 8px;border-radius:6px;transition:background 0.2s;}
-    .btn-remove-item:hover{background:#fde8e4;}
+    /* ── 訂單清單：點菜本 ── */
+    #my-order-list { margin-top: 6px; }
+    .order-list-card {
+      position: relative; border-radius: 3px; overflow: hidden;
+      background: linear-gradient(175deg, #fbfdf7, #eef3e6);
+      box-shadow: 0 0 0 1px rgba(100,120,90,0.18), 2px 3px 4px rgba(70,50,30,0.08), 8px 12px 22px rgba(70,50,30,0.14);
+    }
+    .order-list-header {
+      background: linear-gradient(180deg, #5f7f58, #4f6b48); color: #f3f6ee; padding: 10px 14px;
+      font-family: 'Noto Serif TC', serif; font-weight: 700; letter-spacing: 0.12em; font-size: 0.95rem;
+    }
+    .order-person-block { padding: 10px 14px 12px; border-bottom: 1px solid rgba(110,150,110,0.3); }
+    .order-person-block:last-child { border-bottom: none; }
+    .order-person-name { font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.12rem; font-weight: 700; color: #1e2733; margin-bottom: 4px; }
+    .order-row { display: flex; flex-direction: column; gap: 2px; padding: 4px 0 4px 10px; border-left: 2px solid rgba(111,138,104,0.35); margin: 6px 0 0 2px; font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; }
+    .order-line { display: grid; grid-template-columns: 34px 1fr; align-items: baseline; column-gap: 6px; }
+    .order-line > i { font-style: normal; font-size: 0.66rem; letter-spacing: 0.12em; color: #8a93a3; font-family: 'Noto Sans TC', sans-serif; }
+    .order-row-item  { font-weight: 700; color: #8a4a30; font-size: 0.98rem; overflow-wrap: anywhere; }
+    .order-row-drink { font-weight: 700; color: #2c5a7a; font-size: 0.98rem; overflow-wrap: anywhere; }
+    .order-row-detail { color: #5b6472; font-size: 0.84rem; margin-left: 6px; }
+    .order-row-detail.price { color: #a8432c; font-weight: 700; font-size: 0.92rem; }
+    .order-row-memo { color: #6b6b6b; font-size: 0.86rem; overflow-wrap: anywhere; }
 
-    /* ── 訂單清單 ── */
-    .order-list-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);animation:rowIn 0.4s ease both;width:100%;max-width:500px;}
-    .order-list-header{background:#3F7D58;padding:14px 20px;font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:#ffffff;border-bottom:3px solid #F4D35E;}
-    .order-person-block{padding:14px 20px;border-bottom:1px solid #e6eee0;}
-    .order-person-block:last-child{border-bottom:none;}
-    .order-person-name{font-family:'Zen Maru Gothic',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-    .order-row{display:flex;flex-direction:column;gap:5px;padding:10px 14px;border-radius:12px;background:#fafcf7;border:1px solid var(--border);margin-bottom:8px;font-size:1.1rem;line-height:1.7;}
-    .order-row:last-child{margin-bottom:0;}
-    .order-row-item{color:var(--warm2);font-weight:700;}
-    .order-row-drink{color:var(--sky2);font-weight:700;}
-    .order-row-detail{color:var(--muted);font-size:1rem;}
-    /* 每一筆午餐／飲料：名稱、甜度冰塊、價錢同一行（新增） */
-    .order-line{display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow-x:auto;scrollbar-width:none;}
-    .order-line::-webkit-scrollbar{display:none;}
-    .order-line .order-row-detail{flex-shrink:0;}
-    .order-line .price{color:var(--warm2);font-weight:700;}
-    .spinner{width:36px;height:36px;border:4px solid #dcebd2;border-top:4px solid var(--warm1);border-radius:50%;animation:spin 0.9s linear infinite;}
-    @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-    .loading-text{font-family:'Zen Maru Gothic',sans-serif;font-size:0.9rem;color:var(--ink2);}
+    /* ── 填寫訂單 ── */
+    .order-date-badge {
+      align-self: center; display: inline-block; padding: 4px 14px; cursor: pointer;
+      border: 2px solid rgba(47,93,154,0.75); border-radius: 4px; color: #2f5d9a; background: rgba(255,255,255,0.5);
+      font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.08em;
+      transform: rotate(-2deg);
+    }
+    .badge-tip { text-align: center; font-size: 0.7rem; color: var(--muted); margin-top: -8px; }
+    .section-card {   /* 木頭夾板 */
+      position: relative; border-radius: 8px; padding: 26px 12px 12px;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.02 0.35' numOctaves='3' seed='8'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .1  0 0 0 .2 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+        linear-gradient(175deg, #c9a273, #a87f52);
+      box-shadow: inset 0 1px 0 rgba(255,240,215,0.45), inset 0 0 0 1px rgba(90,60,30,0.3), 6px 10px 18px rgba(70,50,30,0.25);
+    }
+    .section-card::before {   /* 金屬夾子 */
+      content: ''; position: absolute; top: -8px; left: 50%; width: 110px; height: 28px; margin-left: -55px; z-index: 2;
+      border-radius: 6px 6px 4px 4px;
+      background: linear-gradient(180deg, #e9ecef, #b5bcc3 55%, #8e969e);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 4px rgba(40,30,20,0.35);
+    }
+    .section-sheet {
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+        linear-gradient(175deg, #fffdf6, #f6efdf);
+      border-radius: 2px; box-shadow: 0 1px 3px rgba(60,40,20,0.2);
+    }
+    .section-header {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 14px 14px 6px;
+      font-family: 'Noto Serif TC', serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.2em; color: #2f2a24;
+    }
+    .section-header .dot-l { width: 10px; height: 10px; border-radius: 50%; }
+    .shop-badge { margin-left: auto; font-family: 'LXGW WenKai TC', sans-serif; font-size: 1rem; letter-spacing: 0.04em; font-weight: 700; }
+    .shop-badge.lunch { color: #8a4a30; } .shop-badge.drink { color: #2c5a7a; }
+    .section-body { padding: 6px 14px 16px; display: flex; flex-direction: column; gap: 12px; }
 
-    /* ── 菜單照片（新增）── */
-        .menu-view{border:1.5px dashed var(--border);border-radius:12px;padding:12px;background:#fafcf7;display:flex;flex-direction:column;gap:8px;}
-    .menu-view.drink{border-color:#ecd77a;background:#fffcec;}
-    .menu-view-title{font-size:0.9rem;font-weight:700;color:var(--warm2);}
-    .menu-view.drink .menu-view-title{color:var(--sky2);}
-    .menu-view-title small{font-size:0.72rem;color:var(--muted);font-weight:500;margin-left:6px;}
-    .menu-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
-    .menu-strip img{flex:0 0 auto;width:120px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:zoom-in;}
-    .menu-strip img:only-child{width:100%;aspect-ratio:auto;max-height:420px;object-fit:contain;}
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 0.74rem; letter-spacing: 0.14em; color: #7d8aa0; font-weight: 700; }
+    .field input[type="text"], .field select, #order-notes {
+      width: 100%; padding: 6px 2px; border: none; border-bottom: 1.5px solid rgba(60,70,90,0.45); border-radius: 0;
+      background: transparent; outline: none; -webkit-appearance: none; appearance: none;
+      font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; font-size: 1.15rem; font-weight: 700; color: #1e2733;
+    }
+    .field input[type="text"]:focus, .field select:focus, #order-notes:focus { border-bottom-color: #6f8a68; background: rgba(111,138,104,0.06); }
+    .field input::placeholder, #order-notes::placeholder { color: #b0b6bf; font-weight: 500; }
+    #order-notes { min-height: 70px; resize: vertical; line-height: 1.6; border: 1px solid rgba(60,70,90,0.25); border-radius: 3px; padding: 8px 10px; background: rgba(255,255,255,0.5); }
+    .select-wrap { position: relative; }
+    .select-wrap::after { content: '▾'; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); color: #6c7686; pointer-events: none; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* ── 菜單照片放大檢視（新增）── */
-    .menu-viewer{position:fixed;inset:0;background:rgba(20,12,6,0.9);z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;}
-    .menu-viewer.show{display:flex;}
-    .menu-viewer img{max-width:100%;max-height:calc(100dvh - 110px);object-fit:contain;border-radius:8px;background:#fff;}
-    .mv-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;color:#fff;font-size:0.85rem;}
-    .mv-btn{min-width:44px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;font-size:0.85rem;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;text-decoration:none;text-align:center;}
-    .mv-btn:hover{background:rgba(255,255,255,0.25);}
-    /* ══════════ 鮮艷＋立體感（修改）══════════ */
-    body{background-image:radial-gradient(circle at 8% 10%,rgba(127,183,126,0.42) 0%,transparent 48%),
-        radial-gradient(circle at 92% 88%,rgba(244,211,94,0.34) 0%,transparent 46%);}
-    /* 卡片：下緣厚度＋較深的陰影，看起來浮在背景上 */
-    header,.dates-card,.section-card,.order-list-card{border:1.5px solid #b9d6ad;
-      box-shadow:0 3px 0 #c3dcb7,0 14px 28px rgba(63,125,88,0.20);}
-    .title-icon{background:linear-gradient(145deg,#8fc98d,#3F7D58);
-      box-shadow:inset 0 2px 0 rgba(255,255,255,0.45),0 3px 0 #2f6044,0 6px 12px rgba(63,125,88,0.35);}
-    .btn-return{background:linear-gradient(180deg,#ffffff,#e7f2de);border-color:#a9cf9f;color:#2f6044;
-      box-shadow:0 3px 0 #b9d6ad;}
-    .btn-return:hover{transform:translateY(-1px);}
-    .btn-return:active{transform:translateY(3px);box-shadow:0 0 0 #b9d6ad;}
+    .order-item { position: relative; padding: 10px 0 4px; display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed rgba(90,130,180,0.4); }
+    .order-item:first-child { border-top: none; padding-top: 2px; }
+    .item-header { display: flex; align-items: center; justify-content: space-between; font-size: 0.74rem; letter-spacing: 0.14em; color: #a8574a; font-weight: 700; font-family: 'Noto Serif TC', serif; }
+    .btn-remove-item { border: 1px solid rgba(168,67,44,0.4); background: rgba(255,255,255,0.7); color: #a8432c; border-radius: 999px; padding: 2px 10px; font-size: 0.74rem; cursor: pointer; font-family: inherit; letter-spacing: 0; }
+    .btn-add-item {
+      width: 100%; padding: 10px; cursor: pointer; border-radius: 4px;
+      border: 1.5px dashed rgba(60,70,90,0.4); background: rgba(255,255,255,0.5);
+      font-family: 'Noto Serif TC', serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.1em; color: #4d5a6e;
+    }
+    .btn-add-item:active { transform: translateY(1px); }
 
-    /* 區塊標題：飽和的漸層色帶＋上緣亮邊 */
-    .dates-header,.section-header.lunch{background:linear-gradient(135deg,#56a274,#3F7D58);color:#ffffff;
-      border-bottom:none;box-shadow:inset 0 2px 0 rgba(255,255,255,0.28),inset 0 -3px 0 rgba(0,0,0,0.12);
-      text-shadow:0 1px 2px rgba(0,0,0,0.25);}
-    .section-header.drink{background:linear-gradient(135deg,#fbe27e,#F4D35E);color:#3f3400;
-      border-bottom:none;box-shadow:inset 0 2px 0 rgba(255,255,255,0.55),inset 0 -3px 0 rgba(122,98,0,0.18);}
-    .shop-badge.lunch,.shop-badge.drink{background:#ffffff;border:none;box-shadow:0 2px 0 rgba(0,0,0,0.12);text-shadow:none;}
-    .shop-badge.lunch{color:#2f6044;}
-    .shop-badge.drink{color:#5c4a00;}
-    .order-list-header{background:linear-gradient(135deg,#56a274,#2f6044);border-bottom:4px solid #F4D35E;
-      box-shadow:inset 0 2px 0 rgba(255,255,255,0.25);text-shadow:0 1px 2px rgba(0,0,0,0.3);}
+    /* 菜單照片：拍立得 */
+    .menu-view { display: flex; flex-direction: column; gap: 8px; }
+    .menu-view-title { font-size: 0.74rem; letter-spacing: 0.14em; color: #7d8aa0; font-weight: 700; }
+    .menu-view-title small { margin-left: 6px; letter-spacing: 0; font-weight: 500; }
+    .menu-strip { display: flex; gap: 12px; overflow-x: auto; padding: 10px 4px 8px; scrollbar-width: thin; }
+    .menu-strip img {
+      flex: 0 0 auto; width: 110px; aspect-ratio: 3/4; object-fit: cover; cursor: zoom-in;
+      background: #fff; padding: 5px 5px 16px; border-radius: 2px;
+      box-shadow: 2px 3px 6px rgba(60,40,20,0.25); transform: rotate(-2deg);
+    }
+    .menu-strip img:nth-child(2n) { transform: rotate(2deg); }
+    .menu-strip img:only-child { width: 100%; aspect-ratio: auto; max-height: 420px; object-fit: contain; transform: rotate(-1deg); }
 
-    /* 日期按鈕：像實體按鍵，按下去會下沉 */
-    .date-btn{background:linear-gradient(180deg,#ffffff,#e3f0da);border:1.5px solid #9cc892;color:#2f6044;
-      box-shadow:inset 0 2px 0 rgba(255,255,255,0.9),0 5px 0 #a9cf9f,0 10px 18px rgba(63,125,88,0.18);}
-    .date-btn:hover{background:linear-gradient(180deg,#ffffff,#d2e6c6);transform:translateY(-2px);
-      box-shadow:inset 0 2px 0 rgba(255,255,255,0.9),0 7px 0 #a9cf9f,0 14px 22px rgba(63,125,88,0.22);}
-    .date-btn:active{transform:translateY(4px);box-shadow:inset 0 2px 0 rgba(255,255,255,0.9),0 1px 0 #a9cf9f;}
-    .date-btn:disabled{transform:none;box-shadow:0 3px 0 #d2d2d2;}
-    .tag{padding:3px 10px;box-shadow:0 2px 0 rgba(0,0,0,0.10);}
-    .tag-lunch{background:#7FB77E;color:#143522;border:none;}
-    .tag-drink{background:#F4D35E;color:#3f3400;border:none;}
-    .order-date-badge{background:linear-gradient(135deg,#56a274,#3F7D58);color:#fff;border:none;
-      box-shadow:0 3px 0 #2f6044;}
+    .form-msg { display: none; font-size: 0.86rem; padding: 8px 12px; border-radius: 2px; font-family: 'LXGW WenKai TC', 'Noto Sans TC', sans-serif; }
+    .form-msg.show { display: block; }
+    .form-msg.ok  { background: #edf2e9; color: #4f6b48; border-left: 3px solid #6f8a68; }
+    .form-msg.err { background: #f7ece4; color: #7a3a26; border-left: 3px solid #a8432c; }
 
-    /* 主要按鈕 */
-    .btn-submit{background:linear-gradient(180deg,#5cab7b,#3F7D58);
-      box-shadow:inset 0 2px 0 rgba(255,255,255,0.35),0 5px 0 #2a5a3e,0 12px 22px rgba(63,125,88,0.35);
-      text-shadow:0 1px 2px rgba(0,0,0,0.25);}
-    .btn-submit:hover{transform:translateY(-2px);
-      box-shadow:inset 0 2px 0 rgba(255,255,255,0.35),0 7px 0 #2a5a3e,0 16px 26px rgba(63,125,88,0.4);}
-    .btn-submit:active{transform:translateY(4px);box-shadow:inset 0 2px 0 rgba(255,255,255,0.35),0 1px 0 #2a5a3e;}
-    .btn-back{background:linear-gradient(180deg,#ffffff,#e7f2de);border-color:#a9cf9f;color:#2f6044;
-      box-shadow:0 5px 0 #b9d6ad,0 10px 18px rgba(63,125,88,0.12);}
-    .btn-back:active{transform:translateY(4px);box-shadow:0 1px 0 #b9d6ad;}
-    .btn-add-item.lunch-add{border-color:#7FB77E;background:#f1f8ec;color:#2f6044;}
-    .btn-add-item.drink-add{border-color:#e2bf3a;background:#fff9e0;color:#5c4a00;}
+    /* 下方小木板按鍵 */
+    .btn-row { justify-content: center; gap: 12px; padding: 4px 16px 22px; }
+    .btn {
+      flex: 0 0 auto; height: 44px; padding: 0 22px; border: none; border-radius: 4px; cursor: pointer;
+      font-family: 'Noto Serif TC', serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.14em;
+      color: #fff8ec; text-shadow: 0 -1px 0 rgba(40,25,10,0.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset -2px -3px 0 rgba(40,25,10,0.18), 3px 5px 8px rgba(70,50,30,0.22);
+      background-size: 240px 100%, auto;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 1px 2px 4px rgba(70,50,30,0.22); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-submit { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #88a77a, #617f55); }
+    .btn-back { color: #4a2d14; text-shadow: 0 1px 0 rgba(255,240,215,0.55);
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #e2c49c, #c9a171); }
 
-    /* 內層：輸入框微凹、訂單列微凸 */
-    .order-item{background:#f6faf2;border-color:#c5dbb8;box-shadow:0 3px 0 #d6e6cb;}
-    .field input[type="text"],.field input[type="number"],.field select{background:#ffffff;border-color:#b9d6ad;
-      box-shadow:inset 0 2px 4px rgba(63,125,88,0.12);}
-    .order-row{background:linear-gradient(180deg,#ffffff,#f1f8ec);border-color:#c5dbb8;box-shadow:0 3px 0 #d6e6cb;}
-    .order-row-item{color:#2f6044;}
-    .order-line .price{background:#F4D35E;color:#3f3400;border-radius:999px;padding:0 10px;
-      font-size:0.95rem;box-shadow:0 2px 0 #d9b83f;}
-    .menu-view{border-style:solid;border-color:#b9d6ad;background:#f1f8ec;box-shadow:inset 0 2px 4px rgba(63,125,88,0.10);}
-    .menu-view.drink{border-color:#e2bf3a;background:#fff9e0;}
-    .menu-strip img{box-shadow:0 4px 10px rgba(0,0,0,0.18);}
+    /* 菜單照片放大 */
+    .menu-viewer { position: fixed; inset: 0; background: rgba(30,22,14,0.9); z-index: 900; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
+    .menu-viewer.show { display: flex; }
+    .menu-viewer img { max-width: 100%; max-height: calc(100dvh - 110px); object-fit: contain; border-radius: 4px; background: #fff; }
+    .mv-bar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; color: #fff; font-size: 0.85rem; }
+    .mv-btn { min-width: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.12); color: #fff; font-size: 0.85rem; font-weight: 700; font-family: inherit; cursor: pointer; text-decoration: none; text-align: center; }
+
+    @media (prefers-reduced-motion: reduce) { .date-btn { animation: none; } }
   </style>
 </head>
 <body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="ambient-top" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
 
-<div class="deco">🍱</div>
-<div class="deco">🧋</div>
-<div class="deco">🌿</div>
-<div class="deco">🍜</div>
-
-<header>
-  <div class="header-top">
-    <div class="site-title"><div class="title-icon">🍱</div>義大社工科｜訂餐</div>
+<div class="panel">
+  <header>
     <button class="btn-return" onclick="window.location.href='main.html'">← 返回</button>
-  </div>
-  <div class="header-info">
-    <span id="clock"></span>
-    <span id="welcome"></span>
-  </div>
-</header>
+    <div id="clock"></div>
+    <h1 class="site-title">訂餐</h1>
+    <div class="site-sub">義大社工科</div>
+    <div class="header-info"><span id="welcome"></span></div>
+  </header>
 
-<div class="page active" id="page-dates">
-  <div class="loading-card" id="dates-loading">
-    <div class="spinner"></div>
-    <div class="loading-text">載入中…</div>
-  </div>
-  <div class="dates-card" id="dates-card" style="display:none">
-    <div class="dates-header">📅 請選擇訂餐日期</div>
-    <div class="dates-body" id="dates-body"></div>
-  </div>
-
-  <!-- 訂單清單（選擇日期後顯示） -->
-  <div id="my-order-list" style="display:none;"></div>
-</div>
-
-<div class="page" id="page-order">
-  <div><span class="order-date-badge" id="order-date-badge" onclick="goBackToDates()" style="cursor:pointer;" title="點擊重新選擇日期">📅 —</span></div>
-
-  <!-- 訂餐人姓名（新增）：僅訂餐專用帳號顯示 -->
-  <div class="section-card" id="orderer-section" style="display:none">
-    <div class="section-header lunch">👤 訂餐人<span class="shop-badge lunch">社區醫學科</span></div>
-    <div class="section-body">
-      <div class="field"><label>訂餐人姓名 <span style="color:var(--danger);">*</span></label>
-        <input type="text" id="orderer-name" placeholder="請輸入您的姓名" autocomplete="off" maxlength="20"/></div>
+  <div class="page active" id="page-dates">
+    <div class="loading-card" id="dates-loading">
+      <div class="spinner"></div>
+      <div class="loading-text">載入中…</div>
     </div>
-  </div>
-
-  <div class="section-card" id="lunch-section" style="display:none">
-    <div class="section-header lunch">🍱 午餐<span class="shop-badge lunch" id="lunch-shop-badge"></span></div>
-    <div class="section-body">
-      <div class="menu-view" id="lunch-menu-view" style="display:none"></div>
-      <div id="lunch-items-wrap"></div>
-      <button class="btn-add-item lunch-add" onclick="addLunchItem()">＋ 新增午餐</button>
+    <div class="dates-card" id="dates-card" style="display:none">
+      <div class="sec-head"><span class="sec-title">請選擇訂餐日期</span></div>
+      <div class="dates-body" id="dates-body"></div>
     </div>
+
+    <!-- 訂單清單（選擇日期後顯示） -->
+    <div id="my-order-list" style="display:none;"></div>
   </div>
 
-  <div class="section-card" id="drink-section" style="display:none">
-    <div class="section-header drink">🧋 飲料<span class="shop-badge drink" id="drink-shop-badge"></span></div>
-    <div class="section-body">
-      <div class="menu-view drink" id="drink-menu-view" style="display:none"></div>
-      <div id="drink-items-wrap"></div>
-      <button class="btn-add-item drink-add" onclick="addDrinkItem()">＋ 新增飲料</button>
-    </div>
-  </div>
+  <div class="page" id="page-order">
+    <span class="order-date-badge" id="order-date-badge" onclick="goBackToDates()" title="點擊重新選擇日期">—</span>
+    <div class="badge-tip">點日期章可重新選擇日期</div>
 
-  <div class="section-card" id="note-section" style="display:none">
-    <div class="section-header" style="background:linear-gradient(135deg,#a3d1a1,#7FB77E);color:#143522;border-bottom:none;box-shadow:inset 0 2px 0 rgba(255,255,255,0.4),inset 0 -3px 0 rgba(0,0,0,0.08);">📝 備註</div>
-    <div class="section-body">
-      <div class="field">
-        <textarea id="order-notes" placeholder="可填寫特殊需求或說明（選填）"
-          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
-                 font-size:0.95rem;font-family:'Noto Sans TC',sans-serif;color:var(--ink);
-                 background:#f8fbf5;outline:none;min-height:80px;resize:vertical;line-height:1.6;"></textarea>
+    <!-- 訂餐人姓名：僅訂餐專用帳號顯示 -->
+    <div class="section-card" id="orderer-section" style="display:none">
+      <div class="section-sheet">
+        <div class="section-header"><span class="dot-l" style="background:#88a77a"></span>訂餐人<span class="shop-badge lunch">社區醫學科</span></div>
+        <div class="section-body">
+          <div class="field"><label>訂餐人姓名 <span style="color:#a8432c;">*</span></label>
+            <input type="text" id="orderer-name" placeholder="請輸入您的姓名" autocomplete="off" maxlength="20"/></div>
+        </div>
       </div>
     </div>
+
+    <div class="section-card" id="lunch-section" style="display:none">
+      <div class="section-sheet">
+        <div class="section-header lunch"><span class="dot-l" style="background:#c78464"></span>午餐<span class="shop-badge lunch" id="lunch-shop-badge"></span></div>
+        <div class="section-body">
+          <div class="menu-view" id="lunch-menu-view" style="display:none"></div>
+          <div id="lunch-items-wrap"></div>
+          <button class="btn-add-item lunch-add" onclick="addLunchItem()">＋ 再點一份午餐</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card" id="drink-section" style="display:none">
+      <div class="section-sheet">
+        <div class="section-header drink"><span class="dot-l" style="background:#7892ad"></span>飲料<span class="shop-badge drink" id="drink-shop-badge"></span></div>
+        <div class="section-body">
+          <div class="menu-view drink" id="drink-menu-view" style="display:none"></div>
+          <div id="drink-items-wrap"></div>
+          <button class="btn-add-item drink-add" onclick="addDrinkItem()">＋ 再點一杯飲料</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card" id="note-section" style="display:none">
+      <div class="section-sheet">
+        <div class="section-header"><span class="dot-l" style="background:#cfab62"></span>備註</div>
+        <div class="section-body">
+          <div class="field"><textarea id="order-notes" placeholder="可填寫特殊需求或說明（選填）"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-msg" id="form-msg"></div>
   </div>
 
-  <div class="form-msg" id="form-msg"></div>
-</div>
-
-<div class="btn-row" id="btn-row-order" style="display:none;max-width:500px;width:100%;z-index:1;">
-  <button class="btn btn-back" onclick="goBackToDates()">← 返回</button>
-  <button class="btn btn-submit" id="btn-submit" onclick="submitOrder()">✅ 送出訂單</button>
+  <div class="btn-row" id="btn-row-order" style="display:none;">
+    <button class="btn btn-back" onclick="goBackToDates()">← 返回</button>
+    <button class="btn btn-submit" id="btn-submit" onclick="submitOrder()">送出訂單</button>
+  </div>
 </div>
 
 <script>
+        // ══ 光線隨時間變化（新增）══
+  //  早上太陽在左邊（東）低低的、偏金黃；中午在正上方、白亮；
+  //  下午移到右邊；傍晚右側低角度橘紅；入夜後房間變暗、改成月光＋桌燈。
+  //  測試用：網址後面加 ?hour=18.5 可以直接看某個時間的樣子
+  (function () {
+      //  時間   太陽X  太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影
+      //  時間   太陽X 太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影  窗光  窗X(vw) 窗Y(vh) 傾斜  旋轉
+      const K = [
+          [0,     72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],   // 深夜：月光
+          [4.6,   72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],
+          [5.6,    0, 66,  255,160,130,  .80,   48, 12, 214,160,200,  .45,  .35, .80, .55, 52,  6,  -42,  6],   // 破曉：粉紫
+          [7,      2, 42,  255,206,130,  .95,   40, 18, 255,226,190,  .18,  0,   1.5, .75, 46,  4,  -34,  4],   // 早晨：金黃
+          [10,    24, 12,  255,226,170,  .85,   22, 30, 255,248,236,  .04,  0,   1.6, .65, 34, 14,  -18,  2],
+          [12.5,  50,  0,  255,246,226,  .70,    0, 38, 255,255,255,  0,    0,   1.4, .55, 22, 34,    0,  0],   // 正午：白亮、影子短
+          [15,    78, 12,  255,220,150,  .85,  -22, 30, 255,244,226,  .06,  0,   1.6, .65,  8, 14,   18, -2],
+          [17,    98, 40,  255,160, 80,  1,    -42, 18, 255,190,140,  .30,  0,   1.7, .80, -4,  4,   34, -4],   // 傍晚：橘
+          [18.2, 100, 66,  255,110, 90,  .85,  -50, 12, 170,110,150,  .52,  .40, 1.1, .55, -8,  6,   42, -6],   // 黃昏：紅紫
+          [19.4,  72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],   // 入夜
+          [24,    72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],
+      ];
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      function apply() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < K.length - 2 && h >= K[i + 1][0]) i++;
+          const a = K[i], b = K[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          const v = a.map((x, j) => x + (b[j] - x) * t);
+          const r = document.documentElement.style;
+          r.setProperty('--sunx', v[1] + '%');
+          r.setProperty('--suny', v[2] + '%');
+          r.setProperty('--sunc', `${v[3] | 0},${v[4] | 0},${v[5] | 0}`);
+          r.setProperty('--suna', v[6].toFixed(3));
+          r.setProperty('--sx', v[7].toFixed(1) + 'px');
+          r.setProperty('--sy', v[8].toFixed(1) + 'px');
+          r.setProperty('--ovc', `${v[9] | 0},${v[10] | 0},${v[11] | 0}`);
+          r.setProperty('--ova', v[12].toFixed(3));
+          r.setProperty('--lamp', v[13].toFixed(3));
+          r.setProperty('--leafk', v[14].toFixed(3));
+          r.setProperty('--win', v[15].toFixed(3));
+          r.setProperty('--wx', v[16].toFixed(1) + 'vw');
+          r.setProperty('--wy', v[17].toFixed(1) + 'vh');
+          r.setProperty('--wsk', v[18].toFixed(1) + 'deg');
+          r.setProperty('--wrot', v[19].toFixed(1) + 'deg');
+          document.documentElement.classList.toggle('night', v[12] > 0.45);
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = v[12] > 0.6 ? '#4b5270' : (v[12] > 0.3 ? '#c9a9a8' : '#efe6d8');
+      }
+      apply();
+      setInterval(apply, 60 * 1000);   // 每分鐘更新一次
+  })();
+
+        // ══════════════════════════════════════════
+  //  寫實光影（Canvas）
+  //  牆面在陰影中是偏冷的灰；陽光穿過窗戶，在牆上投出一塊暖色光斑，
+  //  窗框形成十字陰影，窗外的樹葉在光斑裡留下深淺不一的影子並隨風擺動。
+  //  早上太陽低、光斑又長又斜、偏右；中午太陽高、光斑小而低；
+  //  下午移到左邊；傍晚轉橘紅；夜晚只剩微弱的冷色月光。
+  // ══════════════════════════════════════════
+  (function () {
+      const cv = document.getElementById('scene');
+      const ctx = cv.getContext('2d');
+      const SCALE = 0.5;                       // 半解析度繪製：陰影本來就柔，也比較省電
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      let W = 0, H = 0;
+
+      // 亂數（固定種子，每次畫出來的樹一樣）
+      let seed = 11;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const R = (a, b) => a + rnd() * (b - a);
+
+      // ── 時間表 ──
+      //  時:  陰影牆色RGB      光的加亮RGB     光斑 x   y    寬   高   斜    葉影深淺 風力
+      const T = [
+          [0,    36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],   // 夜：月光
+          [4.6,  36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+          [5.6, 146,136,146,  105, 58, 46,   .50, .00, .56, .50,  .28,  .70, .7],  // 破曉
+          [7,   188,180,170,  100, 72, 34,   .44, .00, .52, .60,  .22,  .85, .8],  // 早晨
+          [10,  204,197,187,   72, 60, 40,   .33, .10, .44, .62,  .10,  .90, 1 ],
+          [12.5,212,206,196,   52, 48, 38,   .22, .44, .50, .50,  .00,  .80, 1 ],  // 正午：光斑低而小
+          [15,  204,196,185,   74, 60, 36,   .18, .10, .44, .62, -.10,  .90, 1 ],
+          [17,  178,163,148,  108, 64, 22,   .04, .00, .52, .62, -.22,  .90, .9],  // 傍晚
+          [18.2,126,106,112,   96, 40, 24,  -.06, .02, .56, .50, -.28,  .75, .7],  // 黃昏
+          [19.4, 36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],  // 入夜
+          [24,   36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+      ];
+      function sample() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < T.length - 2 && h >= T[i + 1][0]) i++;
+          const a = T[i], b = T[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          return a.map((x, j) => x + (b[j] - x) * t);
+      }
+
+      // ── 畫一根帶葉子的樹枝（黑色剪影）到離屏畫布，再用「縮小再放大」做出柔邊 ──
+      function leaf(c, L, Wd) {
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.bezierCurveTo(L * 0.28, -Wd * 1.05, L * 0.72, -Wd * 0.85, L, R(-1, 1));
+          c.bezierCurveTo(L * 0.70, Wd * 0.95, L * 0.30, Wd * 0.9, 0, 0);
+          c.fill();
+          c.lineWidth = 1.1; c.beginPath(); c.moveTo(-L * 0.12, 0); c.lineTo(0, 0); c.stroke();
+      }
+      function branchSprite(size, blurK, sd) {
+          seed = sd;
+          const s = document.createElement('canvas'); s.width = s.height = size;
+          const c = s.getContext('2d');
+          c.fillStyle = '#000'; c.strokeStyle = '#000'; c.lineCap = 'round';
+          function grow(x, y, ang, len, thick, depth) {
+              const steps = Math.max(6, len / 14 | 0);
+              let cx = x, cy = y, a = ang;
+              for (let i = 0; i < steps; i++) {
+                  a += R(-0.10, 0.10);
+                  const nx = cx + Math.cos(a) * len / steps, ny = cy + Math.sin(a) * len / steps;
+                  c.lineWidth = Math.max(0.8, thick * (1 - i / steps));
+                  c.beginPath(); c.moveTo(cx, cy); c.lineTo(nx, ny); c.stroke();
+                  cx = nx; cy = ny;
+                  // 葉子：左右交錯、大小不一、角度隨機
+                  if (i > 0 && rnd() < 0.85) {
+                      const side = i % 2 ? 1 : -1;
+                      c.save(); c.translate(cx, cy);
+                      c.rotate(a + side * R(0.6, 1.2));
+                      const L = R(22, 42) * (depth ? 0.85 : 1), Wd = L * R(0.26, 0.4);
+                      c.scale(1, R(0.55, 1));            // 有些葉子斜著，影子變扁
+                      leaf(c, L, Wd); c.restore();
+                  }
+                  // 小枝
+                  if (depth < 2 && i > 1 && rnd() < 0.28) {
+                      grow(cx, cy, a + (rnd() < 0.5 ? -1 : 1) * R(0.5, 1.0), len * R(0.3, 0.5), thick * 0.55, depth + 1);
+                  }
+              }
+              // 枝端一簇葉
+              for (let k = 0; k < 4; k++) {
+                  c.save(); c.translate(cx, cy); c.rotate(a + R(-0.9, 0.9));
+                  const L = R(20, 36); leaf(c, L, L * R(0.28, 0.38)); c.restore();
+              }
+          }
+          grow(size * 0.98, size * 0.04, R(2.3, 2.6), size * 0.95, 6, 0);
+          // 柔邊（模擬半影）：縮小再放大
+          const k = Math.max(1, blurK);
+          const t1 = document.createElement('canvas');
+          t1.width = Math.max(1, size / k | 0); t1.height = t1.width;
+          const c1 = t1.getContext('2d'); c1.imageSmoothingQuality = 'high';
+          c1.drawImage(s, 0, 0, t1.width, t1.height);
+          const out = document.createElement('canvas'); out.width = out.height = size;
+          const co = out.getContext('2d'); co.imageSmoothingQuality = 'high';
+          co.drawImage(t1, 0, 0, size, size);
+          return out;
+      }
+
+      // 三種距離的樹枝：遠的模糊、近的清楚
+      let sprites = [];
+      function buildSprites() {
+          const base = Math.round(Math.max(W, H) * 0.9);
+          sprites = [
+              { img: branchSprite(base,       7, 21), fx: .55, fy: -.18, rot: .25, s: 1.10, a: .55, amp: .020, f: .55, ph: 0   },
+              { img: branchSprite(base,       6, 37), fx: .10, fy:  .05, rot: -.1, s: 0.95, a: .55, amp: .018, f: .48, ph: 1.7 },
+              { img: branchSprite(base * .8,  3.5, 53), fx: .40, fy: -.05, rot: .05, s: 1.00, a: .78, amp: .030, f: .80, ph: 3.1 },
+              { img: branchSprite(base * .8,  3, 71), fx: -.05, fy: .25, rot: -.35, s: 0.90, a: .75, amp: .028, f: .72, ph: 4.4 },
+              { img: branchSprite(base * .6,  1.8, 97), fx: .62, fy: .10, rot: .45, s: 0.90, a: .88, amp: .045, f: 1.1, ph: 2.2 },
+          ];
+      }
+
+      // 光斑位置：手機直式畫面比較窄，光斑放大一些才看得到
+      function geo() {
+          const portrait = H > W * 1.2;
+          const kw = portrait ? 1.9 : 1, kh = portrait ? 1.05 : 1;
+          const w = P[9] * W * kw, h = P[10] * H * kh;
+          const x = portrait ? (P[7] - 0.22) * W * 1.35 : P[7] * W;
+          const y = P[8] * H * (portrait ? 0.8 : 1);
+          return [x, y, w, h, P[11] * W * kw];
+      }
+
+      // 光斑（含窗框十字），每分鐘依時間重畫一次
+      const patch = document.createElement('canvas');
+      let P = null;
+      function buildPatch() {
+          P = sample();
+          patch.width = W; patch.height = H;
+          const c = patch.getContext('2d');
+          c.clearRect(0, 0, W, H);
+          const [x, y, w, h, sk] = geo();
+          // 先畫在小畫布再放大 → 光斑邊緣自然柔和
+          const k = 6, sm = document.createElement('canvas');
+          sm.width = Math.ceil(W / k); sm.height = Math.ceil(H / k);
+          const s = sm.getContext('2d');
+          s.scale(1 / k, 1 / k);
+          s.fillStyle = `rgb(${P[4] | 0},${P[5] | 0},${P[6] | 0})`;
+          s.beginPath();
+          s.moveTo(x, y); s.lineTo(x + w, y); s.lineTo(x + w + sk, y + h); s.lineTo(x + sk, y + h); s.closePath();
+          s.fill();
+          // 窗框：一直一橫的陰影
+          s.globalCompositeOperation = 'destination-out';
+          const mw = Math.max(6, w * 0.035);
+          s.beginPath();
+          s.moveTo(x + w * .5 - mw / 2, y); s.lineTo(x + w * .5 + mw / 2, y);
+          s.lineTo(x + w * .5 + mw / 2 + sk, y + h); s.lineTo(x + w * .5 - mw / 2 + sk, y + h); s.closePath(); s.fill();
+          const yy = y + h * .46, sx = sk * .46;
+          s.fillRect(x + sx - 4, yy - mw / 2, w + 8, mw);
+          c.imageSmoothingQuality = 'high';
+          c.drawImage(sm, 0, 0, W, H);
+      }
+
+      const light = document.createElement('canvas');
+      function draw(t) {
+          if (!P) return;
+          const lc = light.getContext('2d');
+          lc.globalCompositeOperation = 'source-over';
+          lc.clearRect(0, 0, W, H);
+          lc.drawImage(patch, 0, 0);
+          // 樹葉擋光：從光斑中「挖掉」葉影
+          lc.globalCompositeOperation = 'destination-out';
+          const [x, y, w, h, sk] = geo();
+          const wind = P[13];
+          // 陣風：幾個慢速波疊起來，偶爾大一點
+          const gust = Math.max(0, Math.sin(t * 0.21) + Math.sin(t * 0.083 + 1.3) - 0.6) * 0.6;
+          sprites.forEach(sp => {
+              const sway = (Math.sin(t * sp.f + sp.ph) + 0.45 * Math.sin(t * sp.f * 2.3 + sp.ph * 1.7)) * sp.amp * wind
+                         + gust * sp.amp * 1.6 * wind;
+              const size = sp.img.width * sp.s;
+              lc.save();
+              lc.globalAlpha = sp.a * P[12];
+              lc.translate(x + w * sp.fx + sk * 0.3, y + h * sp.fy);
+              lc.transform(1, 0, P[11] * 0.6, 1, 0, 0);     // 影子跟著光線一起斜
+              lc.rotate(sp.rot + sway);
+              lc.translate(Math.sin(t * sp.f * 0.7 + sp.ph) * 3 * wind, 0);
+              lc.drawImage(sp.img, -size * 0.5, -size * 0.1, size, size);
+              lc.restore();
+          });
+          // 牆面＝陰影色，再「加上」光
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = `rgb(${P[1] | 0},${P[2] | 0},${P[3] | 0})`;
+          ctx.fillRect(0, 0, W, H);
+          // 室內的反射光：靠下方稍暗（地板方向）
+          const g = ctx.createLinearGradient(0, 0, 0, H);
+          g.addColorStop(0, 'rgba(255,255,255,0.04)'); g.addColorStop(1, 'rgba(40,25,10,0.10)');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.drawImage(light, 0, 0);
+          ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function resize() {
+          W = Math.max(1, Math.round(innerWidth * SCALE));
+          H = Math.max(1, Math.round(Math.max(innerHeight, document.documentElement.clientHeight) * 1.15 * SCALE));
+          cv.width = W; cv.height = H; light.width = W; light.height = H;
+          buildSprites(); buildPatch(); draw(performance.now() / 1000);
+      }
+      resize();
+      // 只有寬度改變（例如手機轉向）才重畫；捲動時網址列伸縮只改高度，不理會（修改）
+      let lastW = innerWidth, rt;
+      addEventListener('resize', () => { if (Math.abs(innerWidth - lastW) < 2) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(resize, 200); });
+      setInterval(() => { buildPatch(); if (reduce) draw(0); }, 60 * 1000);
+
+      if (!reduce) {
+          let last = 0;
+          (function loop(ts) {
+              requestAnimationFrame(loop);
+              if (document.hidden || ts - last < 33) return;   // 約每秒 30 張
+              last = ts;
+              draw(ts / 1000);
+          })(0);
+      }
+  })();
+
+
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
   const account = localStorage.getItem('account');
   // 訂餐專用帳號（新增）：由 index 登入 2040 時設定
@@ -313,17 +703,17 @@
     if (!account) { alert('請先登入'); window.location.href='index.html'; return; }
     if (MEAL_ONLY) {   // 訂餐專用帳號：顯示單位名稱（新增）
       currentUserName = MEAL_ONLY_UNIT;
-      document.getElementById('welcome').textContent = '👋 ' + currentUserName;
+      document.getElementById('welcome').textContent = '您好，' + currentUserName;
       return;
     }
     try {
       const res  = await fetch(`${GAS_URL}?account=${encodeURIComponent(account)}`);
       const data = await res.json();
       currentUserName = data.name || account;
-      document.getElementById('welcome').textContent = '👋 ' + currentUserName;
+      document.getElementById('welcome').textContent = '您好，' + currentUserName;
     } catch {
       currentUserName = account;
-      document.getElementById('welcome').textContent = '👋 ' + account;
+      document.getElementById('welcome').textContent = '您好，' + account;
     }
   }
 
@@ -360,56 +750,40 @@
       const body = document.getElementById('dates-body');
       body.innerHTML = '';
       if (!menuJson.data||menuJson.data.length===0) {
-        body.innerHTML=`<div class="dates-empty"><span class="dates-empty-icon">📭</span><p>目前尚無可訂餐的日期</p></div>`;
+        body.innerHTML=`<div class="dates-empty">目前尚無可訂餐的日期</div>`;
         return;
       }
       const sorted = [...menuJson.data].sort((a,b)=>new Date(String(b.date).replace(/\//g,'-'))-new Date(String(a.date).replace(/\//g,'-')));
+      // 每個日期是一張點單，用曬衣夾掛在麻繩上（樣式修改，功能不變）
       sorted.forEach((item,i)=>{
         const dateStr = normalizeDate(item.date);
         const d = new Date(dateStr+'T00:00:00+08:00');
         const weekdays=['日','一','二','三','四','五','六'];
         const weekday=weekdays[d.getDay()];
         const isClosed = closedSet.has(dateStr);
-        const tags=[
-          item.lunch?`<span class="tag tag-lunch">🍱 ${esc(item.lunch)}</span>`:'',
-          item.drink?`<span class="tag tag-drink">🧋 ${esc(item.drink)}</span>`:''
-        ].filter(Boolean).join('');
+        const x = Math.sin((i + 3) * 7.3) * 10000, tilt = ((x - Math.floor(x)) * 1.6 - 0.8).toFixed(2);
+        const row=document.createElement('div');
+        row.className='ticket-row';
         const btn=document.createElement('button');
         btn.className='date-btn';
-        btn.style.animationDelay=(i*0.06)+'s';
-
+        btn.style.cssText=`--tilt:${tilt}deg;animation-delay:${(i*0.06).toFixed(2)}s`;
+        const shops=`
+          <div class="t-row"><i>午餐</i><span class="t-shop lunch">${item.lunch?esc(item.lunch):'<span class="t-none">—</span>'}</span></div>
+          <div class="t-row"><i>飲料</i><span class="t-shop drink">${item.drink?esc(item.drink):'<span class="t-none">—</span>'}</span></div>`;
         if (isClosed) {
-          // 已結單：反白、無法點擊
+          // 已結單：無法點擊
           btn.disabled = true;
-          btn.style.opacity = '0.45';
-          btn.style.cursor = 'not-allowed';
-          btn.style.background = 'linear-gradient(135deg,#f0f0f0,#e8e8e8)';
-          btn.style.color = '#aaa';
-          btn.style.border = '1.5px solid #ddd';
-          btn.innerHTML=`
-            <div class="date-btn-left">
-              <span style="font-size:1.3rem;">🔒</span>
-              <div>
-                <div>${dateStr} <span style="font-size:0.78rem;opacity:0.7;">（週${weekday}）</span>
-                  <span style="font-size:0.7rem;background:#fde8e4;color:#e05555;border-radius:6px;padding:1px 6px;margin-left:4px;">已結單</span>
-                </div>
-                <div class="date-tags" style="margin-top:5px;">${tags}</div>
-              </div>
-            </div>
-            <span style="font-size:0.78rem;color:#bbb;">不開放訂餐</span>`;
+          btn.innerHTML=`<span class="pin" aria-hidden="true"></span><span class="closed-stamp">已結單</span>
+            <div class="t-head"><span class="t-date">${dateStr}</span><span class="t-wk">星期${weekday}</span></div>
+            ${shops}<div class="closed-tip">不開放訂餐</div>`;
         } else {
-          btn.innerHTML=`
-            <div class="date-btn-left">
-              <span style="font-size:1.3rem;">📅</span>
-              <div>
-                <div>${dateStr} <span style="font-size:0.78rem;opacity:0.7;">（週${weekday}）</span></div>
-                <div class="date-tags" style="margin-top:5px;">${tags}</div>
-              </div>
-            </div>
-            <span style="font-size:1.1rem;opacity:0.4;">›</span>`;
+          btn.innerHTML=`<span class="pin" aria-hidden="true"></span><span class="t-go">›</span>
+            <div class="t-head"><span class="t-date">${dateStr}</span><span class="t-wk">星期${weekday}</span></div>
+            ${shops}<div class="t-tip">點一下開始訂餐</div>`;
           btn.addEventListener('click',()=>selectDate(item,dateStr));
         }
-        body.appendChild(btn);
+        row.appendChild(btn);
+        body.appendChild(row);
       });
 
       // 載入所有日期的訂單清單
@@ -473,23 +847,24 @@
       );
       const card = document.createElement('div');
       card.className = 'order-list-card';
-      let html = `<div class="order-list-header">📋 ${esc(date)} 訂單清單（共 ${rows.length} 筆）</div>`;
+      let html = `<div class="order-list-header">${esc(date)} 訂單清單（共 ${rows.length} 筆）</div>`;
       sortedNames.forEach(nm => {
-        html += `<div class="order-person-block"><div class="order-person-name">👤 ${esc(nm)}</div>`;
+        html += `<div class="order-person-block"><div class="order-person-name">${esc(nm)}</div>`;
         grouped[nm].forEach(r => {
           const parts = [];
+          // 午餐、飲料、備註各一行（樣式修改）
           if (r.lunchItem) parts.push(
-            `<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>` +
-            (r.lunchPrice ? `<span class="order-row-detail price">$${esc(r.lunchPrice)}</span>` : '')
+            `<i>午餐</i><span><span class="order-row-item">${esc(r.lunchItem)}</span>` +
+            (r.lunchPrice ? `<span class="order-row-detail price">$${esc(r.lunchPrice)}</span>` : '') + `</span>`
           );
           if (r.drinkItem) {
-            let d = `<span class="order-row-drink">🧋 ${esc(r.drinkItem)}</span>`;
+            let d = `<i>飲料</i><span><span class="order-row-drink">${esc(r.drinkItem)}</span>`;
             const ex = [r.sugar, r.ice].filter(Boolean).join(' / ');
             if (ex) d += `<span class="order-row-detail">${esc(ex)}</span>`;
             if (r.drinkPrice) d += `<span class="order-row-detail price">$${esc(r.drinkPrice)}</span>`;
-            parts.push(d);
+            parts.push(d + `</span>`);
           }
-          if (r.notes) parts.push(`<span class="order-row-detail">📝 ${esc(r.notes)}</span>`);
+          if (r.notes) parts.push(`<i>備註</i><span class="order-row-memo">${esc(r.notes)}</span>`);
           html += `<div class="order-row">${parts.map(p => `<div class="order-line">${p}</div>`).join('')}</div>`;
         });
         html += `</div>`;
@@ -515,17 +890,17 @@
 
   function selectDate(item,dateStr) {
     currentDateData=item;
-    document.getElementById('order-date-badge').textContent='📅 '+dateStr;
+    document.getElementById('order-date-badge').textContent=dateStr;
     if (item.lunch) {
       document.getElementById('lunch-section').style.display='block';
-      document.getElementById('lunch-shop-badge').textContent='🏪 '+item.lunch;
+      document.getElementById('lunch-shop-badge').textContent=item.lunch;
       document.getElementById('lunch-items-wrap').innerHTML='';
       lunchCount=0; addLunchItem();
       renderMenuView('lunch', item.lunchMenu);   // （新增）顯示午餐菜單照片
     } else { document.getElementById('lunch-section').style.display='none'; }
     if (item.drink) {
       document.getElementById('drink-section').style.display='block';
-      document.getElementById('drink-shop-badge').textContent='🏪 '+item.drink;
+      document.getElementById('drink-shop-badge').textContent=item.drink;
       document.getElementById('drink-items-wrap').innerHTML='';
       drinkCount=0; addDrinkItem();
       renderMenuView('drink', item.drinkMenu);   // （新增）顯示飲料菜單照片
@@ -549,7 +924,7 @@
     div.innerHTML=`
       <div class="item-header">
         <span>第 ${n} 筆午餐</span>
-        ${n>1?`<button class="btn-remove-item" onclick="removeItem('lunch-item-${n}')">✕ 移除</button>`:''}
+        ${n>1?`<button class="btn-remove-item" onclick="removeItem('lunch-item-${n}')">移除</button>`:''}
       </div>
       <div class="field"><label>餐點名稱</label>
         <input type="text" class="lunch-item-name" placeholder="請輸入餐點名稱" autocomplete="off"/></div>
@@ -568,7 +943,7 @@
     div.innerHTML=`
       <div class="item-header">
         <span>第 ${n} 筆飲料</span>
-        ${n>1?`<button class="btn-remove-item" onclick="removeItem('drink-item-${n}')">✕ 移除</button>`:''}
+        ${n>1?`<button class="btn-remove-item" onclick="removeItem('drink-item-${n}')">移除</button>`:''}
       </div>
       <div class="field"><label>飲料名稱</label>
         <input type="text" class="drink-item-name" placeholder="請輸入飲料名稱" autocomplete="off"/></div>
@@ -599,7 +974,7 @@
     box.innerHTML = '';
     if (!list.length) { box.style.display = 'none'; return; }
     box.style.display = 'flex';
-    box.innerHTML = `<div class="menu-view-title">📖 ${type==='lunch'?'午餐':'飲料'}菜單<small>點照片可放大</small></div>`;
+    box.innerHTML = `<div class="menu-view-title">${type==='lunch'?'午餐':'飲料'}菜單<small>點照片可放大</small></div>`;
     const strip = document.createElement('div');
     strip.className = 'menu-strip';
     list.forEach((ref, i) => {
@@ -665,7 +1040,7 @@
       const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'saveMealOrder',rows})});
       const json=await res.json();
       if (json.status==='ok') {
-        showMsg('✅ 訂單送出成功！','ok');
+        showMsg('訂單送出成功！','ok');
         setTimeout(async ()=>{
           goBackToDates();
           hideMsg();
@@ -716,22 +1091,22 @@
       );
 
       let html = `<div class="order-list-card">
-        <div class="order-list-header">📋 ${esc(date)} 訂單清單（共 ${json.data.length} 筆）</div>`;
+        <div class="order-list-header">${esc(date)} 訂單清單（共 ${json.data.length} 筆）</div>`;
 
       sortedNames.forEach(nm => {
         html += `<div class="order-person-block">
-          <div class="order-person-name">👤 ${esc(nm)}</div>`;
+          <div class="order-person-name">${esc(nm)}</div>`;
         grouped[nm].forEach(r => {
           const parts = [];
-          if (r.lunchItem)  parts.push(`<span class="order-row-item">🍱 ${esc(r.lunchItem)}</span>${r.lunchPrice ? `<span class="order-row-detail price">$${esc(r.lunchPrice)}</span>` : ''}`);
+          if (r.lunchItem)  parts.push(`<i>午餐</i><span><span class="order-row-item">${esc(r.lunchItem)}</span>${r.lunchPrice ? `<span class="order-row-detail price">$${esc(r.lunchPrice)}</span>` : ''}</span>`);
           if (r.drinkItem) {
-            let drinkDetail = `<span class="order-row-drink">🧋 ${esc(r.drinkItem)}</span>`;
+            let drinkDetail = `<i>飲料</i><span><span class="order-row-drink">${esc(r.drinkItem)}</span>`;
             const extras = [r.sugar, r.ice].filter(Boolean).join(' / ');
             if (extras) drinkDetail += `<span class="order-row-detail">${esc(extras)}</span>`;
             if (r.drinkPrice) drinkDetail += `<span class="order-row-detail price">$${esc(r.drinkPrice)}</span>`;
-            parts.push(drinkDetail);
+            parts.push(drinkDetail + `</span>`);
           }
-          if (r.notes) parts.push(`<span class="order-row-detail">📝 ${esc(r.notes)}</span>`);
+          if (r.notes) parts.push(`<i>備註</i><span class="order-row-memo">${esc(r.notes)}</span>`);
           html += `<div class="order-row">${parts.map(p => `<div class="order-line">${p}</div>`).join('')}</div>`;
         });
         html += `</div>`;
