@@ -329,6 +329,48 @@
     .mv-btn { min-width: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.12); color: #fff; font-size: 0.85rem; font-weight: 700; font-family: inherit; cursor: pointer; text-decoration: none; text-align: center; }
 
     @media (prefers-reduced-motion: reduce) { .date-btn { animation: none; } }
+    /* ══ 字體放大（修改）：整頁文字約放大 15～25% ══ */
+    #clock { font-size: 0.92rem; margin-top: 40px; }   /* 放大後移到返回鍵下方，避免重疊 */
+    .dates-card { gap: 22px; }
+    .site-title { font-size: 1.8rem; }
+    .site-sub { font-size: 0.82rem; }
+    #welcome { font-size: 1.12rem; }
+    .sec-title { font-size: 1.22rem; }
+    .loading-text { font-size: 1.05rem; }
+    .date-btn .t-date { font-size: 1.35rem; }
+    .date-btn .t-wk { font-size: 0.92rem; }
+    .date-btn .t-row { grid-template-columns: 42px 1fr; margin-top: 8px; }
+    .date-btn .t-row > i { font-size: 0.8rem; }
+    .date-btn .t-shop { font-size: 1.22rem; }
+    .date-btn .t-tip, .date-btn .closed-tip { font-size: 0.9rem; }
+    .date-btn .closed-stamp { font-size: 1.05rem; }
+    .dates-empty { font-size: 1.1rem; }
+    .order-list-header { font-size: 1.1rem; }
+    .order-person-name { font-size: 1.32rem; }
+    .order-line { grid-template-columns: 42px 1fr; }
+    .order-line > i { font-size: 0.8rem; }
+    .order-row-item, .order-row-drink { font-size: 1.16rem; }
+    .order-row-detail { font-size: 0.98rem; }
+    .order-row-detail.price { font-size: 1.08rem; }
+    .order-row-memo { font-size: 1rem; }
+    .order-date-badge { font-size: 1.2rem; }
+    .badge-tip { font-size: 0.82rem; }
+    .section-header { font-size: 1.3rem; }
+    .shop-badge { font-size: 1.18rem; }
+    .field label { font-size: 0.88rem; }
+    .field input[type="text"], .field select, #order-notes { font-size: 1.32rem; }
+    .item-header { font-size: 0.88rem; }
+    .btn-remove-item { font-size: 0.88rem; padding: 3px 12px; }
+    .btn-add-item { font-size: 1.05rem; padding: 12px; }
+    .menu-view-title { font-size: 0.88rem; }
+    .form-msg { font-size: 1rem; }
+    .btn { font-size: 1.1rem; height: 50px; padding: 0 26px; }
+    .btn-return { font-size: 0.95rem; height: 38px; }
+    @media (max-width: 380px) {
+      .site-title { font-size: 1.6rem; }
+      .date-btn .t-date { font-size: 1.22rem; }
+      .field input[type="text"], .field select, #order-notes { font-size: 1.2rem; }
+    }
   </style>
 </head>
 <body>
