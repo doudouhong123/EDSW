@@ -360,7 +360,8 @@
     .chalkboard .cb-title.lunch { color: #f5d7a8; } .chalkboard .cb-title.drink { color: #bfe0f0; }
     .chalkboard .cb-line { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 5px 2px; border-bottom: 1px dashed rgba(238,240,232,0.22); font-size: 0.98rem; }
     .chalkboard .cb-line:last-child { border-bottom: none; }
-    .chalkboard .cb-line .who { color: rgba(238,240,232,0.75); font-size: 0.88rem; text-align: right; }
+    .chalkboard .cb-line .who { color: rgba(238,240,232,0.75); font-size: 0.88rem; text-align: right; white-space: nowrap; }
+    .chalkboard .cb-line .who .pr { color: #f6c98a; font-weight: 700; }   /* 品項價錢（新增） */
     .chalkboard .cb-line .opt { color: #bfe0f0; font-size: 0.8rem; margin-left: 6px; }
     .chalkboard .cb-empty { text-align: center; color: rgba(238,240,232,0.6); padding: 8px 0; }
     .chalkboard .save-msg { color: rgba(238,240,232,0.85); }
@@ -1344,16 +1345,27 @@
     const drinkRows = rows.filter(r => r.drinkItem).map(r => ({ item: r.drinkItem, sugar: r.sugar, ice: r.ice, name: r.name }));
     drinkRows.sort((a, b) => sortKey(a.item).localeCompare(sortKey(b.item), 'zh-TW'));
 
+    // 黑板上顯示用：多帶價錢（新增）；寫入 Google Sheet 的資料維持原樣
+    const lunchView = rows.filter(r => r.lunchItem).map(r => ({ item: r.lunchItem, name: r.name, price: r.lunchPrice }));
+    lunchView.sort((a, b) => sortKey(a.item).localeCompare(sortKey(b.item), 'zh-TW'));
+    const drinkView = rows.filter(r => r.drinkItem).map(r => ({ item: r.drinkItem, sugar: r.sugar, ice: r.ice, name: r.name, price: r.drinkPrice }));
+    drinkView.sort((a, b) => sortKey(a.item).localeCompare(sortKey(b.item), 'zh-TW'));
+    // 名字前面加上價錢，中間空一格（新增）
+    const whoWithPrice = r => {
+      const p = String(r.price ?? '').trim();
+      return (p ? `<span class="pr">$${esc(p)}</span> ` : '') + esc(r.name);
+    };
+
     // 餐點整理寫在黑板上（修改）
     result.innerHTML = `
       <div class="chalkboard">
         <div class="cb-title lunch">午餐整理</div>
-        ${lunchRows.length ? lunchRows.map(r=>`<div class="cb-line"><span>${esc(r.item)}</span><span class="who">${esc(r.name)}</span></div>`).join('') : '<div class="cb-empty">無午餐資料</div>'}
+        ${lunchView.length ? lunchView.map(r=>`<div class="cb-line"><span>${esc(r.item)}</span><span class="who">${whoWithPrice(r)}</span></div>`).join('') : '<div class="cb-empty">無午餐資料</div>'}
         <div id="lunch-arrange-msg" class="save-msg"></div>
       </div>
       <div class="chalkboard">
         <div class="cb-title drink">飲料整理</div>
-        ${drinkRows.length ? drinkRows.map(r=>`<div class="cb-line"><span>${esc(r.item)}<span class="opt">${esc([r.sugar, r.ice].filter(Boolean).join('／'))}</span></span><span class="who">${esc(r.name)}</span></div>`).join('') : '<div class="cb-empty">無飲料資料</div>'}
+        ${drinkView.length ? drinkView.map(r=>`<div class="cb-line"><span>${esc(r.item)}<span class="opt">${esc([r.sugar, r.ice].filter(Boolean).join('／'))}</span></span><span class="who">${whoWithPrice(r)}</span></div>`).join('') : '<div class="cb-empty">無飲料資料</div>'}
         <div id="drink-arrange-msg" class="save-msg"></div>
       </div>`;
 
