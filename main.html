@@ -2,360 +2,445 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登入後頁面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#efe6d8">
+    <title>義大社工科</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="image" href="photo1.jpg">
     <style>
+        /* ══════════ 主畫面：窗邊葉影＋風鈴＋書桌（與後台 deleloper 同一套光影）══════════ */
+        :root {
+            --ink: #2f2a24; --ink-2: #5b5348; --muted: #8f8579; --hair: #e3d9ca; --sage: #6f8a68;
+            --sx: 14px; --sy: 24px; --ovc: 255,255,255; --ova: 0; --lamp: 0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { min-height: 100%; background: #e6ddd0; overflow-x: hidden; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 20px;
-            font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #b5c4a6 0%, #8fa682 100%);   /* 鼠尾草綠（修改，與登入頁一致） */
-            color: #fff;
+            font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            color: var(--ink);
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        .container {
-            background: #fffaf0;                 /* 奶油白（修改，與登入頁一致） */
-            border: 1px solid #efe6d2;
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            animation: fadeIn 1s ease-in-out;
-            max-width: 400px;
-            width: 90%;
-        }
-        .info { text-align: center; margin-bottom: 30px; color: #3f4d38; }   /* 奶油白底 → 深色字 */
-        /* 與 index 上方時間完全相同：不閃爍、不滑入、灰色粗體（修改） */
-        .info #time { color: #666; font-size: 22.5px; font-weight: bold;
-                      opacity: 1; animation: none; margin: 0 0 20px; }
-        .info div {
-            margin: 10px 0; font-size: 22px;
-            opacity: 0; animation: slideIn 0.8s ease-out 0.5s forwards;
-        }
-        .buttons { display: flex; flex-direction: column; gap: 15px; }
-        button {
-            padding: 15px 20px; font-size: 18px; border: none;
-            border-radius: 10px; cursor: pointer;
-            background: rgba(255,255,255,0.2); color: #fff;
-            transition: all 0.3s ease; backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            position: relative; overflow: hidden;
-        }
-        button:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-        button:active { transform: translateY(0); }
-        button::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
-        }
-        button:hover::before { left: 100%; }
-        .btn-qr {
-            background: rgba(255,220,80,0.35);
-            border: 1.5px solid rgba(255,220,80,0.6);
-            font-weight: 700;
-        }
-        .btn-qr:hover { background: rgba(255,220,80,0.5); }
-        .loading { animation: pulse 1.5s infinite; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
-        @keyframes slideIn { from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);} }
-        @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.5;} }
 
-        /* ── QR 掃描 overlay ── */
-        .qr-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.88); z-index: 500;
-            flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+        /* ── 寫實光影（牆面、窗光、葉影）── */
+        #scene { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }
+        .grain {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            mix-blend-mode: multiply;
         }
-        .qr-overlay.show { display: flex; }
-        .qr-title { color: #fff; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; }
-        #qr-video {
-            width: 300px; height: 300px; object-fit: cover;
-            border-radius: 16px; border: 3px solid #ffd050;
+        .ambient-top {
+            position: fixed; inset: 0; z-index: 4; pointer-events: none;
+            background: rgb(var(--ovc)); opacity: calc(var(--ova) * 0.38);
+            mix-blend-mode: multiply;
         }
-        .qr-hint { color: #ffd050; font-size: 0.95rem; }
+        .lamp {
+            position: fixed; inset: 0; z-index: 4; pointer-events: none;
+            background: radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255,186,110,0.45), rgba(255,186,110,0) 70%);
+            mix-blend-mode: soft-light; opacity: var(--lamp);
+        }
+        html.night { --muted: #6f665b; }
+        html.night .tabletop, html.night .under { filter: brightness(0.62) saturate(0.85); }
+        html.night .frame-mover { filter: brightness(0.82); }
+
+        /* ══════════ 風鈴：兩條細繩 ══════════ */
+        .chimes { position: relative; z-index: 1; width: 100%; max-width: 620px; margin: 0 auto; padding-top: max(14px, env(safe-area-inset-top)); }
+        .rope-row { position: relative; }
+        .rope-row.r1 { height: 214px; }
+        .rope-row.r2 { height: 252px; margin-top: 4px; }
+        .rope {   /* 繩子橫跨整個畫面，中間微微下垂 */
+            position: absolute; top: 0; left: calc(50% - 50vw); width: 100vw; height: 30px;
+            overflow: visible; pointer-events: none;
+            filter: drop-shadow(calc(var(--sx) * 0.25) calc(var(--sy) * 0.25 + 1px) 1.5px rgba(60,40,22,0.25));
+        }
+        .rope path { fill: none; vector-effect: non-scaling-stroke; }
+        .rope .r-base { stroke: #6b5440; stroke-width: 1.8px; }
+        .rope .r-twist { stroke: rgba(255,236,205,0.45); stroke-width: 0.8px; stroke-dasharray: 2.5 3.5; }
+
+        .chime {
+            position: absolute; top: 12px; left: var(--x); width: 96px; margin-left: -48px;
+            border: none; background: none; padding: 0; cursor: pointer; font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .chime:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 4px; border-radius: 8px; }
+        /* 會晃的整串：以繩子上的結為支點 */
+        .c-sw {
+            display: flex; flex-direction: column; align-items: center;
+            transform-origin: 50% 0;
+            animation: cIdle 4.8s ease-in-out infinite alternate; animation-delay: var(--d, 0s);
+            filter: drop-shadow(calc(var(--sx) * 0.35) calc(var(--sy) * 0.3 + 2px) 5px rgba(60,40,22,0.28));
+        }
+        .c-knot { width: 7px; height: 7px; margin-top: -3px; border-radius: 50%; background: #6b5440; }
+        .c-str { width: 1.4px; height: 16px; background: #6b5440; }
+        /* 玻璃風鈴 */
+        .c-bell {
+            position: relative; z-index: 2; width: 58px; height: 50px;
+            border-radius: 50% 50% 14% 14% / 80% 80% 20% 20%;
+            background:
+                radial-gradient(ellipse at 32% 26%, rgba(255,255,255,0.95) 0 5%, rgba(255,255,255,0.4) 12%, rgba(255,255,255,0) 30%),
+                linear-gradient(180deg, transparent 0 60%, rgba(var(--g),0.72) 60% 67%, transparent 67% 72%, rgba(var(--g),0.5) 72% 75%, transparent 75%),
+                linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(232,242,246,0.32) 40%, rgba(var(--g),0.20) 78%, rgba(255,255,255,0.45) 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(255,255,255,0.7),
+                inset -7px -5px 10px rgba(var(--g),0.28),
+                inset 5px 3px 8px rgba(255,255,255,0.45);
+            -webkit-backdrop-filter: blur(1.5px); backdrop-filter: blur(1.5px);
+        }
+        .c-bell::before {   /* 頂端的小環 */
+            content: ''; position: absolute; top: -5px; left: 50%; width: 12px; height: 7px; margin-left: -6px;
+            border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #e9eef0, #b9c3c8);
+            box-shadow: inset 0 0 0 1px rgba(90,100,110,0.25);
+        }
+        .c-bell::after {    /* 鈴口 */
+            content: ''; position: absolute; left: 3px; right: 3px; bottom: -2px; height: 6px; border-radius: 50%;
+            background: radial-gradient(ellipse at 50% 30%, rgba(70,82,92,0.22), rgba(255,255,255,0.7) 75%);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+        }
+        /* 舌片＋短冊（紙條）：比鈴晃得更明顯 */
+        .c-tail {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; align-items: center;
+            margin-top: -24px; transform-origin: 50% 0;
+            animation: tIdle 3.6s ease-in-out infinite alternate; animation-delay: calc(var(--d, 0s) - 0.8s);
+        }
+        .c-bead { width: 7px; height: 14px; border-radius: 3px; background: linear-gradient(90deg, #c8d2d6, #f4f7f8 45%, #aab6bb); box-shadow: 0 1px 1px rgba(0,0,0,0.15); }
+        .c-str2 { width: 1.2px; height: 26px; background: #6b5440; }
+        .c-strip {
+            position: relative; width: 46px; padding: 16px 0 12px;
+            writing-mode: vertical-rl; text-orientation: upright;
+            font-family: 'Noto Sans TC', sans-serif; font-weight: 900; font-size: 1.42rem; line-height: 46px; letter-spacing: 0.14em;
+            color: #1c1915; text-align: center;
+            background:
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9 0.35' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .32  0 0 0 0 .22  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+                linear-gradient(180deg, var(--p1), var(--p2));
+            border-top: 6px solid var(--band);
+            border-radius: 1px;
+            box-shadow: inset -2px 0 0 rgba(60,40,20,0.08), inset 1px 0 0 rgba(255,255,255,0.6);
+        }
+        .c-strip::before {   /* 綁繩的小孔 */
+            content: ''; position: absolute; top: -4px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+            border-radius: 50%; background: #5a4634;
+        }
+        .chime.main .c-strip { width: 54px; line-height: 54px; font-size: 1.7rem; }
+        .chime.main .c-bell { width: 64px; height: 55px; }
+
+        @keyframes cIdle  { from { transform: rotate(-1.3deg); } to { transform: rotate(1.3deg); } }
+        @keyframes tIdle  { from { transform: rotate(2.4deg); }  to { transform: rotate(-2.4deg); } }
+        /* 被碰到：像一陣風吹過 */
+        @keyframes cWind  { 0% { transform: rotate(0); } 14% { transform: rotate(9deg); } 32% { transform: rotate(-6deg); } 50% { transform: rotate(4deg); } 68% { transform: rotate(-2.4deg); } 84% { transform: rotate(1deg); } 100% { transform: rotate(0); } }
+        @keyframes tWind  { 0% { transform: rotate(0); } 12% { transform: rotate(-7deg); } 28% { transform: rotate(16deg); } 46% { transform: rotate(-11deg); } 62% { transform: rotate(7deg); } 78% { transform: rotate(-3.5deg); } 100% { transform: rotate(0); } }
+        @keyframes cBreeze{ 0% { transform: rotate(0); } 25% { transform: rotate(3.5deg); } 55% { transform: rotate(-2deg); } 80% { transform: rotate(1deg); } 100% { transform: rotate(0); } }
+        @keyframes tBreeze{ 0% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 45% { transform: rotate(7deg); } 70% { transform: rotate(-3deg); } 100% { transform: rotate(0); } }
+        .chime.blow   .c-sw   { animation: cWind 2.2s cubic-bezier(.25,.6,.3,1); }
+        .chime.blow   .c-tail { animation: tWind 2.5s cubic-bezier(.25,.6,.3,1) .06s backwards; }
+        .chime.breeze .c-sw   { animation: cBreeze 1.9s ease-out; }
+        .chime.breeze .c-tail { animation: tBreeze 2.1s ease-out .08s backwards; }
+
+        /* 訂餐專用帳號：只留上方「訂餐」 */
+        body.meal-only .rope-row.r2 { display: none; }
+
+        /* ══════════ 書桌 ══════════ */
+        .desk { position: relative; z-index: 1; margin-top: auto; width: 100%; overflow: hidden; padding-top: 16px; }
+        .items {
+            position: relative; z-index: 2;
+            display: flex; justify-content: center; align-items: flex-end; gap: clamp(14px, 4vw, 34px);
+            padding: 0 12px; margin-bottom: -40px;
+        }
+        .tabletop {
+            position: relative; height: 96px;
+            background:
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='96'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.004 0.22' numOctaves='3' seed='5'/><feColorMatrix values='0 0 0 0 .28  0 0 0 0 .17  0 0 0 0 .07  0 0 0 .30 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"),
+                linear-gradient(180deg, #b48b5c 0%, #c79e6d 45%, #cfa676 100%);
+            background-size: 400px 100%, auto;
+            box-shadow: 0 -8px 18px rgba(50,32,15,0.18);   /* 桌子靠牆處的影子 */
+        }
+        .tabletop::before {   /* 桌面反光（跟著太陽方向） */
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(calc(90deg + var(--sx) * 2deg / 1px), rgba(255,240,215,0.18), rgba(255,240,215,0) 60%);
+        }
+        .tabletop::after {    /* 桌緣厚度 */
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background: linear-gradient(180deg, #9a7148 0%, #7d5a37 100%);
+            box-shadow: inset 0 1.5px 0 rgba(255,232,200,0.45);
+        }
+        .under { height: max(28px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, #4a3826, #2f241a); }
+        .desk-note {
+            position: absolute; z-index: 3; right: 12%; bottom: 24px;
+            font-family: 'Noto Serif TC', serif; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.16em;
+            color: rgba(70,45,22,0.72); text-shadow: 0 1px 0 rgba(255,235,205,0.35);
+            pointer-events: none;
+        }
+
+        /* iPad */
+        .ipad {
+            position: relative; flex: 0 0 auto;
+            width: clamp(176px, 47vw, 248px); aspect-ratio: 3 / 4;
+            padding: 11px; border-radius: 20px;
+            background: linear-gradient(145deg, #45484e, #1b1c1f 60%, #2a2c30);
+            box-shadow:
+                inset 0 0 0 1.5px #62666c, inset 0 0 0 3px #17181b,
+                calc(var(--sx) * 0.5) 8px 16px rgba(30,20,10,0.35);
+            margin-bottom: 4px;
+        }
+        .ipad::before {   /* 桌上的陰影 */
+            content: ''; position: absolute; z-index: -1; left: 6%; right: 2%; bottom: -10px; height: 18px;
+            border-radius: 50%; background: rgba(35,22,10,0.4); filter: blur(6px);
+            transform: translateX(calc(var(--sx) * 0.6));
+        }
+        .ipad .cam { position: absolute; top: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: #2c3a46; }
+        .screen {
+            position: relative; height: 100%; border-radius: 10px; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            padding: 18px 8px 14px; color: #fff;
+            background:
+                radial-gradient(ellipse 80% 60% at 70% 20%, rgba(255,226,180,0.55), rgba(255,226,180,0) 70%),
+                radial-gradient(ellipse 120% 60% at 20% 100%, rgba(70,98,78,0.85), rgba(70,98,78,0) 70%),
+                linear-gradient(165deg, #8ea79a 0%, #b4b59a 40%, #d2ad85 75%, #b98468 100%);
+            text-shadow: 0 1px 6px rgba(30,30,30,0.28);
+        }
+        .screen::after {   /* 玻璃反光 */
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(118deg, rgba(255,255,255,0.16) 0 34%, rgba(255,255,255,0) 34.5%);
+        }
+        #ipad-date { font-size: 0.86rem; font-weight: 700; letter-spacing: 0.06em; opacity: 0.95; }
+        #time {
+            font-size: clamp(2.6rem, 13vw, 3.5rem); font-weight: 500; line-height: 1.05; letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums; margin-top: 2px;
+        }
+        #name { margin-top: auto; font-size: clamp(0.9rem, 4.2vw, 1.1rem); font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; }
+        #name.loading { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+        #acct { font-size: 0.84rem; font-weight: 500; opacity: 0.9; margin-top: 2px; letter-spacing: 0.08em; }
+        #back {
+            margin-top: 12px; height: 38px; padding: 0 22px; border-radius: 999px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.24);
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            color: #fff; font-family: inherit; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.2em;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        }
+        #back:active { transform: scale(0.96); background: rgba(255,255,255,0.34); }
+
+        /* 相片框 */
+        .frame-slot {
+            position: relative; flex: 0 0 auto; width: clamp(122px, 33vw, 196px);
+            margin-bottom: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .frame-mover { position: relative; }
+        .frame-mover::after {   /* 桌上的陰影 */
+            content: ''; position: absolute; z-index: -1; left: 4%; right: -2%; bottom: -8px; height: 14px;
+            border-radius: 50%; background: rgba(35,22,10,0.38); filter: blur(5px);
+            transform: translateX(calc(var(--sx) * 0.5));
+        }
+        .frame {
+            position: relative; aspect-ratio: 5 / 4; padding: var(--bw);
+            transform: perspective(500px) rotateX(5deg); transform-origin: 50% 100%;
+            box-shadow: calc(var(--sx) * 0.3) 4px 8px rgba(30,20,10,0.3);
+        }
+        .frame .mat { height: 100%; padding: var(--mat); background: #f8f5ee; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.25); }
+        .frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .frame.oak   { --bw: 9px; --mat: 6px;
+            background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='160'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.4' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .25  0 0 0 0 .15  0 0 0 0 .06  0 0 0 .3 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>"), linear-gradient(145deg, #c49464, #8d6239);
+            box-shadow: inset 0 0 0 1px rgba(255,230,195,0.35), calc(var(--sx) * 0.3) 4px 8px rgba(30,20,10,0.3); }
+        .frame.white { --bw: 8px; --mat: 7px; background: linear-gradient(145deg, #fdfcf8, #ddd7cb);
+            box-shadow: inset 0 0 0 1px rgba(150,140,120,0.35), calc(var(--sx) * 0.3) 4px 8px rgba(30,20,10,0.3); }
+        .frame.black { --bw: 5px; --mat: 0px; background: linear-gradient(145deg, #4a4a4a, #111);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), calc(var(--sx) * 0.3) 4px 8px rgba(30,20,10,0.35); }
+        .frame.black .mat { box-shadow: none; }
+        /* 換相框的手 */
+        .hand {
+            position: absolute; z-index: 5; top: 50%; left: calc(100% - 30px);
+            width: 160px; height: 66px; margin-top: -33px;
+            transform: translateX(120vw); pointer-events: none;
+            filter: drop-shadow(calc(var(--sx) * 0.3) 5px 6px rgba(30,20,10,0.3));
+        }
+        .hand svg { display: block; width: 100%; height: 100%; }
+
+        /* ══════════ 提示框（紙卡＋木板按鍵，與其他頁一致）══════════ */
+        .qr-overlay, .confirm-overlay, .msg-overlay, .return-overlay, .remind-overlay {
+            display: none; position: fixed; inset: 0; padding: 20px;
+            align-items: center; justify-content: center;
+        }
+        .qr-overlay { background: rgba(20,16,12,0.9); z-index: 500; flex-direction: column; gap: 18px; }
+        .confirm-overlay { background: rgba(40,30,20,0.45); z-index: 600; }
+        .return-overlay  { background: rgba(40,30,20,0.45); z-index: 650; }
+        .remind-overlay  { background: rgba(40,30,20,0.5);  z-index: 680; }
+        .msg-overlay     { background: rgba(40,30,20,0.45); z-index: 700; }
+        .confirm-overlay, .return-overlay, .remind-overlay, .msg-overlay { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+        .qr-overlay.show, .confirm-overlay.show, .msg-overlay.show, .return-overlay.show, .remind-overlay.show { display: flex; }
+        .qr-title { color: #fff8ec; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.1em; font-family: 'Noto Serif TC', serif; }
+        #qr-video { width: 300px; height: 300px; max-width: 80vw; max-height: 80vw; object-fit: cover; border-radius: 6px; border: 3px solid #cfab62; }
+        .qr-hint { color: #e9cf8e; font-size: 0.95rem; }
         .qr-close-btn {
-            padding: 10px 28px; border-radius: 10px; border: none;
-            background: rgba(255,255,255,0.18); color: #fff;
-            font-size: 1rem; cursor: pointer;
+            padding: 10px 28px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.12); color: #fff; font-size: 1rem; font-family: inherit; cursor: pointer;
         }
-        .qr-close-btn:hover { background: rgba(255,255,255,0.3); }
 
-        /* ── 確認 dialog ── */
-        .confirm-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); z-index: 600;
-            align-items: center; justify-content: center;
+        .confirm-dialog, .msg-box, .return-box, .remind-box {
+            position: relative; width: 100%; max-width: 380px; color: var(--ink);
+            background:
+                url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .34  0 0 0 0 .26  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+                linear-gradient(175deg, #fffdf6, #f4ede0);
+            border-radius: 4px; box-shadow: 0 0 0 1px rgba(120,100,70,0.12), 8px 14px 34px rgba(30,20,10,0.32);
+            padding: 24px 20px 18px;
+            display: flex; flex-direction: column; gap: 14px; text-align: center;
         }
-        .confirm-overlay.show { display: flex; }
-        .confirm-dialog {
-            background: #fff; color: #333; border-radius: 18px;
-            padding: 28px 24px 22px; width: 88%; max-width: 360px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
-            display: flex; flex-direction: column; gap: 14px;
+        .msg-box { align-items: center; max-width: 340px; }
+        .confirm-title, .remind-title { font-family: 'Noto Serif TC', serif; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); }
+        .remind-title { color: #8a3a26; }
+        .msg-icon, .return-icon, .remind-icon { font-size: 2rem; line-height: 1; }
+        .msg-text, .return-text { font-size: 1.05rem; font-weight: 500; color: var(--ink); line-height: 1.7; white-space: pre-line; }
+        .return-text b, .remind-list b { color: #8a4a30; }
+        .device-list, .return-list {
+            border-top: 2px solid rgba(90,120,160,0.4); border-bottom: 1px solid rgba(110,150,190,0.35);
+            padding: 10px 4px; text-align: left; font-size: 1.05rem; font-weight: 700; color: #2c4a6e; line-height: 1.7;
         }
-        .confirm-title { font-size: 1.15rem; font-weight: 700; color: #444; text-align: center; }
-        .device-list {
-            background: #f5f0ff; border-radius: 10px; padding: 12px 16px;
-            font-size: 1rem; color: #5a3ea8; font-weight: 600; line-height: 1.7;
-            min-height: 40px;
-        }
-        /* ── 用途下拉選單（新增） ── */
-        .purpose-wrap { display: flex; flex-direction: column; gap: 6px; }
-        .purpose-label { font-size: 0.95rem; font-weight: 700; color: #555; }
-        .purpose-label .req { color: #e05555; }
+        .return-list { display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow-y: auto; }
+        .return-item { color: var(--ink); }
+        .return-item .r-date { color: var(--muted); font-size: 0.9rem; font-weight: 500; margin-right: 8px; }
+        .return-item .r-dev { color: #2c4a6e; }
+        .purpose-wrap { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+        .purpose-label, .return-note-label { font-size: 0.9rem; font-weight: 700; color: #7d8aa0; letter-spacing: 0.1em; text-align: left; }
+        .purpose-label .req { color: #a8432c; }
         .purpose-select {
-            width: 100%; padding: 11px 38px 11px 12px;
-            border-radius: 10px; border: 1.5px solid #d9cff0;
-            background: #faf8ff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237b4fc9' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;
-            appearance: none; -webkit-appearance: none;
-            font-size: 1rem; font-family: inherit; color: #333;
-            outline: none; cursor: pointer; box-sizing: border-box;
+            width: 100%; padding: 8px 26px 8px 2px; border: none; border-bottom: 1.5px solid rgba(60,70,90,0.45); border-radius: 0;
+            background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236c7686' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 4px center;
+            -webkit-appearance: none; appearance: none; outline: none; cursor: pointer;
+            font-family: inherit; font-size: 1.08rem; font-weight: 700; color: #1e2733;
         }
-        .purpose-select:focus { border-color: #7b4fc9; background-color: #fff; }
-        .purpose-select.error { border-color: #e05555; background-color: #fff5f5; }
-        .purpose-err { font-size: 0.85rem; color: #e05555; min-height: 1em; }
-
-        .confirm-btns { display: flex; gap: 10px; }
-        .confirm-btns button {
-            flex: 1; padding: 12px; border-radius: 10px; border: none;
-            font-size: 1rem; font-weight: 700; cursor: pointer; color: #fff;
-            box-shadow: none; backdrop-filter: none;
-        }
-        .confirm-btns button::before { display: none; }
-        .btn-add-more { background: #7b4fc9; }
-        .btn-add-more:hover { background: #6a3db8; transform: translateY(-1px); }
-        .btn-submit-dev { background: #06d6a0; }
-        .btn-submit-dev:hover { background: #04b888; transform: translateY(-1px); }
-        .btn-cancel-dev { background: #e05555; }
-        .btn-cancel-dev:hover { background: #c83e3e; transform: translateY(-1px); }
-
-        /* ── 自訂提示框 ── */
-        .msg-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55); z-index: 700;
-            align-items: center; justify-content: center;
-        }
-        .msg-overlay.show { display: flex; }
-        .msg-box {
-            background: #fff; color: #333; border-radius: 18px;
-            padding: 28px 24px 20px; width: 82%; max-width: 340px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
-            display: flex; flex-direction: column; align-items: center; gap: 16px;
-            text-align: center;
-        }
-        .msg-icon { font-size: 2.2rem; }
-        .msg-text { font-size: 1.05rem; font-weight: 600; color: #444; line-height: 1.6; }
-        .msg-ok {
-            padding: 10px 36px; border-radius: 10px; border: none;
-            background: #7b4fc9; color: #fff; font-size: 1rem;
-            font-weight: 700; cursor: pointer;
-        }
-        .msg-ok:hover { background: #6a3db8; }
-        /* ── 歸還提示框 ── */
-        .return-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55); z-index: 650;
-            align-items: center; justify-content: center;
-        }
-        .return-overlay.show { display: flex; }
-        .return-box {
-            background: #fff; color: #333; border-radius: 18px;
-            padding: 26px 22px 20px; width: 88%; max-width: 380px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
-            display: flex; flex-direction: column; gap: 14px;
-        }
-        .return-icon { font-size: 2.2rem; text-align: center; }
-        .return-text { font-size: 1.05rem; font-weight: 600; color: #444; line-height: 1.7; text-align: center; }
-        .return-text b { color: #5a3ea8; }
-        .return-list {
-            background: #f5f0ff; border-radius: 10px; padding: 10px 14px;
-            display: flex; flex-direction: column; gap: 6px;
-            max-height: 40vh; overflow-y: auto;
-        }
-        .return-item { font-size: 1rem; color: #444; line-height: 1.5; }
-        .return-item .r-date { color: #888; font-size: 0.9rem; margin-right: 8px; }
-        .return-item .r-dev  { color: #5a3ea8; font-weight: 700; }
-        .return-note-label { font-size: 0.95rem; font-weight: 700; color: #555; }
+        .purpose-select:focus { border-bottom-color: var(--sage); background-color: rgba(111,138,104,0.06); }
+        .purpose-select.error { border-bottom-color: #a8432c; background-color: rgba(168,67,44,0.06); }
+        .purpose-err, .return-msg { font-size: 0.88rem; color: #a8432c; min-height: 1.1em; text-align: left; }
+        .return-msg { text-align: center; }
         .return-note {
-            width: 100%; min-height: 80px; resize: vertical;
-            padding: 10px 12px; border-radius: 10px;
-            border: 1.5px solid #d9cff0; background: #faf8ff;
-            font-size: 1rem; font-family: inherit; color: #333; outline: none;
-            box-sizing: border-box;
+            width: 100%; min-height: 80px; resize: vertical; padding: 8px 10px; outline: none;
+            border: 1px solid rgba(60,70,90,0.25); border-radius: 3px; background: rgba(255,255,255,0.6);
+            font-family: inherit; font-size: 1rem; color: var(--ink);
         }
-        .return-note:focus { border-color: #7b4fc9; background: #fff; }
-        .return-btns { display: flex; gap: 10px; }
-        .return-btns button {
-            flex: 1; padding: 12px; border-radius: 10px; border: none;
-            font-size: 1rem; font-weight: 700; cursor: pointer; color: #fff;
-            box-shadow: none; backdrop-filter: none;
-        }
-        .return-btns button::before { display: none; }
-        .btn-return-ok   { background: #06d6a0; }
-        .btn-return-ok:hover   { background: #04b888; }
-        .btn-return-later{ background: #a0a0b0; }
-        .btn-return-later:hover{ background: #888898; }
-        .return-btns button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .return-msg { font-size: 0.9rem; text-align: center; min-height: 1.2em; color: #e05555; }
+        .return-note:focus { border-color: var(--sage); }
+        .remind-list { list-style: none; max-height: 45vh; overflow-y: auto; text-align: left; border-top: 2px solid rgba(90,120,160,0.4); }
+        .remind-list li { padding: 10px 4px; border-bottom: 1px solid rgba(110,150,190,0.35); font-size: 1rem; line-height: 1.6; }
 
-        /* ── 設備未歸還提醒框（新增，與 device 頁相同） ── */
-        .remind-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); z-index: 680;
-            align-items: center; justify-content: center; padding: 20px;
+        /* 木板按鍵 */
+        .confirm-btns, .return-btns, .remind-btns { display: flex; gap: 10px; }
+        .confirm-btns button, .return-btns button, .remind-btns button, .msg-ok {
+            flex: 1; height: 46px; padding: 0 12px; border: none; border-radius: 4px; cursor: pointer;
+            font-family: 'Noto Serif TC', serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.1em;
+            color: #fff8ec; text-shadow: 0 -1px 0 rgba(40,25,10,0.35);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset -2px -3px 0 rgba(40,25,10,0.18), 3px 5px 8px rgba(70,50,30,0.22);
+            background-size: 240px 100%, auto;
         }
-        .remind-overlay.show { display: flex; }
-        .remind-box {
-            background: #fff; color: #333; border-radius: 18px;
-            padding: 24px 22px 20px; width: 100%; max-width: 380px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.28);
-            text-align: center;
-        }
-        .remind-icon { font-size: 2.2rem; margin-bottom: 6px; }
-        .remind-title { font-size: 1.15rem; font-weight: 700; color: #e8590c; margin-bottom: 14px; }
-        .remind-list {
-            list-style: none; margin: 0 0 18px; padding: 0;
-            max-height: 45vh; overflow-y: auto; text-align: left;
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        .remind-list li {
-            background: #fff4e6; border: 1.5px solid #ffd8a8;
-            border-radius: 12px; padding: 10px 14px;
-            font-size: 0.98rem; line-height: 1.6; color: #333;
-        }
-        .remind-list b { color: #d9480f; }
-        .remind-btns { display: flex; gap: 10px; }
-        .remind-btns button {
-            flex: 1; padding: 12px; border-radius: 10px; border: none;
-            font-size: 1rem; font-weight: 700; cursor: pointer;
-            box-shadow: none; backdrop-filter: none;
-        }
-        .remind-btns button::before { display: none; }
-        .btn-remind-cancel { background: #eceaf3; color: #666; }
-        .btn-remind-cancel:hover { background: #dddae8; }
-        .btn-remind-ok { background: #06d6a0; color: #fff; }
-        .btn-remind-ok:hover { background: #04b888; }
-        .confirm-btns button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        /* ── 圓圈選單（新增；可旋轉） ── */
-        .circle-menu {
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
-            --d: clamp(100px, 29vw, 124px);          /* 圓圈直徑 */
-        }
-        .container:has(.circle-menu) { padding-left: 20px; padding-right: 20px; }
-        .ring {
-            position: relative;
-            width: 100%; max-width: 340px; aspect-ratio: 1 / 1;
-            touch-action: pan-y;                     /* 垂直仍可捲動，水平留給滑動 */
-            user-select: none; -webkit-user-select: none;
-        }
-        .ring .circle {
-            position: absolute;
-            transition: left 0.45s cubic-bezier(.4,.1,.2,1), top 0.45s cubic-bezier(.4,.1,.2,1),
-                        transform 0.2s, background 0.3s, box-shadow 0.3s;
-        }
-        /* 四個位置：上、右、下、左（順時針） */
-        .ring .circle.pos0 { left: calc(50% - var(--d)/2); top: 0; }
-        .ring .circle.pos1 { left: calc(100% - var(--d));  top: calc(50% - var(--d)/2); }
-        .ring .circle.pos2 { left: calc(50% - var(--d)/2); top: calc(100% - var(--d)); }
-        .ring .circle.pos3 { left: 0;                      top: calc(50% - var(--d)/2); }
-        .ring .circle.pos0 { box-shadow: 0 0 0 4px rgba(143,166,130,0.55), 0 10px 26px rgba(0,0,0,0.22); }   /* 最上方：鼠尾草綠外框 */
-        .ring-hint { font-size: 0.85rem; color: #7a8a70; letter-spacing: 1px; }
-
-        .circle-menu .circle {
-            width: var(--d);
-            height: var(--d);
-            aspect-ratio: 1 / 1;
-            padding: 0;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 18px;
-            font-weight: 700;
-            border: 2px solid rgba(255,255,255,0.45);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.18), inset 0 0 0 4px rgba(255,255,255,0.08);
-        }
-        .circle-menu .circle:hover  { transform: scale(1.06); box-shadow: 0 10px 24px rgba(0,0,0,0.22); }
-        .circle-menu .circle:active { transform: scale(0.96); }
-        .circle-menu .c-ic { font-size: 2.1rem; line-height: 1; }
-        .circle-menu .c-lb { font-size: 1rem; letter-spacing: 1px; white-space: nowrap; }
-
-        /* 各圓圈顏色（修改）：大地溫暖色系，搭配鼠尾草綠、各不相同 */
-        .circle-menu .circle { text-shadow: 0 1px 2px rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.7); }
-        .circle-menu .c-order { background: #b8694a; }              /* 訂餐：陶土橘 */
-        .circle-menu .c-order:hover { background: #a65b3e; }
-        .circle-menu .c-qr    { background: #b08a35; }              /* 快速登記：芥末黃 */
-        .circle-menu .c-qr:hover { background: #9c7a2c; }
-        .circle-menu .c-dev   { background: #5c7fa3; }              /* 設備：霧藍 */
-        .circle-menu .c-dev:hover { background: #4f7091; }
-        .circle-menu .c-sta   { background: #9a6884; }              /* 文具：藕紫 */
-        .circle-menu .c-sta:hover { background: #885a74; }
-        .circle-menu .c-back  { width: 84px; height: 84px; gap: 2px;
-                                background: #56694f; }              /* 返回：深橄欖綠 */
-        .circle-menu .c-back:hover { background: #4a5b44; }
-        /* 返回：改成圓角方形按鍵（修改） */
-        .circle-menu .circle.c-back {
-            width: 150px; height: 52px; aspect-ratio: auto;
-            border-radius: 14px;
-            flex-direction: row; gap: 8px;
-            margin-top: 6px;
-        }
-        .circle-menu .circle.c-back:hover  { transform: translateY(-2px); }
-        .circle-menu .circle.c-back:active { transform: translateY(0); }
-        .circle-menu .c-back .c-ic { font-size: 1.5rem; }
-        .circle-menu .c-back .c-lb { font-size: 0.9rem; }
-
-        /* ── 訂餐專用帳號：只顯示「訂餐」（新增） ── */
-        .ring.meal-only { aspect-ratio: auto; height: calc(var(--d) + 16px); }
-        .ring.meal-only .circle.c-order { left: calc(50% - var(--d)/2); top: 8px; }
-        .ring.meal-only #equipment,
-        .ring.meal-only #stationery,
-        .ring.meal-only #quick-scan { display: none; }
-        .meal-only-hide { display: none !important; }
+        .msg-ok { flex: 0 0 auto; min-width: 120px; }
+        .confirm-btns button:active, .return-btns button:active, .remind-btns button:active, .msg-ok:active { transform: translateY(2px); }
+        .confirm-btns button:disabled, .return-btns button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .btn-submit-dev, .btn-return-ok, .btn-remind-ok, .msg-ok { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #88a77a, #617f55); }
+        .btn-add-more { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='6'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #cfab62, #a8833a); }
+        .btn-cancel-dev { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #c78464, #a35d3f); }
+        .btn-return-later, .btn-remind-cancel { color: #4a2d14; text-shadow: 0 1px 0 rgba(255,240,215,0.55);
+            background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .19  0 0 0 0 .08  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"), linear-gradient(175deg, #e2c49c, #c9a171); }
 
         #toast {
-            position: fixed; top: 22px; left: 50%;
+            position: fixed; top: 22px; left: 50%; z-index: 999; max-width: 92vw;
             transform: translateX(-50%) translateY(-20px);
-            background: #06d6a0; color: #fff; padding: 12px 26px;
-            border-radius: 14px; font-size: 1rem; font-weight: 600;
-            z-index: 999; opacity: 0; transition: all 0.3s;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15); white-space: nowrap;
+            padding: 12px 22px; border-left: 4px solid var(--sage); border-radius: 2px;
+            background: linear-gradient(175deg, #fffef8, #f6f0e2); color: #3f5f38;
+            font-size: 1rem; font-weight: 700; text-align: center;
+            box-shadow: 0 0 0 1px rgba(120,100,70,0.12), 4px 8px 18px rgba(40,25,10,0.28);
+            opacity: 0; transition: all 0.3s; pointer-events: none;
         }
+
+        @media (max-height: 760px) {
+            .rope-row.r1 { height: 196px; }
+            .rope-row.r2 { height: 236px; }
+            .c-strip { font-size: 1.3rem; padding: 12px 0 10px; }
+            .chime.main .c-strip { font-size: 1.55rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { .c-sw, .c-tail { animation: none !important; } }
     </style>
 </head>
 <body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="ambient-top" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
 
-<div class="container">
-    <div class="info">
-        <div id="time"></div>
-        <div id="name" class="loading">載入中...</div>
+<!-- ══ 風鈴：上方一條繩掛「訂餐」，下方一條繩掛三個 ══ -->
+<div class="chimes">
+    <div class="rope-row r1">
+        <svg class="rope" viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true"><path class="r-base" d="M0 4 Q500 48 1000 4"/><path class="r-twist" d="M0 4 Q500 48 1000 4"/></svg>
+        <button class="chime main" id="order" aria-label="訂餐" style="--x:50%;--d:-0.4s;--g:199,132,100;--band:#c78464;--p1:#fbf1e8;--p2:#f3e2d4">
+            <span class="c-sw"><span class="c-knot"></span><span class="c-str"></span><span class="c-bell"></span>
+                <span class="c-tail"><span class="c-bead"></span><span class="c-str2"></span><span class="c-strip">訂餐</span></span></span>
+        </button>
     </div>
-    <!-- 圓圈選單（可左右滑動旋轉） -->
-    <div class="buttons circle-menu">
-        <div class="ring" id="ring">
-            <button class="circle c-order" id="order"><span class="c-ic">🍽️</span><span class="c-lb">訂餐</span></button>
-            <button class="circle c-dev" id="equipment"><span class="c-ic">📱</span><span class="c-lb">設備</span></button>
-            <button class="circle c-sta" id="stationery"><span class="c-ic">✏️</span><span class="c-lb">文具</span></button>
-            <button class="circle c-qr btn-qr" id="quick-scan"><span class="c-ic">📷</span><span class="c-lb">快速登記</span></button>
+    <div class="rope-row r2">
+        <svg class="rope" viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true"><path class="r-base" d="M0 4 Q500 48 1000 4"/><path class="r-twist" d="M0 4 Q500 48 1000 4"/></svg>
+        <button class="chime" id="quick-scan" aria-label="快速登記" style="--x:17%;--d:-1.6s;--g:207,171,98;--band:#cfab62;--p1:#fcf6e4;--p2:#f3e8c9">
+            <span class="c-sw"><span class="c-knot"></span><span class="c-str"></span><span class="c-bell"></span>
+                <span class="c-tail"><span class="c-bead"></span><span class="c-str2"></span><span class="c-strip">快速登記</span></span></span>
+        </button>
+        <button class="chime" id="equipment" aria-label="設備" style="--x:50%;--d:-2.9s;--g:120,146,173;--band:#7892ad;--p1:#eef3f8;--p2:#dde7f0">
+            <span class="c-sw"><span class="c-knot"></span><span class="c-str"></span><span class="c-bell"></span>
+                <span class="c-tail"><span class="c-bead"></span><span class="c-str2"></span><span class="c-strip">設備</span></span></span>
+        </button>
+        <button class="chime" id="stationery" aria-label="文具" style="--x:83%;--d:-0.9s;--g:154,104,132;--band:#9a6884;--p1:#f7eef3;--p2:#ecdde5">
+            <span class="c-sw"><span class="c-knot"></span><span class="c-str"></span><span class="c-bell"></span>
+                <span class="c-tail"><span class="c-bead"></span><span class="c-str2"></span><span class="c-strip">文具</span></span></span>
+        </button>
+    </div>
+</div>
+
+<!-- ══ 書桌：中間 iPad，右邊相片框 ══ -->
+<div class="desk">
+    <div class="items">
+        <div class="ipad">
+            <span class="cam"></span>
+            <div class="screen">
+                <div id="ipad-date"></div>
+                <div id="time"></div>
+                <div id="name" class="loading">載入中...</div>
+                <div id="acct"></div>
+                <button id="back">← 返回</button>
+            </div>
         </div>
-        <div class="ring-hint">← 左右滑動可旋轉 →</div>
-        <button class="circle c-back" id="back"><span class="c-ic">⬅️</span><span class="c-lb">返回</span></button>
+        <div class="frame-slot" id="frame-slot" role="button" tabindex="0" aria-label="換一張照片">
+            <div class="frame-mover" id="frame-mover">
+                <div class="frame oak" id="frame"><div class="mat"><img id="frame-img" alt="科室活動照片" src="photo1.jpg"></div></div>
+            </div>
+            <div class="hand" id="hand" aria-hidden="true">
+                <svg viewBox="0 0 240 100">
+                    <defs>
+                        <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d2b4"/><stop offset="0.6" stop-color="#eebf9b"/><stop offset="1" stop-color="#d9a581"/></linearGradient>
+                        <linearGradient id="sleeve" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fa9c2"/><stop offset="1" stop-color="#5f7d99"/></linearGradient>
+                    </defs>
+                    <!-- 袖子 -->
+                    <rect x="160" y="18" width="90" height="64" rx="10" fill="url(#sleeve)"/>
+                    <rect x="156" y="16" width="16" height="68" rx="6" fill="#e9eef3"/>
+                    <!-- 手背 -->
+                    <path d="M160 28 C130 20 102 20 80 26 L76 72 C100 80 132 80 160 70 Z" fill="url(#skin)"/>
+                    <!-- 四根手指（由上而下：食指、中指、無名指、小指），指尖勾住相框右緣 -->
+                    <rect x="22" y="24" width="64" height="13" rx="6.5" fill="url(#skin)"/>
+                    <rect x="14" y="38" width="72" height="13.5" rx="6.75" fill="url(#skin)"/>
+                    <rect x="18" y="52.5" width="68" height="13" rx="6.5" fill="url(#skin)"/>
+                    <rect x="32" y="66" width="52" height="11.5" rx="5.75" fill="url(#skin)"/>
+                    <!-- 指節與指縫 -->
+                    <path d="M86 37.5 H40 M86 52 H36 M86 66 H44" stroke="#c98f6d" stroke-width="1" fill="none" opacity="0.7"/>
+                    <path d="M58 26 v9 M54 40 v9 M56 54.5 v9 M62 67.5 v8" stroke="#c98f6d" stroke-width="1" opacity="0.55"/>
+                    <!-- 指尖陰影 -->
+                    <path d="M22 30.5 a6.5 6.5 0 0 1 6.5 -6.5 M14 44.75 a6.75 6.75 0 0 1 6.75 -6.75 M18 59 a6.5 6.5 0 0 1 6.5 -6.5 M32 71.75 a5.75 5.75 0 0 1 5.75 -5.75" stroke="#d29a76" stroke-width="2" fill="none" opacity="0.6"/>
+                </svg>
+            </div>
+        </div>
     </div>
+    <div class="tabletop"><span class="desk-note">點相框換照片</span></div>
+    <div class="under"></div>
 </div>
 
 <!-- QR 掃描 overlay -->
 <div class="qr-overlay" id="qr-overlay">
-    <div class="qr-title">📷 對準設備上的 QR Code</div>
+    <div class="qr-title">對準設備上的 QR Code</div>
     <video id="qr-video" autoplay playsinline muted></video>
     <canvas id="qr-canvas" style="display:none;"></canvas>
     <div class="qr-hint">掃描後自動辨識設備</div>
@@ -367,9 +452,8 @@
     <div class="confirm-dialog">
         <div class="confirm-title" id="confirm-title">登記以下設備嗎？</div>
         <div class="device-list" id="device-list"></div>
-        <!-- 用途（新增） -->
         <div class="purpose-wrap">
-            <label class="purpose-label" for="purpose-select">📝 用途 <span class="req">*</span></label>
+            <label class="purpose-label" for="purpose-select">用途 <span class="req">*</span></label>
             <select class="purpose-select" id="purpose-select">
                 <option value="">請選擇用途</option>
                 <option value="開會(科會、個案研討、讀書會、各項會議)">開會（科會、個案研討、讀書會、各項會議）</option>
@@ -390,7 +474,7 @@
 
 <div id="toast"></div>
 
-<!-- 設備未歸還提醒框（新增，與 device 頁相同） -->
+<!-- 設備未歸還提醒框 -->
 <div class="remind-overlay" id="remind-overlay">
     <div class="remind-box">
         <div class="remind-icon">⚠️</div>
@@ -430,13 +514,278 @@
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
+        // ══ 光線隨時間變化（新增）══
+  //  早上太陽在左邊（東）低低的、偏金黃；中午在正上方、白亮；
+  //  下午移到右邊；傍晚右側低角度橘紅；入夜後房間變暗、改成月光＋桌燈。
+  //  測試用：網址後面加 ?hour=18.5 可以直接看某個時間的樣子
+  (function () {
+      //  時間   太陽X  太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影
+      //  時間   太陽X 太陽Y  光色R,G,B      強度  影子X 影子Y  天色R,G,B     天色濃度 桌燈 葉影  窗光  窗X(vw) 窗Y(vh) 傾斜  旋轉
+      const K = [
+          [0,     72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],   // 深夜：月光
+          [4.6,   72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18,  -4],
+          [5.6,    0, 66,  255,160,130,  .80,   48, 12, 214,160,200,  .45,  .35, .80, .55, 52,  6,  -42,  6],   // 破曉：粉紫
+          [7,      2, 42,  255,206,130,  .95,   40, 18, 255,226,190,  .18,  0,   1.5, .75, 46,  4,  -34,  4],   // 早晨：金黃
+          [10,    24, 12,  255,226,170,  .85,   22, 30, 255,248,236,  .04,  0,   1.6, .65, 34, 14,  -18,  2],
+          [12.5,  50,  0,  255,246,226,  .70,    0, 38, 255,255,255,  0,    0,   1.4, .55, 22, 34,    0,  0],   // 正午：白亮、影子短
+          [15,    78, 12,  255,220,150,  .85,  -22, 30, 255,244,226,  .06,  0,   1.6, .65,  8, 14,   18, -2],
+          [17,    98, 40,  255,160, 80,  1,    -42, 18, 255,190,140,  .30,  0,   1.7, .80, -4,  4,   34, -4],   // 傍晚：橘
+          [18.2, 100, 66,  255,110, 90,  .85,  -50, 12, 170,110,150,  .52,  .40, 1.1, .55, -8,  6,   42, -6],   // 黃昏：紅紫
+          [19.4,  72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],   // 入夜
+          [24,    72,  8,  170,190,255,  .28,  -10, 22,  52, 64,105,  .80,  .85, .55, .22,  2,  -6,  18, -4],
+      ];
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      function apply() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < K.length - 2 && h >= K[i + 1][0]) i++;
+          const a = K[i], b = K[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          const v = a.map((x, j) => x + (b[j] - x) * t);
+          const r = document.documentElement.style;
+          r.setProperty('--sunx', v[1] + '%');
+          r.setProperty('--suny', v[2] + '%');
+          r.setProperty('--sunc', `${v[3] | 0},${v[4] | 0},${v[5] | 0}`);
+          r.setProperty('--suna', v[6].toFixed(3));
+          r.setProperty('--sx', v[7].toFixed(1) + 'px');
+          r.setProperty('--sy', v[8].toFixed(1) + 'px');
+          r.setProperty('--ovc', `${v[9] | 0},${v[10] | 0},${v[11] | 0}`);
+          r.setProperty('--ova', v[12].toFixed(3));
+          r.setProperty('--lamp', v[13].toFixed(3));
+          r.setProperty('--leafk', v[14].toFixed(3));
+          r.setProperty('--win', v[15].toFixed(3));
+          r.setProperty('--wx', v[16].toFixed(1) + 'vw');
+          r.setProperty('--wy', v[17].toFixed(1) + 'vh');
+          r.setProperty('--wsk', v[18].toFixed(1) + 'deg');
+          r.setProperty('--wrot', v[19].toFixed(1) + 'deg');
+          document.documentElement.classList.toggle('night', v[12] > 0.45);
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = v[12] > 0.6 ? '#4b5270' : (v[12] > 0.3 ? '#c9a9a8' : '#efe6d8');
+      }
+      apply();
+      setInterval(apply, 60 * 1000);   // 每分鐘更新一次
+  })();
+
+        // ══════════════════════════════════════════
+  //  寫實光影（Canvas）
+  //  牆面在陰影中是偏冷的灰；陽光穿過窗戶，在牆上投出一塊暖色光斑，
+  //  窗框形成十字陰影，窗外的樹葉在光斑裡留下深淺不一的影子並隨風擺動。
+  //  早上太陽低、光斑又長又斜、偏右；中午太陽高、光斑小而低；
+  //  下午移到左邊；傍晚轉橘紅；夜晚只剩微弱的冷色月光。
+  // ══════════════════════════════════════════
+  (function () {
+      const cv = document.getElementById('scene');
+      const ctx = cv.getContext('2d');
+      const SCALE = 0.5;                       // 半解析度繪製：陰影本來就柔，也比較省電
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const forced = parseFloat(new URLSearchParams(location.search).get('hour'));
+      let W = 0, H = 0;
+
+      // 亂數（固定種子，每次畫出來的樹一樣）
+      let seed = 11;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const R = (a, b) => a + rnd() * (b - a);
+
+      // ── 時間表 ──
+      //  時:  陰影牆色RGB      光的加亮RGB     光斑 x   y    寬   高   斜    葉影深淺 風力
+      const T = [
+          [0,    36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],   // 夜：月光
+          [4.6,  36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+          [5.6, 146,136,146,  105, 58, 46,   .50, .00, .56, .50,  .28,  .70, .7],  // 破曉
+          [7,   188,180,170,  100, 72, 34,   .44, .00, .52, .60,  .22,  .85, .8],  // 早晨
+          [10,  204,197,187,   72, 60, 40,   .33, .10, .44, .62,  .10,  .90, 1 ],
+          [12.5,212,206,196,   52, 48, 38,   .22, .44, .50, .50,  .00,  .80, 1 ],  // 正午：光斑低而小
+          [15,  204,196,185,   74, 60, 36,   .18, .10, .44, .62, -.10,  .90, 1 ],
+          [17,  178,163,148,  108, 64, 22,   .04, .00, .52, .62, -.22,  .90, .9],  // 傍晚
+          [18.2,126,106,112,   96, 40, 24,  -.06, .02, .56, .50, -.28,  .75, .7],  // 黃昏
+          [19.4, 36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],  // 入夜
+          [24,   36, 42, 60,   14, 18, 30,   .56, .06, .38, .52, -.06,  .45, .5],
+      ];
+      function sample() {
+          const now = new Date();
+          const h = isNaN(forced) ? now.getHours() + now.getMinutes() / 60 : ((forced % 24) + 24) % 24;
+          let i = 0; while (i < T.length - 2 && h >= T[i + 1][0]) i++;
+          const a = T[i], b = T[i + 1], t = (h - a[0]) / (b[0] - a[0] || 1);
+          return a.map((x, j) => x + (b[j] - x) * t);
+      }
+
+      // ── 畫一根帶葉子的樹枝（黑色剪影）到離屏畫布，再用「縮小再放大」做出柔邊 ──
+      function leaf(c, L, Wd) {
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.bezierCurveTo(L * 0.28, -Wd * 1.05, L * 0.72, -Wd * 0.85, L, R(-1, 1));
+          c.bezierCurveTo(L * 0.70, Wd * 0.95, L * 0.30, Wd * 0.9, 0, 0);
+          c.fill();
+          c.lineWidth = 1.1; c.beginPath(); c.moveTo(-L * 0.12, 0); c.lineTo(0, 0); c.stroke();
+      }
+      function branchSprite(size, blurK, sd) {
+          seed = sd;
+          const s = document.createElement('canvas'); s.width = s.height = size;
+          const c = s.getContext('2d');
+          c.fillStyle = '#000'; c.strokeStyle = '#000'; c.lineCap = 'round';
+          function grow(x, y, ang, len, thick, depth) {
+              const steps = Math.max(6, len / 14 | 0);
+              let cx = x, cy = y, a = ang;
+              for (let i = 0; i < steps; i++) {
+                  a += R(-0.10, 0.10);
+                  const nx = cx + Math.cos(a) * len / steps, ny = cy + Math.sin(a) * len / steps;
+                  c.lineWidth = Math.max(0.8, thick * (1 - i / steps));
+                  c.beginPath(); c.moveTo(cx, cy); c.lineTo(nx, ny); c.stroke();
+                  cx = nx; cy = ny;
+                  // 葉子：左右交錯、大小不一、角度隨機
+                  if (i > 0 && rnd() < 0.85) {
+                      const side = i % 2 ? 1 : -1;
+                      c.save(); c.translate(cx, cy);
+                      c.rotate(a + side * R(0.6, 1.2));
+                      const L = R(22, 42) * (depth ? 0.85 : 1), Wd = L * R(0.26, 0.4);
+                      c.scale(1, R(0.55, 1));            // 有些葉子斜著，影子變扁
+                      leaf(c, L, Wd); c.restore();
+                  }
+                  // 小枝
+                  if (depth < 2 && i > 1 && rnd() < 0.28) {
+                      grow(cx, cy, a + (rnd() < 0.5 ? -1 : 1) * R(0.5, 1.0), len * R(0.3, 0.5), thick * 0.55, depth + 1);
+                  }
+              }
+              // 枝端一簇葉
+              for (let k = 0; k < 4; k++) {
+                  c.save(); c.translate(cx, cy); c.rotate(a + R(-0.9, 0.9));
+                  const L = R(20, 36); leaf(c, L, L * R(0.28, 0.38)); c.restore();
+              }
+          }
+          grow(size * 0.98, size * 0.04, R(2.3, 2.6), size * 0.95, 6, 0);
+          // 柔邊（模擬半影）：縮小再放大
+          const k = Math.max(1, blurK);
+          const t1 = document.createElement('canvas');
+          t1.width = Math.max(1, size / k | 0); t1.height = t1.width;
+          const c1 = t1.getContext('2d'); c1.imageSmoothingQuality = 'high';
+          c1.drawImage(s, 0, 0, t1.width, t1.height);
+          const out = document.createElement('canvas'); out.width = out.height = size;
+          const co = out.getContext('2d'); co.imageSmoothingQuality = 'high';
+          co.drawImage(t1, 0, 0, size, size);
+          return out;
+      }
+
+      // 三種距離的樹枝：遠的模糊、近的清楚
+      let sprites = [];
+      function buildSprites() {
+          const base = Math.round(Math.max(W, H) * 0.9);
+          sprites = [
+              { img: branchSprite(base,       7, 21), fx: .55, fy: -.18, rot: .25, s: 1.10, a: .55, amp: .020, f: .55, ph: 0   },
+              { img: branchSprite(base,       6, 37), fx: .10, fy:  .05, rot: -.1, s: 0.95, a: .55, amp: .018, f: .48, ph: 1.7 },
+              { img: branchSprite(base * .8,  3.5, 53), fx: .40, fy: -.05, rot: .05, s: 1.00, a: .78, amp: .030, f: .80, ph: 3.1 },
+              { img: branchSprite(base * .8,  3, 71), fx: -.05, fy: .25, rot: -.35, s: 0.90, a: .75, amp: .028, f: .72, ph: 4.4 },
+              { img: branchSprite(base * .6,  1.8, 97), fx: .62, fy: .10, rot: .45, s: 0.90, a: .88, amp: .045, f: 1.1, ph: 2.2 },
+          ];
+      }
+
+      // 光斑位置：手機直式畫面比較窄，光斑放大一些才看得到
+      function geo() {
+          const portrait = H > W * 1.2;
+          const kw = portrait ? 1.9 : 1, kh = portrait ? 1.05 : 1;
+          const w = P[9] * W * kw, h = P[10] * H * kh;
+          const x = portrait ? (P[7] - 0.22) * W * 1.35 : P[7] * W;
+          const y = P[8] * H * (portrait ? 0.8 : 1);
+          return [x, y, w, h, P[11] * W * kw];
+      }
+
+      // 光斑（含窗框十字），每分鐘依時間重畫一次
+      const patch = document.createElement('canvas');
+      let P = null;
+      function buildPatch() {
+          P = sample();
+          patch.width = W; patch.height = H;
+          const c = patch.getContext('2d');
+          c.clearRect(0, 0, W, H);
+          const [x, y, w, h, sk] = geo();
+          // 先畫在小畫布再放大 → 光斑邊緣自然柔和
+          const k = 6, sm = document.createElement('canvas');
+          sm.width = Math.ceil(W / k); sm.height = Math.ceil(H / k);
+          const s = sm.getContext('2d');
+          s.scale(1 / k, 1 / k);
+          s.fillStyle = `rgb(${P[4] | 0},${P[5] | 0},${P[6] | 0})`;
+          s.beginPath();
+          s.moveTo(x, y); s.lineTo(x + w, y); s.lineTo(x + w + sk, y + h); s.lineTo(x + sk, y + h); s.closePath();
+          s.fill();
+          // 窗框：一直一橫的陰影
+          s.globalCompositeOperation = 'destination-out';
+          const mw = Math.max(6, w * 0.035);
+          s.beginPath();
+          s.moveTo(x + w * .5 - mw / 2, y); s.lineTo(x + w * .5 + mw / 2, y);
+          s.lineTo(x + w * .5 + mw / 2 + sk, y + h); s.lineTo(x + w * .5 - mw / 2 + sk, y + h); s.closePath(); s.fill();
+          const yy = y + h * .46, sx = sk * .46;
+          s.fillRect(x + sx - 4, yy - mw / 2, w + 8, mw);
+          c.imageSmoothingQuality = 'high';
+          c.drawImage(sm, 0, 0, W, H);
+      }
+
+      const light = document.createElement('canvas');
+      function draw(t) {
+          if (!P) return;
+          const lc = light.getContext('2d');
+          lc.globalCompositeOperation = 'source-over';
+          lc.clearRect(0, 0, W, H);
+          lc.drawImage(patch, 0, 0);
+          // 樹葉擋光：從光斑中「挖掉」葉影
+          lc.globalCompositeOperation = 'destination-out';
+          const [x, y, w, h, sk] = geo();
+          const wind = P[13];
+          // 陣風：幾個慢速波疊起來，偶爾大一點
+          const gust = Math.max(0, Math.sin(t * 0.21) + Math.sin(t * 0.083 + 1.3) - 0.6) * 0.6;
+          sprites.forEach(sp => {
+              const sway = (Math.sin(t * sp.f + sp.ph) + 0.45 * Math.sin(t * sp.f * 2.3 + sp.ph * 1.7)) * sp.amp * wind
+                         + gust * sp.amp * 1.6 * wind;
+              const size = sp.img.width * sp.s;
+              lc.save();
+              lc.globalAlpha = sp.a * P[12];
+              lc.translate(x + w * sp.fx + sk * 0.3, y + h * sp.fy);
+              lc.transform(1, 0, P[11] * 0.6, 1, 0, 0);     // 影子跟著光線一起斜
+              lc.rotate(sp.rot + sway);
+              lc.translate(Math.sin(t * sp.f * 0.7 + sp.ph) * 3 * wind, 0);
+              lc.drawImage(sp.img, -size * 0.5, -size * 0.1, size, size);
+              lc.restore();
+          });
+          // 牆面＝陰影色，再「加上」光
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = `rgb(${P[1] | 0},${P[2] | 0},${P[3] | 0})`;
+          ctx.fillRect(0, 0, W, H);
+          // 室內的反射光：靠下方稍暗（地板方向）
+          const g = ctx.createLinearGradient(0, 0, 0, H);
+          g.addColorStop(0, 'rgba(255,255,255,0.04)'); g.addColorStop(1, 'rgba(40,25,10,0.10)');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.drawImage(light, 0, 0);
+          ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function resize() {
+          W = Math.max(1, Math.round(innerWidth * SCALE));
+          H = Math.max(1, Math.round(Math.max(innerHeight, document.documentElement.clientHeight) * 1.15 * SCALE));
+          cv.width = W; cv.height = H; light.width = W; light.height = H;
+          buildSprites(); buildPatch(); draw(performance.now() / 1000);
+      }
+      resize();
+      // 只有寬度改變（例如手機轉向）才重畫；捲動時網址列伸縮只改高度，不理會（修改）
+      let lastW = innerWidth, rt;
+      addEventListener('resize', () => { if (Math.abs(innerWidth - lastW) < 2) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(resize, 200); });
+      setInterval(() => { buildPatch(); if (reduce) draw(0); }, 60 * 1000);
+
+      if (!reduce) {
+          let last = 0;
+          (function loop(ts) {
+              requestAnimationFrame(loop);
+              if (document.hidden || ts - last < 33) return;   // 約每秒 30 張
+              last = ts;
+              draw(ts / 1000);
+          })(0);
+      }
+  })();
+
+
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyACtMKVngQdstQIvWwhxhG5AdvCZElmCdKvW8kQLWguHxLCWESDlVPjm13Ae_lEgDd/exec';
 
     // ── 訂餐專用帳號（新增）：由 index 登入 2040 時設定 ──
     const MEAL_ONLY = localStorage.getItem('mealOnly') === '1' && localStorage.getItem('account') === '2040';
     if (MEAL_ONLY) {
-        document.getElementById('ring').classList.add('meal-only');
-        document.querySelector('.ring-hint').classList.add('meal-only-hide');
+        document.body.classList.add('meal-only');   // 只留上方「訂餐」風鈴（修改）
     }
 
     // ── 自訂提示框 ──
@@ -453,15 +802,19 @@
     }
 
     // ── 時鐘 ──
-    function updateTime() {
+    function updateTime() {   // iPad 畫面：日期＋時間（修改）
         const now = new Date();
-        document.getElementById('time').textContent = now.toLocaleString('zh-TW');   // 與 index 相同格式（修改）
+        const wk = '日一二三四五六'[now.getDay()];
+        document.getElementById('ipad-date').textContent = `${now.getMonth() + 1}月${now.getDate()}日 星期${wk}`;
+        document.getElementById('time').textContent =
+            String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
     }
     updateTime(); setInterval(updateTime, 1000);
 
     // ── 取姓名 ──
     const account = localStorage.getItem('account');
     let currentUserName = '';
+    if (account) document.getElementById('acct').textContent = '帳號：' + account;   // iPad 顯示帳號（新增）
     if (!account) { showMsg('請先登入', '🔒', () => { window.location.href = 'index.html'; }); }
     else if (MEAL_ONLY) {   // 訂餐專用帳號：顯示單位名稱（新增）
         currentUserName = '社區醫學科';
@@ -474,11 +827,13 @@
             .then(data => {
                 currentUserName = data.name || account;
                 document.getElementById('name').textContent = '歡迎，' + currentUserName;
+                document.getElementById('name').classList.remove('loading');
                 checkUnreturned();
             })
             .catch(() => {
                 currentUserName = account;
                 document.getElementById('name').textContent = '歡迎，' + account;
+                document.getElementById('name').classList.remove('loading');
             });
     }
 
@@ -573,55 +928,21 @@
         setTimeout(() => { if (_msgCallback === cb) closeMsg(); }, 2000);
     }
 
-    // ══════════════════════════════
-    //  圓圈選單：左右滑動旋轉（新增）
-    //  往右滑 → 順時針（左邊的轉到上方）；往左滑 → 逆時針
-    // ══════════════════════════════
-    (function () {
-        const ring  = document.getElementById('ring');
-        if (MEAL_ONLY) return;   // 訂餐專用帳號只有一個選項，不需旋轉（新增）
-        const order = ['order', 'equipment', 'stationery', 'quick-scan']; // 初始：上、右、下、左
-        let rot = 0;
-        function layout() {
-            order.forEach((id, i) => {
-                const el = document.getElementById(id);
-                el.classList.remove('pos0', 'pos1', 'pos2', 'pos3');
-                el.classList.add('pos' + (((i + rot) % 4) + 4) % 4);
-            });
-        }
-        layout();
-
-        let sx = 0, sy = 0, tracking = false, swiped = false;
-        ring.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; tracking = true; swiped = false; });
-        ring.addEventListener('pointerup', e => {
-            if (!tracking) return;
-            tracking = false;
-            const dx = e.clientX - sx, dy = e.clientY - sy;
-            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-                rot += dx > 0 ? 1 : -1;      // 右滑 +1（順時針）、左滑 -1
-                layout();
-                swiped = true;               // 這次是滑動，不要觸發按鈕
-            }
-        });
-        ring.addEventListener('pointercancel', () => { tracking = false; });
-        // 滑動後擋掉緊接著的 click，避免誤開頁面
-        ring.addEventListener('click', e => {
-            if (swiped) { e.stopPropagation(); e.preventDefault(); swiped = false; }
-        }, true);
-        // 電腦可用鍵盤左右鍵旋轉
-        document.addEventListener('keydown', e => {
-            if (document.querySelector('.qr-overlay.show, .confirm-overlay.show, .msg-overlay.show, .return-overlay.show, .remind-overlay.show')) return;
-            if (e.key === 'ArrowRight') { rot++; layout(); }
-            if (e.key === 'ArrowLeft')  { rot--; layout(); }
-        });
-    })();
-
     // ── 按鈕 ──
-    document.getElementById('equipment').addEventListener('click', () => window.location.href = 'device.html');
-    document.getElementById('stationery').addEventListener('click', () => window.location.href = 'Stationery.html');
-    document.getElementById('order').addEventListener('click', () => window.location.href = 'meal.html');
+    // 風鈴：點一下先像被風吹一樣晃動，再進入頁面（修改）
+    function chimeGo(id, action) {
+        document.getElementById(id).addEventListener('click', function () {
+            if (this.dataset.busy) return;
+            this.dataset.busy = '1';
+            blow(this);
+            setTimeout(() => { delete this.dataset.busy; action(); }, 520);
+        });
+    }
+    chimeGo('equipment',  () => window.location.href = 'device.html');
+    chimeGo('stationery', () => window.location.href = 'Stationery.html');
+    chimeGo('order',      () => window.location.href = 'meal.html');
+    chimeGo('quick-scan', openQR);
     document.getElementById('back').addEventListener('click', () => { localStorage.removeItem('account'); localStorage.removeItem('mealOnly'); window.location.href = 'index.html'; });
-    document.getElementById('quick-scan').addEventListener('click', openQR);
 
     // ══════════════════════════════
     //  QR 掃描
@@ -866,6 +1187,98 @@
             t.style.transform = 'translateX(-50%) translateY(-20px)';
         }, 2500);
     }
+
+    // ══════════════════════════════
+    //  風鈴（新增）：掛在繩子上、碰到會像被風吹過一樣晃動
+    // ══════════════════════════════
+    function blow(el) {
+        el.classList.remove('blow', 'breeze'); void el.offsetWidth; el.classList.add('blow');
+        // 同一條繩上的其他風鈴也跟著輕輕晃
+        el.parentElement.querySelectorAll('.chime').forEach((o, i) => {
+            if (o === el) return;
+            setTimeout(() => { o.classList.remove('breeze'); void o.offsetWidth; if (!o.classList.contains('blow')) o.classList.add('breeze'); }, 120 + i * 90);
+        });
+    }
+    document.querySelectorAll('.chime').forEach(c => {
+        c.addEventListener('animationend', e => { if (e.target.classList.contains('c-tail')) c.classList.remove('blow', 'breeze'); });
+        c.addEventListener('mouseenter', () => blow(c));
+        c.addEventListener('touchstart', () => blow(c), { passive: true });
+    });
+    // 讓每個風鈴的結剛好落在下垂的繩子上
+    function placeChimes() {
+        document.querySelectorAll('.rope-row').forEach(row => {
+            const r = row.querySelector('.rope').getBoundingClientRect();
+            row.querySelectorAll('.chime').forEach(c => {
+                const b = c.getBoundingClientRect();
+                const t = Math.min(1, Math.max(0, (b.left + b.width / 2 - r.left) / r.width));
+                c.style.top = (4 + 88 * t * (1 - t) - 1) + 'px';
+            });
+        });
+    }
+    placeChimes();
+    let _pw = innerWidth;
+    addEventListener('resize', () => { if (Math.abs(innerWidth - _pw) < 2) return; _pw = innerWidth; placeChimes(); });
+
+    // ══════════════════════════════
+    //  相片框（新增）：點一下，一隻手把相框拿走，換上另一個相框，照片隨機
+    // ══════════════════════════════
+    (function () {
+        const PHOTOS = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg'];
+        const STYLES = ['oak', 'white', 'black'];
+        PHOTOS.forEach(src => { const im = new Image(); im.src = src; });   // 先載好，換的時候不會閃
+        const slot  = document.getElementById('frame-slot');
+        const mover = document.getElementById('frame-mover');
+        const frame = document.getElementById('frame');
+        const img   = document.getElementById('frame-img');
+        const hand  = document.getElementById('hand');
+        const pickOther = (arr, cur) => { const o = arr.filter(x => x !== cur); return o[Math.floor(Math.random() * o.length)]; };
+        let curPhoto = PHOTOS[Math.floor(Math.random() * PHOTOS.length)];
+        let curStyle = 'oak';
+        img.src = curPhoto;
+
+        const wait = ms => new Promise(r => setTimeout(r, ms));
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let busy = false;
+        async function swap() {
+            if (busy) return;
+            busy = true;
+            const nextPhoto = pickOther(PHOTOS, curPhoto);
+            const nextStyle = pickOther(STYLES, curStyle);
+            if (reduce) { apply(nextPhoto, nextStyle); busy = false; return; }
+            const off = Math.max(200, innerWidth - slot.getBoundingClientRect().left + 40);
+            const IN = 'cubic-bezier(.2,.7,.3,1)', OUT = 'cubic-bezier(.5,0,.75,0)';
+            const go = (el, from, to, dur, easing) => el.animate([{ transform: from }, { transform: to }], { duration: dur, easing, fill: 'forwards' }).finished;
+            // 1. 手伸進來，抓住相框
+            await go(hand, `translateX(${off}px)`, 'translateX(0)', 520, IN);
+            await wait(140);
+            // 2. 連同相框一起拿走
+            await Promise.all([
+                go(hand,  'translateX(0)', `translateX(${off}px)`, 460, OUT),
+                go(mover, 'translateX(0) rotate(0)', `translateX(${off}px) rotate(5deg)`, 460, OUT)
+            ]);
+            // 3. 換一個相框、換一張照片
+            apply(nextPhoto, nextStyle);
+            await wait(180);
+            // 4. 放上新的相框
+            await Promise.all([
+                go(hand,  `translateX(${off}px)`, 'translateX(0)', 560, IN),
+                go(mover, `translateX(${off}px) rotate(-4deg)`, 'translateX(0) rotate(0)', 560, IN)
+            ]);
+            mover.animate([{ transform: 'translateY(-3px)' }, { transform: 'translateY(0)' }], { duration: 160, easing: 'ease-in' });
+            await wait(150);
+            // 5. 手縮回去
+            await go(hand, 'translateX(0)', `translateX(${off}px)`, 440, OUT);
+            busy = false;
+        }
+        function apply(p, s) {
+            curPhoto = p; curStyle = s;
+            img.src = p;
+            frame.className = 'frame ' + s;
+        }
+        slot.addEventListener('click', swap);
+        slot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); swap(); } });
+    })();
+
 </script>
 </body>
 </html>
