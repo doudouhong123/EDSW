@@ -7,7 +7,6 @@
     <title>義大社工科</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="preload" as="image" href="photo1.jpg">
     <style>
         /* ══════════ 主畫面：窗邊葉影＋風鈴＋書桌（與後台 deleloper 同一套光影）══════════ */
         :root {
@@ -146,8 +145,8 @@
         .desk { position: relative; z-index: 1; margin-top: auto; width: 100%; overflow: hidden; padding-top: 16px; }
         .items {
             position: relative; z-index: 2;
-            display: flex; justify-content: center; align-items: flex-end; gap: clamp(14px, 4vw, 34px);
-            padding: 0 12px; margin-bottom: -40px;
+            display: flex; justify-content: center; align-items: flex-end; gap: clamp(10px, 3vw, 34px);
+            padding: 0 10px; margin-bottom: -40px;
         }
         .tabletop {
             position: relative; height: 96px;
@@ -205,27 +204,27 @@
             content: ''; position: absolute; inset: 0; pointer-events: none;
             background: linear-gradient(118deg, rgba(255,255,255,0.16) 0 34%, rgba(255,255,255,0) 34.5%);
         }
-        #ipad-date { font-size: 0.86rem; font-weight: 700; letter-spacing: 0.06em; opacity: 0.95; }
+        #ipad-date { font-size: clamp(0.95rem, 4.3vw, 1.1rem); font-weight: 700; letter-spacing: 0.06em; opacity: 0.95; }
         #time {
-            font-size: clamp(2.6rem, 13vw, 3.5rem); font-weight: 500; line-height: 1.05; letter-spacing: 0.02em;
+            font-size: clamp(3.1rem, 15.5vw, 4.2rem); font-weight: 500; line-height: 1.05; letter-spacing: 0.02em;
             font-variant-numeric: tabular-nums; margin-top: 2px;
         }
-        #name { margin-top: auto; font-size: clamp(0.9rem, 4.2vw, 1.1rem); font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; }
+        #name { margin-top: auto; width: 100%; font-size: clamp(1.15rem, 5.4vw, 1.4rem); font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; }
         #name.loading { animation: pulse 1.5s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
-        #acct { font-size: 0.84rem; font-weight: 500; opacity: 0.9; margin-top: 2px; letter-spacing: 0.08em; }
+        #acct { display: none; font-size: 0.84rem; font-weight: 500; opacity: 0.9; margin-top: 2px; letter-spacing: 0.08em; }
         #back {
-            margin-top: 12px; height: 38px; padding: 0 22px; border-radius: 999px; cursor: pointer;
+            margin-top: 14px; height: 44px; padding: 0 26px; border-radius: 999px; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.24);
             -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-            color: #fff; font-family: inherit; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.2em;
+            color: #fff; font-family: inherit; font-size: 1.12rem; font-weight: 700; letter-spacing: 0.2em;
             text-shadow: 0 1px 3px rgba(0,0,0,0.25);
         }
         #back:active { transform: scale(0.96); background: rgba(255,255,255,0.34); }
 
         /* 相片框 */
         .frame-slot {
-            position: relative; flex: 0 0 auto; width: clamp(122px, 33vw, 196px);
+            position: relative; flex: 0 0 auto; width: clamp(150px, 40vw, 250px);
             margin-bottom: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
         .frame-mover { position: relative; }
@@ -401,13 +400,12 @@
                 <div id="ipad-date"></div>
                 <div id="time"></div>
                 <div id="name" class="loading">載入中...</div>
-                <div id="acct"></div>
                 <button id="back">← 返回</button>
             </div>
         </div>
         <div class="frame-slot" id="frame-slot" role="button" tabindex="0" aria-label="換一張照片">
             <div class="frame-mover" id="frame-mover">
-                <div class="frame oak" id="frame"><div class="mat"><img id="frame-img" alt="科室活動照片" src="photo1.jpg"></div></div>
+                <div class="frame oak" id="frame"><div class="mat"><img id="frame-img" alt="科室活動照片"></div></div>
             </div>
             <div class="hand" id="hand" aria-hidden="true">
                 <svg viewBox="0 0 240 100">
@@ -434,7 +432,7 @@
             </div>
         </div>
     </div>
-    <div class="tabletop"><span class="desk-note">點相框換照片</span></div>
+    <div class="tabletop"></div>
     <div class="under"></div>
 </div>
 
@@ -814,7 +812,6 @@
     // ── 取姓名 ──
     const account = localStorage.getItem('account');
     let currentUserName = '';
-    if (account) document.getElementById('acct').textContent = '帳號：' + account;   // iPad 顯示帳號（新增）
     if (!account) { showMsg('請先登入', '🔒', () => { window.location.href = 'index.html'; }); }
     else if (MEAL_ONLY) {   // 訂餐專用帳號：顯示單位名稱（新增）
         currentUserName = '社區醫學科';
@@ -1188,6 +1185,17 @@
         }, 2500);
     }
 
+    // iPad 上的名字太長時自動縮小字級，維持一行（新增）
+    function fitName() {
+        const el = document.getElementById('name');
+        el.style.fontSize = '';
+        let size = parseFloat(getComputedStyle(el).fontSize);
+        while (el.scrollWidth > el.clientWidth + 1 && size > 12) { size -= 0.5; el.style.fontSize = size + 'px'; }
+    }
+    new MutationObserver(fitName).observe(document.getElementById('name'), { childList: true, characterData: true, subtree: true });
+    fitName();
+    addEventListener('resize', fitName);
+
     // ══════════════════════════════
     //  風鈴（新增）：掛在繩子上、碰到會像被風吹過一樣晃動
     // ══════════════════════════════
@@ -1223,18 +1231,33 @@
     //  相片框（新增）：點一下，一隻手把相框拿走，換上另一個相框，照片隨機
     // ══════════════════════════════
     (function () {
-        const PHOTOS = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg'];
+        // 每張照片：[壓縮版（較快）, 原始檔名（備用）]；壓縮版沒上傳時自動改用原始檔
+        const PHOTOS = [
+            ['photo1.jpg', 'EA21686D-E859-4DE3-A28F-0E0F62FE076C.jpg'],
+            ['photo2.jpg', '6C4A9967-CD74-4885-A2A3-9E864190E0B5.jpg'],
+            ['photo3.jpg', '9ECAE22C-EF9E-460A-B2BC-F49EEA83783C.jpg'],
+        ];
+        const resolved = PHOTOS.map(p => p[0]);   // 實際能載入的網址
+        PHOTOS.forEach((p, i) => {   // 先載好，換的時候不會閃
+            const im = new Image();
+            im.onerror = () => { im.onerror = null; resolved[i] = p[1]; im.src = p[1]; };
+            im.src = p[0];
+        });
         const STYLES = ['oak', 'white', 'black'];
-        PHOTOS.forEach(src => { const im = new Image(); im.src = src; });   // 先載好，換的時候不會閃
         const slot  = document.getElementById('frame-slot');
         const mover = document.getElementById('frame-mover');
         const frame = document.getElementById('frame');
         const img   = document.getElementById('frame-img');
         const hand  = document.getElementById('hand');
         const pickOther = (arr, cur) => { const o = arr.filter(x => x !== cur); return o[Math.floor(Math.random() * o.length)]; };
-        let curPhoto = PHOTOS[Math.floor(Math.random() * PHOTOS.length)];
+        const IDX = [0, 1, 2];
+        let curPhoto = Math.floor(Math.random() * PHOTOS.length);
         let curStyle = 'oak';
-        img.src = curPhoto;
+        function showPhoto(i) {
+            img.onerror = () => { img.onerror = null; resolved[i] = PHOTOS[i][1]; img.src = PHOTOS[i][1]; };
+            img.src = resolved[i];
+        }
+        showPhoto(curPhoto);
 
         const wait = ms => new Promise(r => setTimeout(r, ms));
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1242,7 +1265,7 @@
         async function swap() {
             if (busy) return;
             busy = true;
-            const nextPhoto = pickOther(PHOTOS, curPhoto);
+            const nextPhoto = pickOther(IDX, curPhoto);
             const nextStyle = pickOther(STYLES, curStyle);
             if (reduce) { apply(nextPhoto, nextStyle); busy = false; return; }
             const off = Math.max(200, innerWidth - slot.getBoundingClientRect().left + 40);
@@ -1272,7 +1295,7 @@
         }
         function apply(p, s) {
             curPhoto = p; curStyle = s;
-            img.src = p;
+            showPhoto(p);
             frame.className = 'frame ' + s;
         }
         slot.addEventListener('click', swap);
